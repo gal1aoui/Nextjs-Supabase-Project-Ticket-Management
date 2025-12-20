@@ -1,22 +1,55 @@
-# Next.js Supabase Authentication System
+# Next.js Supabase Project&Ticket Management System
 
-Modern authentication system built with Next.js 16, Supabase, Shadcn UI, and TypeScript. Features beautiful, accessible UI components with context-based state management, custom hooks, and a clean component architecture. Perfect starter template for projects requiring user authentication.
+A modern, full-featured project and ticket management system built with Next.js 15, Supabase, TanStack Query, and Pragmatic Drag-and-Drop. Create projects, manage ticket states and priorities, and organize work with an intuitive Kanban board interface.
+
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green?style=flat-square&logo=supabase)](https://supabase.com/)
+[![TanStack Query](https://img.shields.io/badge/TanStack_Query-5.0-red?style=flat-square&logo=react-query)](https://tanstack.com/query)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 
 ## ✨ Features
 
-- 🔐 **Complete Authentication Flow** - Login, signup, password recovery with OTP verification
-- ✉️ **Email Verification** - 6-digit OTP code verification using Resend
-- 📧 **Custom Email Templates** - Beautiful emails built with React-Email
-- 🛡️ **Middleware Protection** - Automatic redirect for unverified users
-- 🎨 **Beautiful UI** - Built with Shadcn UI components
-- ✅ **Zod Validation** - Type-safe form and data validation
-- 🎯 **TypeScript** - Fully typed for better developer experience
-- ⚡ **Next.js 16** - Latest Next.js features with App Router
-- 🗄️ **Supabase** - Powerful backend-as-a-service
-- 📱 **Responsive Design** - Works seamlessly on all devices
-- ♿ **Accessibility** - WCAG compliant components
-- 🗺️ **Centralized Routing** - All routes defined in app/routes.ts
-- 🎭 **Clean Architecture** - Well-organized component structure
+### 🎨 **Project Management**
+- ✅ Create, update, and delete projects with custom colors
+- ✅ View all projects with ticket counts and metadata
+- ✅ Project-specific settings and configuration
+- ✅ Beautiful project cards with visual indicators
+
+### 📊 **Kanban Board**
+- ✅ Drag-and-drop tickets between states with visual indicators
+- ✅ Real-time UI updates with optimistic rendering
+- ✅ Custom drag preview with smooth animations
+- ✅ Column highlighting and drop indicators
+- ✅ Empty state handling
+
+### 🎫 **Ticket Management**
+- ✅ Create, read, update, and delete tickets
+- ✅ Rich ticket details with descriptions
+- ✅ Priority and state assignment
+- ✅ User assignment tracking
+- ✅ Ticket statistics and analytics
+
+### ⚙️ **Customizable States & Priorities**
+- ✅ Create custom ticket states per project (To Do, In Progress, Done, etc.)
+- ✅ Create custom priorities with color coding
+- ✅ Drag-and-drop ordering
+- ✅ Edit and delete states/priorities
+- ✅ Visual color pickers
+
+### 🔐 **Authentication & Security**
+- ✅ Supabase authentication integration
+- ✅ Row-level security (RLS) policies
+- ✅ User-specific data isolation
+- ✅ Protected routes and API calls
+
+### 🎯 **Developer Experience**
+- ✅ Full TypeScript support with strict typing
+- ✅ Zod validation for all forms and data
+- ✅ Clean architecture with service layer
+- ✅ TanStack Query for state management
+- ✅ Automatic cache invalidation
+- ✅ Beautiful UI with shadcn/ui components
 
 ## 🚀 Quick Start
 
@@ -33,8 +66,8 @@ Modern authentication system built with Next.js 16, Supabase, Shadcn UI, and Typ
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/gal1aoui/Next.js-Supabase-Authentication-System.git
-cd Next.js-Supabase-Authentication-System
+git clone https://github.com/gal1aoui/Nextjs-Supabase-Project-Ticket-Management.git
+cd Nextjs-Supabase-Project-Ticket-Management
 ```
 
 2. **Install dependencies**
@@ -56,7 +89,17 @@ FROM_EMAIL=onboarding@resend.dev
 
 Get these values from your [Supabase Project Settings](https://app.supabase.com) → API.
 
-4. **Run the development server**
+4. **Set up the database**
+
+Run the migrations in your Supabase SQL Editor:
+
+```sql
+-- Run migrations in order:
+-- 1. lib/supabase/migrations/initial_schema.sql
+-- 2. lib/supabase/migrations/seed_data.sql (optional - for demo data)
+```
+
+5. **Run the development server**
 
 ```bash
 npm run dev
@@ -70,42 +113,95 @@ Navigate to [http://localhost:3000](http://localhost:3000) to see the applicatio
 
 ```
 .
-├── app/                # Next.js App Router
-│   ├── layout.tsx      # Root layout
-│   ├── not-found.tsx   # Not found page
-│   ├── (auth)/         # Authentication pages
-│   ├── (root)/         # Dashboard pages
+├── app/                             # Next.js App Router
+│   ├── layout.tsx                   # Root layout
+│   ├── not-found.tsx                # Not found page
+│   ├── (auth)/                      # Authentication pages
+│   ├── (root)/                      # Dashboard pages
+│   │   └── projects/                # Projects pages
+│   │      ├── page.tsx              # Projects list
+│   │      └── [projectId]/          # Project detail
+│   │          └── page.tsx          # Kanban board & settings
 │   ├── routes.ts       # App routes
 │   └── ...
-├── components/         # React components
-│   ├── ui/             # Shadcn UI components
-│   ├── emails/         # Mailing components
-│   ├── Logo.tsx/       # App logo component
+├── components/                      # React components
+│   ├── ui/                          # Shadcn UI components
+│   ├── emails/                      # Mailing components
+│   ├── Logo.tsx/                    # App logo component
+│   ├── projects/                    # Project components
+│   │   ├── project-card.tsx
+│   │   ├── create-project-dialog.tsx
+│   │   └── edit-project-dialog.tsx
+│   ├── project-detail/              # Project detail components
+│   │   ├── project-stats.tsx
+│   │   └── state-priority-manager.tsx
+│   ├── kanban/                      # Kanban board components
+│   │   ├── kanban-board.tsx
+│   │   ├── column.tsx
+│   │   ├── ticket-card.tsx
+│   │   ├── drop-indicator.tsx
+│   │   ├── create-ticket-dialog.tsx
+│   │   ├── edit-ticket-dialog.tsx
+│   │   └── ticket-detail-dialog.tsx
 │   └── ...
-├── lib/                # Utility functions
-│   ├── supabase/       # Supabase setup
+├── lib/                              # Utility functions
+│   ├── supabase/                     # Supabase setup
+│   │   └── migrations/               # Database migrations
+│   │       ├── 001_initial_schema.sql
+│   │       └── 002_seed_data.sql
 │   └── ...
-├── hooks/              # Custom React hooks
-├── services/           # App services provider
-├── contexts/           # React context providers
-├── types/              # TypeScript type definitions
+├── hooks/                            # Custom React hooks
+│   └── use-user.ts
+├── services/                         # API service layer
+│   ├── project.service.ts
+│   ├── ticket.service.ts
+│   ├── ticket-state.service.ts
+│   └── ticket-priority.service.ts
+├── stores/                           # TanStack Query hooks
+│   ├── project.store.ts
+│   ├── ticket.store.ts
+│   ├── ticket-state.store.ts
+│   └── ticket-priority.store.ts
+├── types/              # TypeScript type definitions and validation
+│   ├── project.ts
+│   ├── ticket.ts
+│   ├── ticket-state.ts
+│   ├── ticket-priority.ts
+│   └── database.ts
 └── public/             # Static assets
 ```
 
 ## 📦 Tech Stack
 
-- **Framework:** [Next.js 16](https://nextjs.org/)
-- **Language:** [TypeScript](https://www.typescriptlang.org/)
-- **Authentication:** [Supabase Auth](https://supabase.com/docs/guides/auth)
-- **Database:** [Supabase](https://supabase.com/)
-- **Email Service:** [Resend](https://resend.com/)
-- **Email Templates:** [React Email](https://react.email/)
-- **UI Components:** [Shadcn UI](https://ui.shadcn.com/)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-- **Validation:** [Zod](https://zod.dev/)
-- **Font:** [Geist](https://vercel.com/font)
-- **Linter/Formatter:** [Biome.js](https://biomejs.dev/)
-- **Containerization:** [Docker](https://www.docker.com/)
+### Core
+- **[Next.js 16](https://nextjs.org/)** - React framework with App Router
+- **[TypeScript](https://www.typescriptlang.org/)** - Type safety
+- **[Supabase](https://supabase.com/)** - Backend-as-a-Service (PostgreSQL)
+
+### State Management
+- **[TanStack Query](https://tanstack.com/query)** - Server state management
+- **React Context** - Client state management
+
+### UI & Styling
+- **[shadcn/ui](https://ui.shadcn.com/)** - Beautiful UI components
+- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS
+- **[Lucide Icons](https://lucide.dev/)** - Icon library
+
+### Drag and Drop
+- **[@atlaskit/pragmatic-drag-and-drop](https://atlassian.design/components/pragmatic-drag-and-drop)** - Performant drag-and-drop
+
+### Validation & Forms
+- **[Zod](https://zod.dev/)** - Schema validation
+- **React Hook Form** - Form handling
+
+### Notifications
+- **[Sonner](https://sonner.emilkowal.ski/)** - Toast notifications
+
+### Code Quality
+- **[Biome.js](https://biomejs.dev/)** - Fast linter and formatter
+
+### Containerization:
+- ** [Docker](https://www.docker.com/)
 
 ## 🛠️ Available Scripts
 
@@ -127,94 +223,143 @@ docker build -t image-name:latest .
 docker run -p 3000:3000 --env-file .env.local image-name:latest
 ```
 
-## 🗃️ Supabase Setup
+# Database
+# Run migrations in Supabase SQL Editor
 
-1. Create a new project on [Supabase](https://app.supabase.com/)
-2. Go to Authentication → Sign In/Providers and disable Confirm email
-3. Configure email templates within project `components/emails` (optional)
-4. Rename `.env.example.local` to `.env.local` and paste your keys
+## 🗃️ Database Schema
 
-## 🎨 Customization
+### Tables
 
-### Theme
+**projects**
+- id (uuid, primary key)
+- name (text)
+- description (text, nullable)
+- color (text, nullable)
+- created_at (timestamp)
+- updated_at (timestamp)
+- created_by (uuid, foreign key to auth.users)
 
-Customize the theme by editing `app/globals.css`. The project uses CSS variables for theming:
+**ticket_states**
+- id (uuid, primary key)
+- name (text)
+- project_id (uuid, foreign key)
+- order (integer)
+- color (text, nullable)
+- created_at (timestamp)
 
-```css
-:root {
-  --background: ...;
-  --foreground: ...;
-  /* Add your custom variables */
-}
+**ticket_priorities**
+- id (uuid, primary key)
+- name (text)
+- project_id (uuid, foreign key)
+- order (integer)
+- color (text, nullable)
+- created_at (timestamp)
+
+**tickets**
+- id (uuid, primary key)
+- title (text)
+- description (text, nullable)
+- project_id (uuid, foreign key)
+- state_id (uuid, foreign key)
+- assigned_to (uuid, foreign key to auth.users)
+- priority_id (uuid, foreign key, nullable)
+- created_at (timestamp)
+- updated_at (timestamp)
+- created_by (uuid, foreign key to auth.users)
+
+### Row Level Security (RLS)
+
+All tables have RLS enabled with policies ensuring users can only access their own data.
+
+## 🎨 Features in Detail
+
+### Drag and Drop System
+
+The application uses **Pragmatic Drag-and-Drop** for a smooth, performant drag-and-drop experience:
+
+- **Visual Indicators**: Blue line showing exact drop position
+- **Custom Preview**: Rotated card preview following cursor
+- **Column Highlighting**: Visual feedback when dragging over columns
+- **Optimistic Updates**: Instant UI updates with automatic rollback on error
+- **Smart Detection**: Automatically detects top/bottom edge for precise placement
+
+### State Management Architecture
+
+```typescript
+// Service Layer - API calls
+projectService.getAll() → Supabase query
+
+// Store Layer - TanStack Query hooks
+useProjects() → React hook with caching
+
+// Component Layer - UI rendering
+<ProjectCard /> → Displays data
 ```
 
-#### GitHub Container Registry (Optional)
+**Benefits:**
+- Automatic caching and background refetching
+- Optimistic updates
+- Request deduplication
+- Automatic error handling
+- Cache invalidation
 
-Publish your Docker image to GitHub Packages for easy distribution and deployment:
+### Form Validation
 
-1. **Build and tag your image:**
-```bash
-docker build -t ghcr.io/your-username/your-image-name:latest .
+All forms use Zod schemas for type-safe validation:
+
+```typescript
+const ticketCreateSchema = z.object({
+  title: z.string().min(1).max(200),
+  description: z.string().optional(),
+  project_id: z.string().uuid(),
+  state_id: z.string().uuid(),
+  assigned_to: z.string().uuid(),
+  priority_id: z.string().uuid().optional(),
+})
 ```
-
-2. **Login to GitHub Container Registry:**
-```bash
-docker login ghcr.io
-# Username: your-github-username
-# Password: ********
-# for the password you can generate a new token with write:packages rights enabled
-```
-
-3. **Push to registry:**
-```bash
-docker push ghcr.io/your-username/your-image-name:latest
-```
-
-4. **Pull and run on any server:**
-```bash
-docker pull ghcr.io/your-username/your-image-name:latest
-docker run -d -p 3000:3000 --env-file .env.local ghcr.io/your-username/your-image-name:latest
-```
-
-**Benefits of GitHub Packages:**
-- Free for public repositories
-- Integrated with your GitHub repository
-- Version control for Docker images
-- Easy team collaboration
-- Automated builds with GitHub Actions
-
-### Components
-
-All UI components are located in `components/` and can be customized individually.
-
-## 📖 Learn More
-
-- [Next.js Documentation](https://nextjs.org/docs) - Learn about Next.js features and API
-- [Supabase Documentation](https://supabase.com/docs) - Learn about Supabase features
-- [Shadcn UI Documentation](https://ui.shadcn.com/) - Browse available components
-- [Biome.js Documentation](https://biomejs.dev/) - Learn about linting and formatting
 
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js).
-
 1. Push your code to GitHub
-2. Import your repository on Vercel
-3. Add environment variables in Vercel project settings
+2. Import your repository on [Vercel](https://vercel.com)
+3. Add environment variables:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 4. Deploy!
 
-Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Docker
+
+```bash
+# Build
+docker build -t ticket-management:latest .
+
+# Run
+docker run -p 3000:3000 --env-file .env.local ticket-management:latest
+```
 
 ### Other Platforms
 
-This application can be deployed to any platform that supports Next.js:
-
+Compatible with:
 - [Netlify](https://www.netlify.com/)
 - [Railway](https://railway.app/)
 - [Render](https://render.com/)
 - [AWS Amplify](https://aws.amazon.com/amplify/)
+
+## 🎯 Roadmap
+
+- [ ] Real-time collaboration with Supabase Realtime
+- [ ] Ticket comments and activity history
+- [ ] File attachments
+- [ ] Time tracking
+- [ ] Advanced filtering and search
+- [ ] Sprint/milestone management
+- [ ] Email notifications
+- [ ] Team collaboration features
+- [ ] Mobile app (React Native)
+- [ ] API documentation
+- [ ] Webhook integrations
 
 ## 🤝 Contributing
 
@@ -223,7 +368,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin main`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
 ## 📝 License
@@ -235,8 +380,17 @@ This project is open source and available under the [MIT License](LICENSE).
 **Achref Gallaoui**
 
 - GitHub: [@gal1aoui](https://github.com/gal1aoui)
+- LinkedIn: [Achref Gallaoui](https://www.linkedin.com/in/gal1aoui)
 
-## ⭐ Show your support
+## 🙏 Acknowledgments
+
+- [Next.js Team](https://nextjs.org/) for the amazing framework
+- [Supabase Team](https://supabase.com/) for the excellent BaaS platform
+- [shadcn](https://ui.shadcn.com/) for the beautiful UI components
+- [TanStack](https://tanstack.com/) for the powerful state management library
+- [Atlassian](https://atlassian.design/) for Pragmatic Drag-and-Drop
+
+## ⭐ Show Your Support
 
 Give a ⭐️ if this project helped you!
 
@@ -246,4 +400,4 @@ For questions or feedback, please open an issue on GitHub.
 
 ---
 
-Made with ❤️ using Next.js and Supabase
+Made with ❤️ using Next.js, Supabase, and TanStack Query

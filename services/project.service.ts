@@ -1,11 +1,10 @@
-import { createClient } from "@/lib/supabase/client";
+import { supabaseClient } from "@/lib/helpers";
 import type { Project } from "@/types/database";
 import type { ProjectCreate, ProjectUpdate } from "@/types/project";
 
 export const projectService = {
   async getAll(): Promise<Project[]> {
-    const supabase = createClient();
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("projects")
       .select("*")
       .order("created_at", { ascending: false });
@@ -15,22 +14,20 @@ export const projectService = {
   },
 
   async getById(id: string): Promise<Project> {
-    const supabase = createClient();
-    const { data, error } = await supabase.from("projects").select("*").eq("id", id).single();
+    const { data, error } = await supabaseClient.from("projects").select("*").eq("id", id).single();
 
     if (error) throw error;
     return data;
   },
 
   async create(project: ProjectCreate): Promise<Project> {
-    const supabase = createClient();
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+    } = await supabaseClient.auth.getUser();
 
     if (!user) throw new Error("User not authenticated");
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("projects")
       .insert({ ...project, created_by: user.id })
       .select()
@@ -41,10 +38,9 @@ export const projectService = {
   },
 
   async update(project: ProjectUpdate): Promise<Project> {
-    const supabase = createClient();
     const { id, ...updates } = project;
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("projects")
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq("id", id)
@@ -56,25 +52,23 @@ export const projectService = {
   },
 
   async delete(id: string): Promise<void> {
-    const supabase = createClient();
-    const { error } = await supabase.from("projects").delete().eq("id", id);
+    const { error } = await supabaseClient.from("projects").delete().eq("id", id);
     if (error) throw error;
   },
 
   async getStats(projectId: string) {
-    const supabase = createClient();
 
-    const { data: tickets } = await supabase
+    const { data: tickets } = await supabaseClient
       .from("tickets")
       .select("state_id, priority_id")
       .eq("project_id", projectId);
 
-    const { data: states } = await supabase
+    const { data: states } = await supabaseClient
       .from("ticket_states")
       .select("id, name")
       .eq("project_id", projectId);
 
-    const { data: priorities } = await supabase
+    const { data: priorities } = await supabaseClient
       .from("ticket_priorities")
       .select("id, name")
       .eq("project_id", projectId);

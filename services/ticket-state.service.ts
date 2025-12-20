@@ -1,11 +1,10 @@
-import { createClient } from "@/lib/supabase/client";
+import { supabaseClient } from "@/lib/helpers";
 import type { TicketState } from "@/types/database";
 import type { TicketStateCreate, TicketStateUpdate } from "@/types/ticket-state";
 
 export const ticketStateService = {
   async getByProject(projectId: string): Promise<TicketState[]> {
-    const supabase = createClient();
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("ticket_states")
       .select("*")
       .eq("project_id", projectId)
@@ -16,10 +15,9 @@ export const ticketStateService = {
   },
 
   async create(state: TicketStateCreate): Promise<TicketState> {
-    const supabase = createClient();
 
     // Get max order for project
-    const { data: states } = await supabase
+    const { data: states } = await supabaseClient
       .from("ticket_states")
       .select("order")
       .eq("project_id", state.project_id)
@@ -28,7 +26,7 @@ export const ticketStateService = {
 
     const maxOrder = states?.[0]?.order ?? -1;
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("ticket_states")
       .insert({ ...state, order: state.order ?? maxOrder + 1 })
       .select()
@@ -39,10 +37,9 @@ export const ticketStateService = {
   },
 
   async update(state: TicketStateUpdate): Promise<TicketState> {
-    const supabase = createClient();
     const { id, ...updates } = state;
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("ticket_states")
       .update(updates)
       .eq("id", id)
@@ -54,8 +51,7 @@ export const ticketStateService = {
   },
 
   async delete(id: string): Promise<void> {
-    const supabase = createClient();
-    const { error } = await supabase.from("ticket_states").delete().eq("id", id);
+    const { error } = await supabaseClient.from("ticket_states").delete().eq("id", id);
     if (error) throw error;
   },
 };

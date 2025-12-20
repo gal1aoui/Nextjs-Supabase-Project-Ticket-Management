@@ -1,11 +1,10 @@
-import { createClient } from "@/lib/supabase/client";
+import { supabaseClient } from "@/lib/helpers";
 import type { TicketPriority } from "@/types/database";
 import type { ticketPriorityCreate, ticketPriorityUpdate } from "@/types/ticket-priority";
 
 export const ticketPriorityService = {
   async getByProject(projectId: string): Promise<TicketPriority[]> {
-    const supabase = createClient();
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("ticket_priorities")
       .select("*")
       .eq("project_id", projectId)
@@ -16,9 +15,8 @@ export const ticketPriorityService = {
   },
 
   async create(state: ticketPriorityCreate): Promise<TicketPriority> {
-    const supabase = createClient();
 
-    const { data: states } = await supabase
+    const { data: states } = await supabaseClient
       .from("ticket_priorities")
       .select("order")
       .eq("project_id", state.project_id)
@@ -27,7 +25,7 @@ export const ticketPriorityService = {
 
     const maxOrder = states?.[0]?.order ?? -1;
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("ticket_priorities")
       .insert({ ...state, order: state.order ?? maxOrder + 1 })
       .select()
@@ -38,10 +36,9 @@ export const ticketPriorityService = {
   },
 
   async update(state: ticketPriorityUpdate): Promise<TicketPriority> {
-    const supabase = createClient();
     const { id, ...updates } = state;
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from("ticket_priorities")
       .update(updates)
       .eq("id", id)
@@ -53,8 +50,7 @@ export const ticketPriorityService = {
   },
 
   async delete(id: string): Promise<void> {
-    const supabase = createClient();
-    const { error } = await supabase.from("ticket_priorities").delete().eq("id", id);
+    const { error } = await supabaseClient.from("ticket_priorities").delete().eq("id", id);
     if (error) throw error;
   },
 };
