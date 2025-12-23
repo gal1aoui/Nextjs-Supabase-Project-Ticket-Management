@@ -1,13 +1,13 @@
 "use client";
 
+import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
+import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Ticket, TicketPriority, TicketState } from "@/types/database";
 import { TicketCard } from "./ticket-card";
-import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter'
-import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine'
 
 interface ColumnProps {
   state: TicketState;
@@ -17,13 +17,7 @@ interface ColumnProps {
   onTicketDrop?: (ticketId: string, newStateId: string, destinationIndex?: number) => void;
 }
 
-export function Column({
-  state,
-  tickets,
-  priorities,
-  onTicketClick,
-  onTicketDrop,
-}: ColumnProps) {
+export function Column({ state, tickets, priorities, onTicketClick, onTicketDrop }: ColumnProps) {
   const columnRef = useRef<HTMLDivElement>(null);
   const [isDraggedOver, setIsDraggedOver] = useState(false);
 
@@ -59,10 +53,7 @@ export function Column({
         <CardTitle className="flex items-center justify-between text-sm font-medium">
           <div className="flex items-center gap-2">
             {state.color && (
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: state.color }}
-              />
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: state.color }} />
             )}
             <span>{state.name}</span>
           </div>
@@ -75,9 +66,7 @@ export function Column({
         <ScrollArea className="h-[calc(100vh-280px)]">
           <div className="space-y-2">
             {tickets.map((ticket) => {
-              const priority = priorities.find(
-                (p) => p.id === ticket.priority_id
-              );
+              const priority = priorities.find((p) => p.id === ticket.priority_id);
               const handleActivate = () => onTicketClick?.(ticket);
               return (
                 <button
@@ -86,11 +75,7 @@ export function Column({
                   onClick={handleActivate}
                   className="w-full text-left p-0 bg-transparent border-0"
                 >
-                  <TicketCard
-                    ticket={ticket}
-                    priority={priority}
-                    assigneeInitials="AC"
-                  />
+                  <TicketCard ticket={ticket} priority={priority} assigneeInitials="AC" />
                 </button>
               );
             })}

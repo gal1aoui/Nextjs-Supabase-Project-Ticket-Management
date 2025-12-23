@@ -1,4 +1,4 @@
-import { supabaseClient } from "@/lib/helpers";
+import { supabaseClient } from "@/lib/supabase/client";
 import type { TicketPriority } from "@/types/database";
 import type { ticketPriorityCreate, ticketPriorityUpdate } from "@/types/ticket-priority";
 
@@ -15,7 +15,6 @@ export const ticketPriorityService = {
   },
 
   async create(state: ticketPriorityCreate): Promise<TicketPriority> {
-
     const { data: states } = await supabaseClient
       .from("ticket_priorities")
       .select("order")

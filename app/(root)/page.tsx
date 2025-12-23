@@ -1,12 +1,12 @@
 "use client";
 
 import { Calendar, CheckCircle2, GitBranch, PlayCircle, Plus, TrendingUp } from "lucide-react";
+import UserName from "@/components/UserName";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import UserName from "@/components/UserName";
 
 export default function Dashboard() {
   const recentTickets = [

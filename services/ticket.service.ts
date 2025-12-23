@@ -1,4 +1,4 @@
-import { supabaseClient } from "@/lib/helpers";
+import { supabaseClient } from "@/lib/supabase/client";
 import type { Ticket } from "@/types/database";
 import type { TicketCreate, TicketUpdate } from "@/types/ticket";
 
@@ -8,7 +8,7 @@ export const ticketService = {
       .from("tickets")
       .select("*")
       .eq("project_id", projectId)
-      .order("created_at", { ascending: false });
+      .order("updated_at", { ascending: false });
 
     if (error) throw error;
     return data;

@@ -1,4 +1,4 @@
-import { supabaseClient } from "@/lib/helpers";
+import { supabaseClient } from "@/lib/supabase/client";
 import type { Project } from "@/types/database";
 import type { ProjectCreate, ProjectUpdate } from "@/types/project";
 
@@ -57,7 +57,6 @@ export const projectService = {
   },
 
   async getStats(projectId: string) {
-
     const { data: tickets } = await supabaseClient
       .from("tickets")
       .select("state_id, priority_id")

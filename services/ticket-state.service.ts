@@ -1,4 +1,4 @@
-import { supabaseClient } from "@/lib/helpers";
+import { supabaseClient } from "@/lib/supabase/client";
 import type { TicketState } from "@/types/database";
 import type { TicketStateCreate, TicketStateUpdate } from "@/types/ticket-state";
 
@@ -15,7 +15,6 @@ export const ticketStateService = {
   },
 
   async create(state: TicketStateCreate): Promise<TicketState> {
-
     // Get max order for project
     const { data: states } = await supabaseClient
       .from("ticket_states")

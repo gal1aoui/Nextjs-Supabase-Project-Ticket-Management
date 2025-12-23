@@ -1,12 +1,13 @@
 "use client";
 
+import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { pointerOutsideOfPreview } from "@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview";
+import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
 import { useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Ticket, TicketPriority } from "@/types/database";
-import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
-import { pointerOutsideOfPreview } from "@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview";
+import UserAvatar from "../UserAvatar";
 
 interface TicketCardProps {
   ticket: Ticket;
@@ -15,12 +16,7 @@ interface TicketCardProps {
   onclick?: () => void;
 }
 
-export function TicketCard({
-  ticket,
-  priority,
-  assigneeInitials,
-  onclick,
-}: TicketCardProps) {
+export function TicketCard({ ticket, priority, onclick }: TicketCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const dragHandleRef = useRef<HTMLDivElement>(null);
 
@@ -49,37 +45,28 @@ export function TicketCard({
   }, [ticket]);
 
   return (
-    <Card
-      ref={cardRef}
-      onClick={onclick}
-      className="cursor-pointer transition-colors hover:bg-accent"
-    >
-      <CardContent className="p-3">
-        <div ref={dragHandleRef} className="cursor-grab active:cursor-grabbing">
-          <p className="text-sm font-medium mb-2">{ticket.title}</p>
-          <div className="flex items-center justify-between">
-            {priority && (
-              <Badge
-                variant="secondary"
-                className="text-xs"
-                style={{
-                  backgroundColor: priority.color || undefined,
-                  color: priority.color
-                    ? getContrastColor(priority.color)
-                    : undefined,
-                }}
-              >
-                {priority.name}
-              </Badge>
-            )}
-            {assigneeInitials && (
-              <div className="h-6 w-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
-                {assigneeInitials}
-              </div>
-            )}
-          </div>
-        </div>
-      </CardContent>
+    <Card ref={cardRef} onClick={onclick} className="cursor-pointer hover:bg-accent gap-2 p-2">
+      <CardHeader className="flex items-center justify-between p-0">
+        {priority && (
+          <Badge
+            variant="secondary"
+            className="text-xs"
+            style={{
+              backgroundColor: priority.color || undefined,
+              color: priority.color ? getContrastColor(priority.color) : undefined,
+            }}
+          >
+            {priority.name}
+          </Badge>
+        )}
+        <UserAvatar />
+      </CardHeader>
+      <div ref={dragHandleRef} className="cursor-grab active:cursor-grabbing space-y-2">
+        <CardTitle>{ticket.title}</CardTitle>
+        <CardDescription className="p-1 line-clamp-2 wrap-break-word">
+          {ticket.description}
+        </CardDescription>
+      </div>
     </Card>
   );
 }

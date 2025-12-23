@@ -3,12 +3,13 @@
 import { LayoutDashboard } from "lucide-react";
 import { use } from "react";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
+import { InviteMemberDialog } from "@/components/members/invite-member-dialog";
+import ProjectDetailSkeleton from "@/components/projects/project-detail/project-detail-skeleton";
 import { ProjectStats } from "@/components/projects/project-detail/project-stats";
 import { StatePriorityManager } from "@/components/projects/project-detail/state-priority-manager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useProject } from "@/stores/project.store";
-import ProjectDetailSkeleton from "@/components/projects/project-detail/project-detail-skeleton";
 import { useUser } from "@/hooks/use-user";
+import { useProject } from "@/stores/project.store";
 
 export default function ProjectDetailPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = use(params);
@@ -50,13 +51,17 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
       </div>
 
       <Tabs defaultValue="board" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="board">
-            <LayoutDashboard className="h-4 w-4 mr-2" />
-            Board
-          </TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
+        <div className="flex justify-between">
+          <TabsList>
+            <TabsTrigger value="board">
+              <LayoutDashboard className="h-4 w-4 mr-2" />
+              Board
+            </TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
+
+          <InviteMemberDialog projectId={projectId} />
+        </div>
 
         <TabsContent value="board" className="space-y-4">
           <ProjectStats projectId={projectId} />

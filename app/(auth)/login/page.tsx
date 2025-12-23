@@ -36,16 +36,6 @@ export default function Login() {
     setIsLoading((prev) => !prev);
   };
 
-  const handleProviderLogin = async (_provider: "google" | "github" | "microsoft") => {
-    try {
-      // await loginWithProvider(provider);
-      toast.success("Welcome!");
-      // router.push("/dashboard");
-    } catch (_error) {
-      toast.error("Authentication failed");
-    }
-  };
-
   return (
     <Card className="w-full max-w-md border-border shadow-lg">
       <CardHeader className="space-y-4 text-center">
@@ -60,32 +50,17 @@ export default function Login() {
 
       <CardContent className="space-y-4">
         <div className="grid gap-2">
-          <Button
-            variant="outline"
-            onClick={() => handleProviderLogin("google")}
-            disabled={isLoading}
-            className="w-full"
-          >
+          <Button variant="outline" disabled={isLoading} className="w-full">
             <Mail className="mr-2 h-4 w-4" />
             Continue with Google
           </Button>
 
-          <Button
-            variant="outline"
-            onClick={() => handleProviderLogin("github")}
-            disabled={isLoading}
-            className="w-full"
-          >
+          <Button variant="outline" disabled={isLoading} className="w-full">
             <Github className="mr-2 h-4 w-4" />
             Continue with GitHub
           </Button>
 
-          <Button
-            variant="outline"
-            onClick={() => handleProviderLogin("microsoft")}
-            disabled={isLoading}
-            className="w-full"
-          >
+          <Button variant="outline" disabled={isLoading} className="w-full">
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z" />
             </svg>

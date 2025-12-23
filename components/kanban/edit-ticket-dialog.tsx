@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -20,9 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useUpdateTicket } from "@/stores/ticket.store";
-import type { Ticket, TicketState, TicketPriority } from "@/types/database";
-import { toast } from "sonner";
+import type { Ticket, TicketPriority, TicketState } from "@/types/database";
 
 interface EditTicketDialogProps {
   ticket: Ticket | null;
@@ -69,14 +69,13 @@ export function EditTicketDialog({
         title,
         description: description || undefined,
         state_id: stateId,
-        priority_id: priorityId || undefined
+        priority_id: priorityId || undefined,
       });
 
       onOpenChange(false);
       toast.success("Ticket updated successfully");
-    } catch (error) {
-      toast.error("Failed to update ticket");
-      console.error(error);
+    } catch (_) {
+      toast.error(`Failed to update ticket: ${updateTicket.error?.message}`);
     }
   };
 
@@ -140,11 +139,7 @@ export function EditTicketDialog({
             </div>
           </div>
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={updateTicket.isPending}>

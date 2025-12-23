@@ -56,9 +56,8 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
 
       onOpenChange(false);
       toast.success("Project updated successfully");
-    } catch (error) {
-      toast.error("Failed to update project");
-      console.error(error);
+    } catch (_) {
+      toast.error(`Failed to update project: ${updateProject.error?.message}`);
     }
   };
 

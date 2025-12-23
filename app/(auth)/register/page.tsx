@@ -116,7 +116,7 @@ export default function Register() {
                 setForm((prev) => {
                   return {
                     ...prev,
-                    name: e.target.value,
+                    password: e.target.value,
                   };
                 })
               }
@@ -143,7 +143,7 @@ export default function Register() {
                 setForm((prev) => {
                   return {
                     ...prev,
-                    name: e.target.value,
+                    confirmPassword: e.target.value,
                   };
                 })
               }

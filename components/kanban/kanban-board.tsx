@@ -1,16 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { useTickets, useUpdateTicket } from "@/stores/ticket.store";
 import { useTicketPriorities } from "@/stores/ticket-priority.store";
 import { useTicketStates } from "@/stores/ticket-state.store";
 import type { Ticket } from "@/types/database";
+import { ProjectKanbanSkeleton } from "../projects/project-detail/project-detail-skeleton";
 import { Column } from "./column";
 import { CreateTicketDialog } from "./create-ticket-dialog";
-import { TicketDetailDialog } from "./ticket-detail-dialog";
-import { ProjectKanbanSkeleton } from "../projects/project-detail/project-detail-skeleton";
-import { toast } from "sonner";
 import { EditTicketDialog } from "./edit-ticket-dialog";
+import { TicketDetailDialog } from "./ticket-detail-dialog";
 
 interface KanbanBoardProps {
   projectId: string;
@@ -24,7 +24,7 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
 
-  const updateTicket = useUpdateTicket()
+  const updateTicket = useUpdateTicket();
 
   const ticketsByState = useMemo(() => {
     const grouped: Record<string, typeof tickets> = {};
@@ -39,13 +39,12 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
       await updateTicket.mutateAsync({
         id: ticketId,
         state_id: newStateId,
-      })
-      toast.success('Ticket moved successfully')
-    } catch (error) {
-      toast.error('Failed to move ticket')
-      console.error(error)
+      });
+      toast.success("Ticket moved successfully");
+    } catch (_) {
+      toast.error(`Failed to move ticket: ${updateTicket.error?.message}`);
     }
-  }
+  };
 
   if (ticketsLoading || statesLoading) {
     return <ProjectKanbanSkeleton />;
@@ -59,7 +58,7 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
       <div className="flex-1 space-y-4 p-8 pt-6">
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold tracking-tight">Kanban Board</h2>
-          <CreateTicketDialog 
+          <CreateTicketDialog
             projectId={projectId}
             states={states}
             priorities={priorities}
@@ -88,8 +87,8 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
         open={!!selectedTicket}
         onOpenChange={(open) => !open && setSelectedTicket(null)}
         onEdit={(ticket) => {
-          setSelectedTicket(null)
-          setEditingTicket(ticket)
+          setSelectedTicket(null);
+          setEditingTicket(ticket);
         }}
       />
 
@@ -101,5 +100,5 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
         onOpenChange={(open) => !open && setEditingTicket(null)}
       />
     </>
-  )
+  );
 }

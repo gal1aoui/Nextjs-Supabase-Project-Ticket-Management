@@ -9,11 +9,11 @@ import { toast } from "sonner";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Logo } from "@/components/Logo";
 import { NotificationDropdown } from "@/components/NotificationDropdown";
+import UserAvatar from "@/components/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Spinner } from "@/components/ui/spinner";
-import { signOut } from "@/lib/helpers";
-import UserAvatar from "@/components/UserAvatar";
+import { profileService } from "@/services/profile.service";
 
 const ThemeToggle = dynamic(() => import("@/components/ThemeToggle"), {
   loading: () => <Spinner className="size-8" />,
@@ -38,7 +38,7 @@ export default function Layout({
   );
 
   const handleLogout = async () => {
-    const result = await signOut();
+    const result = await profileService.signOut();
 
     if (result?.error) {
       toast.error(result.error.message);

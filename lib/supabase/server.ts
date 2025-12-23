@@ -1,3 +1,5 @@
+"use server";
+
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
@@ -19,3 +21,9 @@ export async function createClient() {
     }
   );
 }
+
+export const userServer = async () => {
+  const supabaseServer = await createClient();
+  const { data } = await supabaseServer.auth.getUser();
+  return data.user;
+};

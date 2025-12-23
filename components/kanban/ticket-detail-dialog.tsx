@@ -1,19 +1,8 @@
-'use client'
+"use client";
 
-import { Edit, Trash2 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Calendar, User } from 'lucide-react'
-import { useDeleteTicket } from '@/stores/ticket.store'
-import type { Ticket, TicketState, TicketPriority } from '@/types/database'
-import { toast } from 'sonner'
+import { Calendar, Edit, Trash2, User } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,16 +12,27 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { useState } from 'react'
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { dateFormatter } from "@/lib/helpers";
+import { useDeleteTicket } from "@/stores/ticket.store";
+import type { Ticket, TicketPriority, TicketState } from "@/types/database";
 
 interface TicketDetailDialogProps {
-  ticket: Ticket | null
-  state?: TicketState
-  priority?: TicketPriority
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onEdit?: (ticket: Ticket) => void
+  ticket: Ticket | null;
+  state?: TicketState;
+  priority?: TicketPriority;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onEdit?: (ticket: Ticket) => void;
 }
 
 export function TicketDetailDialog({
@@ -43,24 +43,23 @@ export function TicketDetailDialog({
   onOpenChange,
   onEdit,
 }: TicketDetailDialogProps) {
-  const deleteTicket = useDeleteTicket()
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const deleteTicket = useDeleteTicket();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleDelete = async () => {
-    if (!ticket) return
+    if (!ticket) return;
 
     try {
-      await deleteTicket.mutateAsync(ticket.id)
-      toast.success('Ticket deleted successfully')
-      setDeleteDialogOpen(false)
-      onOpenChange(false)
-    } catch (error) {
-      toast.error('Failed to delete ticket')
-      console.error(error)
+      await deleteTicket.mutateAsync(ticket.id);
+      toast.success("Ticket deleted successfully");
+      setDeleteDialogOpen(false);
+      onOpenChange(false);
+    } catch (_) {
+      toast.error(`Failed to delete ticket: ${deleteTicket.error?.message}`);
     }
-  }
+  };
 
-  if (!ticket) return null
+  if (!ticket) return null;
 
   return (
     <>
@@ -76,27 +75,23 @@ export function TicketDetailDialog({
                 </DialogDescription>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="icon"
                   onClick={() => {
-                    onOpenChange(false)
-                    onEdit?.(ticket)
+                    onOpenChange(false);
+                    onEdit?.(ticket);
                   }}
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="icon"
-                  onClick={() => setDeleteDialogOpen(true)}
-                >
+                <Button variant="outline" size="icon" onClick={() => setDeleteDialogOpen(true)}>
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>
               </div>
             </div>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             {/* Status and Priority */}
             <div className="flex gap-2 flex-wrap">
@@ -152,11 +147,11 @@ export function TicketDetailDialog({
             <div className="grid grid-cols-2 gap-4 pt-4 border-t">
               <div>
                 <p className="text-xs text-muted-foreground">Created</p>
-                <p className="text-sm">{new Date(ticket.created_at).toLocaleString()}</p>
+                <p className="text-sm">{dateFormatter(ticket.created_at)}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Updated</p>
-                <p className="text-sm">{new Date(ticket.updated_at).toLocaleString()}</p>
+                <p className="text-sm">{dateFormatter(ticket.updated_at)}</p>
               </div>
             </div>
           </div>
@@ -173,7 +168,7 @@ export function TicketDetailDialog({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
@@ -183,13 +178,13 @@ export function TicketDetailDialog({
         </AlertDialogContent>
       </AlertDialog>
     </>
-  )
+  );
 }
 
 function getContrastColor(hexColor: string): string {
-  const r = parseInt(hexColor.slice(1, 3), 16)
-  const g = parseInt(hexColor.slice(3, 5), 16)
-  const b = parseInt(hexColor.slice(5, 7), 16)
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-  return luminance > 0.5 ? '#000000' : '#FFFFFF'
+  const r = parseInt(hexColor.slice(1, 3), 16);
+  const g = parseInt(hexColor.slice(3, 5), 16);
+  const b = parseInt(hexColor.slice(5, 7), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5 ? "#000000" : "#FFFFFF";
 }

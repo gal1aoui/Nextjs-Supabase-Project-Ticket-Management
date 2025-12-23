@@ -12,6 +12,40 @@ create table projects (
   created_by uuid references auth.users(id) on delete cascade
 );
 
+-- Roles table (project-agnostic roles)
+create table roles (
+  id uuid primary key default uuid_generate_v4(),
+  name text not null unique,
+  description text,
+  permissions jsonb default '[]'::jsonb,
+  is_system boolean default false,
+  created_at timestamptz default now()
+);
+
+-- Insert default system roles
+insert into roles (name, description, is_system, permissions) values
+('Admin', 'Full access to project management', true, '["manage_project", "manage_members", "manage_roles", "manage_tickets", "manage_states", "manage_priorities"]'::jsonb),
+('Manager', 'Can manage tickets and team members', true, '["manage_members", "manage_tickets", "manage_states", "manage_priorities"]'::jsonb),
+('Product Owner', 'Defines requirements and priorities', true, '["manage_tickets", "manage_priorities", "view_reports"]'::jsonb),
+('Scrum Master', 'Facilitates team and removes blockers', true, '["manage_tickets", "manage_states", "view_reports"]'::jsonb),
+('Developer', 'Works on tickets and updates progress', true, '["create_tickets", "update_own_tickets", "comment"]'::jsonb),
+('Tester', 'Tests and reports bugs', true, '["create_tickets", "update_tickets", "comment"]'::jsonb),
+('Designer', 'Creates designs and assets', true, '["create_tickets", "update_own_tickets", "comment"]'::jsonb),
+('Guest', 'View-only access', true, '["view_tickets"]'::jsonb);
+
+-- Project members (intermediate table with roles)
+create table project_members (
+  id uuid primary key default uuid_generate_v4(),
+  project_id uuid references projects(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete cascade,
+  role_id uuid references roles(id) on delete restrict,
+  invited_by uuid references auth.users(id) on delete set null,
+  invited_at timestamptz default now(),
+  joined_at timestamptz,
+  status text default 'pending' check (status in ('pending', 'active', 'inactive')),
+  unique(project_id, user_id)
+);
+
 -- Ticket states table
 create table ticket_states (
   id uuid primary key default uuid_generate_v4(),
@@ -19,7 +53,8 @@ create table ticket_states (
   project_id uuid references projects(id) on delete cascade,
   "order" integer not null default 0,
   color text,
-  created_at timestamptz default now()
+  created_at timestamptz default now(),
+  unique(project_id, name)
 );
 
 -- Ticket priorities table
@@ -29,7 +64,8 @@ create table ticket_priorities (
   project_id uuid references projects(id) on delete cascade,
   "order" integer not null default 0,
   color text,
-  created_at timestamptz default now()
+  created_at timestamptz default now(),
+  unique(project_id, name)
 );
 
 -- Tickets table
@@ -39,15 +75,28 @@ create table tickets (
   description text,
   project_id uuid references projects(id) on delete cascade,
   state_id uuid references ticket_states(id) on delete restrict,
-  assigned_to uuid references auth.users(id) on delete restrict,
+  assigned_to uuid references auth.users(id) on delete set null,
   priority_id uuid references ticket_priorities(id) on delete set null,
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
-  created_by uuid references auth.users(id) on delete cascade
+  created_by uuid references auth.users(id) on delete set null,
+  constraint assigned_user_must_be_member check (
+    assigned_to is null or 
+    exists (
+      select 1 from project_members 
+      where project_id = tickets.project_id 
+      and user_id = assigned_to
+      and status = 'active'
+    )
+  )
 );
 
 -- Indexes
+create index idx_profiles_username on profiles(username);
 create index idx_projects_created_by on projects(created_by);
+create index idx_project_members_project on project_members(project_id);
+create index idx_project_members_user on project_members(user_id);
+create index idx_project_members_status on project_members(status);
 create index idx_ticket_states_project on ticket_states(project_id);
 create index idx_ticket_priorities_project on ticket_priorities(project_id);
 create index idx_tickets_project on tickets(project_id);
@@ -55,56 +104,149 @@ create index idx_tickets_state on tickets(state_id);
 create index idx_tickets_assigned on tickets(assigned_to);
 create index idx_tickets_priority on tickets(priority_id);
 
+-- Helper function to check if user is project member
+create or replace function is_project_member(p_project_id uuid, p_user_id uuid)
+returns boolean as $$
+begin
+  return exists (
+    select 1 from project_members
+    where project_id = p_project_id
+    and user_id = p_user_id
+    and status = 'active'
+  );
+end;
+$$ language plpgsql security definer;
+
+-- Helper function to check user permission in project
+create or replace function has_project_permission(p_project_id uuid, p_user_id uuid, p_permission text)
+returns boolean as $$
+begin
+  return exists (
+    select 1 from project_members pm
+    join roles r on r.id = pm.role_id
+    where pm.project_id = p_project_id
+    and pm.user_id = p_user_id
+    and pm.status = 'active'
+    and r.permissions @> to_jsonb(p_permission)
+  );
+end;
+$$ language plpgsql security definer;
+
 -- RLS Policies
 alter table projects enable row level security;
+alter table roles enable row level security;
+alter table project_members enable row level security;
 alter table ticket_states enable row level security;
 alter table ticket_priorities enable row level security;
 alter table tickets enable row level security;
 
+-- Roles policies (viewable by all authenticated users)
+create policy "Roles are viewable by authenticated users" on roles
+  for select using (auth.role() = 'authenticated');
+
 -- Projects policies
-create policy "Users can view projects" on projects for select using (auth.uid() = created_by);
-create policy "Users can create projects" on projects for insert with check (auth.uid() = created_by);
-create policy "Users can update own projects" on projects for update using (auth.uid() = created_by);
-create policy "Users can delete own projects" on projects for delete using (auth.uid() = created_by);
+create policy "Users can view projects they are members of" on projects
+  for select using (
+    auth.uid() = created_by or 
+    is_project_member(id, auth.uid())
+  );
+
+create policy "Users can create projects" on projects
+  for insert with check (auth.uid() = created_by);
+
+create policy "Project admins can update projects" on projects
+  for update using (
+    auth.uid() = created_by or
+    has_project_permission(id, auth.uid(), 'manage_project')
+  );
+
+create policy "Project admins can delete projects" on projects
+  for delete using (auth.uid() = created_by);
+
+-- Project members policies
+create policy "Users can view members of their projects" on project_members
+  for select using (is_project_member(project_id, auth.uid()));
+
+create policy "Project admins can invite members" on project_members
+  for insert with check (
+    has_project_permission(project_id, auth.uid(), 'manage_members')
+  );
+
+create policy "Project admins can update members" on project_members
+  for update using (
+    has_project_permission(project_id, auth.uid(), 'manage_members')
+  );
+
+create policy "Project admins can remove members" on project_members
+  for delete using (
+    has_project_permission(project_id, auth.uid(), 'manage_members')
+  );
 
 -- Ticket states policies
-create policy "Users can view states" on ticket_states for select using (
-  exists (select 1 from projects where projects.id = ticket_states.project_id and projects.created_by = auth.uid())
-);
-create policy "Users can create states" on ticket_states for insert with check (
-  exists (select 1 from projects where projects.id = ticket_states.project_id and projects.created_by = auth.uid())
-);
-create policy "Users can update states" on ticket_states for update using (
-  exists (select 1 from projects where projects.id = ticket_states.project_id and projects.created_by = auth.uid())
-);
-create policy "Users can delete states" on ticket_states for delete using (
-  exists (select 1 from projects where projects.id = ticket_states.project_id and projects.created_by = auth.uid())
-);
+create policy "Members can view ticket states" on ticket_states
+  for select using (is_project_member(project_id, auth.uid()));
+
+create policy "Managers can create ticket states" on ticket_states
+  for insert with check (has_project_permission(project_id, auth.uid(), 'manage_states'));
+
+create policy "Managers can update ticket states" on ticket_states
+  for update using (has_project_permission(project_id, auth.uid(), 'manage_states'));
+
+create policy "Managers can delete ticket states" on ticket_states
+  for delete using (has_project_permission(project_id, auth.uid(), 'manage_states'));
 
 -- Ticket priorities policies
-create policy "Users can view priorities" on ticket_priorities for select using (
-  exists (select 1 from projects where projects.id = ticket_priorities.project_id and projects.created_by = auth.uid())
-);
-create policy "Users can create priorities" on ticket_priorities for insert with check (
-  exists (select 1 from projects where projects.id = ticket_priorities.project_id and projects.created_by = auth.uid())
-);
-create policy "Users can update priorities" on ticket_priorities for update using (
-  exists (select 1 from projects where projects.id = ticket_priorities.project_id and projects.created_by = auth.uid())
-);
-create policy "Users can delete priorities" on ticket_priorities for delete using (
-  exists (select 1 from projects where projects.id = ticket_priorities.project_id and projects.created_by = auth.uid())
-);
+create policy "Members can view ticket priorities" on ticket_priorities
+  for select using (is_project_member(project_id, auth.uid()));
+
+create policy "Managers can create ticket priorities" on ticket_priorities
+  for insert with check (has_project_permission(project_id, auth.uid(), 'manage_priorities'));
+
+create policy "Managers can update ticket priorities" on ticket_priorities
+  for update using (has_project_permission(project_id, auth.uid(), 'manage_priorities'));
+
+create policy "Managers can delete ticket priorities" on ticket_priorities
+  for delete using (has_project_permission(project_id, auth.uid(), 'manage_priorities'));
 
 -- Tickets policies
-create policy "Users can view tickets" on tickets for select using (
-  exists (select 1 from projects where projects.id = tickets.project_id and projects.created_by = auth.uid())
-);
-create policy "Users can create tickets" on tickets for insert with check (
-  exists (select 1 from projects where projects.id = tickets.project_id and projects.created_by = auth.uid())
-);
-create policy "Users can update tickets" on tickets for update using (
-  exists (select 1 from projects where projects.id = tickets.project_id and projects.created_by = auth.uid())
-);
-create policy "Users can delete tickets" on tickets for delete using (
-  exists (select 1 from projects where projects.id = tickets.project_id and projects.created_by = auth.uid())
-);
+create policy "Members can view tickets" on tickets
+  for select using (is_project_member(project_id, auth.uid()));
+
+create policy "Members can create tickets" on tickets
+  for insert with check (
+    is_project_member(project_id, auth.uid()) and
+    (has_project_permission(project_id, auth.uid(), 'create_tickets') or
+     has_project_permission(project_id, auth.uid(), 'manage_tickets'))
+  );
+
+create policy "Members can update tickets" on tickets
+  for update using (
+    is_project_member(project_id, auth.uid()) and
+    (has_project_permission(project_id, auth.uid(), 'manage_tickets') or
+     (has_project_permission(project_id, auth.uid(), 'update_own_tickets') and created_by = auth.uid()) or
+     has_project_permission(project_id, auth.uid(), 'update_tickets'))
+  );
+
+create policy "Project managers can delete tickets" on tickets
+  for delete using (has_project_permission(project_id, auth.uid(), 'manage_tickets'));
+
+-- Function to auto-add project creator as admin
+create or replace function add_creator_as_admin()
+returns trigger as $$
+declare
+  admin_role_id uuid;
+begin
+  -- Get admin role id
+  select id into admin_role_id from roles where name = 'Admin' limit 1;
+  
+  -- Add creator as admin
+  insert into project_members (project_id, user_id, role_id, status, joined_at)
+  values (new.id, new.created_by, admin_role_id, 'active', now());
+  
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger on_project_created
+  after insert on projects
+  for each row execute procedure add_creator_as_admin();

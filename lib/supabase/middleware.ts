@@ -1,6 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { routes } from "@/app/routes";
+import {
+  handleAuthenticatedUserRedirect,
+  handleUnauthenticatedUserRedirect,
+  handleUnverifiedUserRedirect,
+} from "../helpers";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -42,22 +47,25 @@ export async function updateSession(request: NextRequest) {
   const isVerifiedUser = user && user.user_metadata?.verified_code === "confirmed";
   const isUnverifiedUser = user && user.user_metadata?.verified_code !== "confirmed";
 
-  if (!user && isProtectedRoute) {
-    return NextResponse.redirect(new URL(routes.auth.login, request.url));
-  }
+  const unauthRedirect = handleUnauthenticatedUserRedirect(user, isProtectedRoute, request);
+  if (unauthRedirect) return unauthRedirect;
 
-  if (user && isAuthRoute) {
-    const destinationUrl = isVerifiedUser ? routes.dashboard.home : routes.auth.otpVerification;
+  const authRedirect = handleAuthenticatedUserRedirect(
+    user,
+    isAuthRoute,
+    isVerifiedUser!,
+    pathname,
+    request
+  );
+  if (authRedirect) return authRedirect;
 
-    console.log(`User logged in, redirecting from auth page to: ${destinationUrl}`);
-    return NextResponse.redirect(new URL(destinationUrl, request.url));
-  }
-
-  if (user && isUnverifiedUser && pathname !== routes.auth.otpVerification) {
-    if (!pathname.startsWith("/_next/") && !pathname.startsWith("/api/")) {
-      return NextResponse.redirect(new URL(routes.auth.otpVerification, request.url));
-    }
-  }
+  const unverifiedRedirect = handleUnverifiedUserRedirect(
+    user,
+    isUnverifiedUser!,
+    pathname,
+    request
+  );
+  if (unverifiedRedirect) return unverifiedRedirect;
 
   return supabaseResponse;
 }

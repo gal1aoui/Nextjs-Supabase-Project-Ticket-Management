@@ -16,10 +16,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useModalDialog } from "@/hooks/use-modal";
 import { useCreateProject } from "@/stores/project.store";
 
 export function CreateProjectDialog() {
-  const [open, setOpen] = useState(false);
+  const { isOpen, toggleModal, closeModal } = useModalDialog();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState("#3B82F6");
@@ -44,16 +45,15 @@ export function CreateProjectDialog() {
       setName("");
       setDescription("");
       setColor("#3B82F6");
-      setOpen(false);
+      closeModal();
       toast.success("Project created successfully");
-    } catch (error) {
-      toast.error("Failed to create project");
-      console.error(error);
+    } catch (_) {
+      toast.error(`Failed to create project: ${createProject.error?.message}`);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={toggleModal}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
@@ -105,7 +105,7 @@ export function CreateProjectDialog() {
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => closeModal()}>
               Cancel
             </Button>
             <Button type="submit" disabled={createProject.isPending}>

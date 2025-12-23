@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { CreateProjectDialog } from "@/components/projects/create-project-dialog";
 import { EditProjectDialog } from "@/components/projects/edit-project-dialog";
 import { ProjectCard } from "@/components/projects/project-card";
+import ProjectsSkeleton from "@/components/projects/projects-card-skeleton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +18,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useDeleteProject, useProjects } from "@/stores/project.store";
 import type { Project } from "@/types/database";
-import ProjectsSkeleton from "@/components/projects/projects-card-skeleton";
 
 export default function ProjectsPage() {
   const { data: projects = [], isLoading } = useProjects();
@@ -32,9 +32,8 @@ export default function ProjectsPage() {
       await deleteProject.mutateAsync(deletingProjectId);
       toast.success("Project deleted successfully");
       setDeletingProjectId(null);
-    } catch (error) {
-      toast.error("Failed to delete project");
-      console.error(error);
+    } catch (_) {
+      toast.error(`Failed to delete project: ${deleteProject.error?.message}`);
     }
   };
 

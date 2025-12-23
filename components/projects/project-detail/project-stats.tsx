@@ -13,7 +13,7 @@ export function ProjectStats({ projectId }: ProjectStatsProps) {
   const { data: stats, isLoading } = useProjectStats(projectId);
 
   if (isLoading) {
-    return <ProjectsCardSkeleton style="h-48 rounded-xl mb-12"/>;
+    return <ProjectsCardSkeleton style="h-48 rounded-xl mb-12" />;
   }
 
   return (

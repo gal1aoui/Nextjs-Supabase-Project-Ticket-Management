@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useModalDialog } from "@/hooks/use-modal";
 import { useCreateTicket } from "@/stores/ticket.store";
 import type { TicketPriority, TicketState } from "@/types/database";
 
@@ -39,7 +40,7 @@ export function CreateTicketDialog({
   priorities,
   userId,
 }: CreateTicketDialogProps) {
-  const [open, setOpen] = useState(false);
+  const { isOpen, toggleModal, closeModal } = useModalDialog();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [stateId, setStateId] = useState("");
@@ -69,16 +70,15 @@ export function CreateTicketDialog({
       setDescription("");
       setStateId("");
       setPriorityId("");
-      setOpen(false);
+      closeModal();
       toast.success("Ticket created successfully");
-    } catch (error) {
-      toast.error("Failed to create ticket");
-      console.error(error);
+    } catch (_) {
+      toast.error(`Failed to create ticket: ${createTicket.error?.message}`);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={toggleModal}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
@@ -143,7 +143,7 @@ export function CreateTicketDialog({
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => closeModal()}>
               Cancel
             </Button>
             <Button type="submit" disabled={createTicket.isPending}>

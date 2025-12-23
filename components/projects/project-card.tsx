@@ -10,8 +10,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Project } from "@/types/database";
 import { useProjectStats } from "@/stores/project.store";
+import type { Project } from "@/types/database";
 
 interface ProjectCardProps {
   project: Project;
