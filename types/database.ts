@@ -27,6 +27,51 @@ export type Database = {
           website?: string | null;
         };
       };
+      meetings: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          color: string | null;
+          start_date: string | null;
+          end_date: string | null;
+          start_time: string | null;
+          end_time: string | null;
+          attendees: string[] | null;
+          location: string;
+          created_at: string;
+          updated_at: string;
+          created_by: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string | null;
+          color?: string | null;
+          start_date?: string | null;
+          end_date?: string | null;
+          start_time?: string | null;
+          end_time?: string | null;
+          attendees?: string[] | null;
+          location?: string;
+          created_at: string;
+          updated_at: string;
+          created_by: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string | null;
+          color?: string | null;
+          start_date?: string | null;
+          end_date?: string | null;
+          start_time?: string | null;
+          end_time?: string | null;
+          attendees?: string[] | null;
+          location?: string;
+          updated_at?: string | null;
+        };
+      };
       projects: {
         Row: {
           id: string;
@@ -200,6 +245,7 @@ export type ProjectMember = Database["public"]["Tables"]["project_members"]["Row
 export type TicketState = Database["public"]["Tables"]["ticket_states"]["Row"];
 export type TicketPriority = Database["public"]["Tables"]["ticket_priorities"]["Row"];
 export type Ticket = Database["public"]["Tables"]["tickets"]["Row"];
+export type Meeting = Database["public"]["Tables"]["meetings"]["Row"];
 
 export type ProjectMembersData = {
   user_id: string;

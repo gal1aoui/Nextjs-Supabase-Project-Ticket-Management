@@ -7,5 +7,6 @@ export const routes = {
   dashboard: {
     home: "/",
     kanban: "/projects",
+    calendar: "/calendar",
   },
 };

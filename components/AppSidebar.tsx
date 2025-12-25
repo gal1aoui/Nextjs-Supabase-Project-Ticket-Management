@@ -1,6 +1,6 @@
 "use client";
 
-import { KanbanSquare, LayoutDashboard } from "lucide-react";
+import { Calendar, KanbanSquare, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { routes } from "@/app/routes";
@@ -19,6 +19,7 @@ import {
 const items = [
   { title: "Dashboard", url: routes.dashboard.home, icon: LayoutDashboard },
   { title: "Projects", url: routes.dashboard.kanban, icon: KanbanSquare },
+  { title: "Calendar", url: routes.dashboard.calendar, icon: Calendar },
 ];
 
 export function AppSidebar() {
