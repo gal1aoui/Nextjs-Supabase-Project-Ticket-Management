@@ -1,29 +1,22 @@
 "use client";
 
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { CreateProjectDialog } from "@/components/projects/create-project-dialog";
-import { EditProjectDialog } from "@/components/projects/edit-project-dialog";
+import DeleteDialog from "@/components/delete-alert-dialog";
+import { ProjectForm } from "@/components/projects/forms/project-form";
 import { ProjectCard } from "@/components/projects/project-card";
 import ProjectsSkeleton from "@/components/projects/projects-card-skeleton";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { useModal } from "@/contexts/modal-context";
 import { useDeleteProject, useProjects } from "@/stores/project.store";
-import type { Project } from "@/types/database";
 
 export default function ProjectsPage() {
   const { data: projects = [], isLoading } = useProjects();
   const deleteProject = useDeleteProject();
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
+
+  const { openModal } = useModal();
 
   const handleDelete = async () => {
     if (!deletingProjectId) return;
@@ -55,7 +48,18 @@ export default function ProjectsPage() {
           <h2 className="text-3xl font-bold tracking-tight">Projects</h2>
           <p className="text-muted-foreground">Manage and organize your project boards</p>
         </div>
-        <CreateProjectDialog />
+        <Button
+          onClick={() =>
+            openModal({
+              title: "Create New Project",
+              description: "Add a new project to organize your tickets",
+              render: ({ close }) => <ProjectForm closeModal={close} />,
+            })
+          }
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          New Project
+        </Button>
       </div>
 
       {projects.length === 0 ? (
@@ -67,45 +71,18 @@ export default function ProjectsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              onEdit={setEditingProject}
-              onDelete={setDeletingProjectId}
-            />
+            <ProjectCard key={project.id} project={project} onDelete={setDeletingProjectId} />
           ))}
         </div>
       )}
 
-      <EditProjectDialog
-        project={editingProject}
-        open={!!editingProject}
-        onOpenChange={(open) => !open && setEditingProject(null)}
-      />
-
-      <AlertDialog
-        open={!!deletingProjectId}
+      <DeleteDialog
+        description="This action cannot be undone. This will permanently delete the
+            project and all associated tickets, states, and priorities."
+        openState={!!deletingProjectId}
         onOpenChange={(open) => !open && setDeletingProjectId(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the project and all
-              associated tickets, states, and priorities.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        deleteAction={handleDelete}
+      />
     </div>
   );
 }

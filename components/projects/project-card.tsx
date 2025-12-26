@@ -10,17 +10,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useModal } from "@/contexts/modal-context";
 import { useProjectStats } from "@/stores/project.store";
 import type { Project } from "@/types/database";
+import { ProjectForm } from "./forms/project-form";
 
 interface ProjectCardProps {
   project: Project;
-  onEdit: (project: Project) => void;
   onDelete: (id: string) => void;
 }
 
-export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
+export function ProjectCard({ project, onDelete }: ProjectCardProps) {
   const { data: stats } = useProjectStats(project.id);
+  const { openModal } = useModal();
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
@@ -37,7 +39,17 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEdit(project)}>Edit Project</DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() =>
+                openModal({
+                  title: "Edit Project",
+                  description: "Update your project information",
+                  render: ({ close }) => <ProjectForm project={project} closeModal={close} />,
+                })
+              }
+            >
+              Edit Project
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onDelete(project.id)} className="text-destructive">
               Delete Project
             </DropdownMenuItem>

@@ -1,6 +1,6 @@
 import { supabaseClient } from "@/lib/supabase/client";
 import type { TicketPriority } from "@/types/database";
-import type { ticketPriorityCreate, ticketPriorityUpdate } from "@/types/ticket-priority";
+import type { TicketPriorityFormSchema, TicketPriorityUpdateSchema } from "@/types/ticket-priority";
 
 export const ticketPriorityService = {
   async getByProject(projectId: string): Promise<TicketPriority[]> {
@@ -14,11 +14,11 @@ export const ticketPriorityService = {
     return data;
   },
 
-  async create(state: ticketPriorityCreate): Promise<TicketPriority> {
+  async create(state: TicketPriorityFormSchema, project_id: string): Promise<TicketPriority> {
     const { data: states } = await supabaseClient
       .from("ticket_priorities")
       .select("order")
-      .eq("project_id", state.project_id)
+      .eq("project_id", project_id)
       .order("order", { ascending: false })
       .limit(1);
 
@@ -26,7 +26,7 @@ export const ticketPriorityService = {
 
     const { data, error } = await supabaseClient
       .from("ticket_priorities")
-      .insert({ ...state, order: state.order ?? maxOrder + 1 })
+      .insert({ ...state, order: state.order ?? maxOrder + 1, project_id })
       .select()
       .single();
 
@@ -34,7 +34,7 @@ export const ticketPriorityService = {
     return data;
   },
 
-  async update(state: ticketPriorityUpdate): Promise<TicketPriority> {
+  async update(state: TicketPriorityUpdateSchema): Promise<TicketPriority> {
     const { id, ...updates } = state;
 
     const { data, error } = await supabaseClient

@@ -1,6 +1,6 @@
 import { supabaseClient } from "@/lib/supabase/client";
 import type { Project } from "@/types/database";
-import type { ProjectCreate, ProjectUpdate } from "@/types/project";
+import type { ProjectFormSchema, ProjectUpdateSchema } from "@/types/project";
 
 export const projectService = {
   async getAll(): Promise<Project[]> {
@@ -20,7 +20,7 @@ export const projectService = {
     return data;
   },
 
-  async create(project: ProjectCreate): Promise<Project> {
+  async create(project: ProjectFormSchema): Promise<Project> {
     const {
       data: { user },
     } = await supabaseClient.auth.getUser();
@@ -29,7 +29,11 @@ export const projectService = {
 
     const { data, error } = await supabaseClient
       .from("projects")
-      .insert({ ...project, created_by: user.id })
+      .insert({
+        ...project,
+        created_by: user.id,
+        workspace_id: "2ced7500-507e-4a5f-8128-661b91a48324",
+      })
       .select()
       .single();
 
@@ -37,7 +41,7 @@ export const projectService = {
     return data;
   },
 
-  async update(project: ProjectUpdate): Promise<Project> {
+  async update(project: ProjectUpdateSchema): Promise<Project> {
     const { id, ...updates } = project;
 
     const { data, error } = await supabaseClient

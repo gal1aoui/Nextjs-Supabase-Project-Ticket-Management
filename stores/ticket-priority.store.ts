@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ticketPriorityService } from "@/services/ticket-priority.service";
-import type { ticketPriorityCreate, ticketPriorityUpdate } from "@/types/ticket-priority";
+import type { TicketPriorityFormSchema, TicketPriorityUpdateSchema } from "@/types/ticket-priority";
 
 export const ticketPriorityKeys = {
   byProject: (projectId: string) => ["ticket-priorities", projectId] as const,
@@ -14,12 +14,12 @@ export function useTicketPriorities(projectId: string) {
   });
 }
 
-export function useCreateTicketPriority() {
+export function useCreateTicketPriority(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: ticketPriorityCreate) => ticketPriorityService.create(data),
-    onSuccess: (_, variables) => {
-      qc.invalidateQueries({ queryKey: ticketPriorityKeys.byProject(variables.project_id) });
+    mutationFn: (data: TicketPriorityFormSchema) => ticketPriorityService.create(data, projectId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ticketPriorityKeys.byProject(projectId) });
     },
   });
 }
@@ -27,7 +27,7 @@ export function useCreateTicketPriority() {
 export function useUpdateTicketPriority() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: ticketPriorityUpdate) => ticketPriorityService.update(data),
+    mutationFn: (data: TicketPriorityUpdateSchema) => ticketPriorityService.update(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ticket-priorities"] });
     },

@@ -24,6 +24,8 @@ export async function signUpNewUser(formData: RegisterInput) {
   const { email, password, name } = parsed.data;
 
   const otp = generateOtpCode();
+  const username = `${name.split(" ")[0][0]}${name.split(" ")[1]}`;
+  console.log("username:", username);
 
   const { error } = await (await supabase).auth.signUp({
     email,
@@ -33,12 +35,14 @@ export async function signUpNewUser(formData: RegisterInput) {
       emailRedirectTo: "/login",
       data: {
         name,
+        username,
         verified_code: otp,
       },
     },
   });
 
   if (error) {
+    console.log("Supabase sign-up error:", error);
     return { supabaseError: error.message };
   }
 

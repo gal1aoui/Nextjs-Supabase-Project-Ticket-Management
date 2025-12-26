@@ -27,57 +27,13 @@ export type Database = {
           website?: string | null;
         };
       };
-      meetings: {
-        Row: {
-          id: string;
-          title: string;
-          description: string | null;
-          color: string | null;
-          start_date: string | null;
-          end_date: string | null;
-          start_time: string | null;
-          end_time: string | null;
-          attendees: string[] | null;
-          location: string;
-          created_at: string;
-          updated_at: string;
-          created_by: string;
-        };
-        Insert: {
-          id?: string;
-          title: string;
-          description?: string | null;
-          color?: string | null;
-          start_date?: string | null;
-          end_date?: string | null;
-          start_time?: string | null;
-          end_time?: string | null;
-          attendees?: string[] | null;
-          location?: string;
-          created_at: string;
-          updated_at: string;
-          created_by: string;
-        };
-        Update: {
-          id?: string;
-          title?: string;
-          description?: string | null;
-          color?: string | null;
-          start_date?: string | null;
-          end_date?: string | null;
-          start_time?: string | null;
-          end_time?: string | null;
-          attendees?: string[] | null;
-          location?: string;
-          updated_at?: string | null;
-        };
-      };
-      projects: {
+      workspaces: {
         Row: {
           id: string;
           name: string;
           description: string | null;
-          color: string | null;
+          slug: string;
+          avatar_url: string | null;
           created_at: string;
           updated_at: string;
           created_by: string;
@@ -86,7 +42,8 @@ export type Database = {
           id?: string;
           name: string;
           description?: string | null;
-          color?: string | null;
+          slug: string;
+          avatar_url?: string | null;
           created_at?: string;
           updated_at?: string;
           created_by: string;
@@ -95,7 +52,8 @@ export type Database = {
           id?: string;
           name?: string;
           description?: string | null;
-          color?: string | null;
+          slug?: string;
+          avatar_url?: string | null;
           updated_at?: string;
         };
       };
@@ -104,7 +62,7 @@ export type Database = {
           id: string;
           name: string;
           description: string | null;
-          permissions: string[] | null;
+          permissions: string[];
           is_system: boolean;
           created_at: string;
         };
@@ -112,7 +70,7 @@ export type Database = {
           id?: string;
           name: string;
           description?: string | null;
-          permissions?: string[] | null;
+          permissions?: string[];
           is_system?: boolean;
           created_at?: string;
         };
@@ -120,7 +78,64 @@ export type Database = {
           id?: string;
           name?: string;
           description?: string | null;
-          permissions?: string[] | null;
+          permissions?: string[];
+        };
+      };
+      workspace_members: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          user_id: string;
+          role_id: string;
+          invited_by: string | null;
+          invited_at: string;
+          joined_at: string | null;
+          status: string;
+        };
+        Insert: {
+          id?: string;
+          workspace_id: string;
+          user_id: string;
+          role_id: string;
+          invited_by?: string | null;
+          invited_at?: string;
+          joined_at?: string | null;
+          status?: string;
+        };
+        Update: {
+          id?: string;
+          role_id?: string;
+          joined_at?: string | null;
+          status?: string;
+        };
+      };
+      projects: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          name: string;
+          description: string | null;
+          color: string | null;
+          created_at: string;
+          updated_at: string;
+          created_by: string;
+        };
+        Insert: {
+          id?: string;
+          workspace_id: string;
+          name: string;
+          description?: string | null;
+          color?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          color?: string | null;
+          updated_at?: string;
         };
       };
       project_members: {
@@ -239,17 +254,38 @@ export type Database = {
 };
 
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
-export type Project = Database["public"]["Tables"]["projects"]["Row"];
+export type Workspace = Database["public"]["Tables"]["workspaces"]["Row"];
 export type Role = Database["public"]["Tables"]["roles"]["Row"];
+export type WorkspaceMember = Database["public"]["Tables"]["workspace_members"]["Row"];
+export type Project = Database["public"]["Tables"]["projects"]["Row"];
 export type ProjectMember = Database["public"]["Tables"]["project_members"]["Row"];
 export type TicketState = Database["public"]["Tables"]["ticket_states"]["Row"];
 export type TicketPriority = Database["public"]["Tables"]["ticket_priorities"]["Row"];
 export type Ticket = Database["public"]["Tables"]["tickets"]["Row"];
-export type Meeting = Database["public"]["Tables"]["meetings"]["Row"];
 
-export type ProjectMembersData = {
-  user_id: string;
-  status: string;
-  role_id: string;
-  invited_at: string;
+export type WorkspaceMemberWithProfile = WorkspaceMember & {
+  profile: Profile;
+  role: Role;
+};
+
+export type ProjectMemberWithProfile = ProjectMember & {
+  profile: Profile;
+  role: Role;
+};
+
+export type ProjectWithCounts = Project & {
+  ticket_count: number;
+  member_count: number;
+};
+
+export type WorkspaceWithCounts = Workspace & {
+  project_count: number;
+  member_count: number;
+};
+
+export type TicketWithRelations = Ticket & {
+  state: TicketState;
+  priority: TicketPriority | null;
+  assigned_user: Profile | null;
+  created_user: Profile | null;
 };

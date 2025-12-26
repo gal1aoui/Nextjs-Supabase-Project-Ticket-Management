@@ -1,17 +1,16 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { useState } from "react";
 import { MemberList } from "@/components/members/member-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useModal } from "@/contexts/modal-context";
 import { useUser } from "@/hooks/use-user";
 import { useTicketPriorities } from "@/stores/ticket-priority.store";
 import { useTicketStates } from "@/stores/ticket-state.store";
-import type { TicketPriority, TicketState } from "@/types/database";
-import PriorityDialog from "./priority-dialog";
+import PriorityForm from "../forms/priority-form";
+import StateForm from "../forms/state-form";
 import PriorityItem from "./priority-item";
-import StateDialog from "./state-dialog";
 import StateItem from "./state-item";
 
 interface StatePriorityManagerProps {
@@ -22,22 +21,25 @@ export function StatePriorityManager({ projectId }: StatePriorityManagerProps) {
   const { data: states = [] } = useTicketStates(projectId);
   const { data: priorities = [] } = useTicketPriorities(projectId);
 
-  const { data: user } = useUser();
+  const { openModal } = useModal();
 
-  const [stateDialog, setStateDialog] = useState<{ open: boolean; state?: TicketState }>({
-    open: false,
-  });
-  const [priorityDialog, setPriorityDialog] = useState<{
-    open: boolean;
-    priority?: TicketPriority;
-  }>({ open: false });
+  const { data: user } = useUser();
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Ticket States</CardTitle>
-          <Button size="sm" onClick={() => setStateDialog({ open: true })}>
+          <Button
+            size="sm"
+            onClick={() =>
+              openModal({
+                title: "Create State",
+                description: "Add a new ticket state for this project",
+                render: ({ close }) => <StateForm projectId={projectId} closeModal={close} />,
+              })
+            }
+          >
             <Plus className="h-4 w-4 mr-1" />
             Add State
           </Button>
@@ -51,7 +53,15 @@ export function StatePriorityManager({ projectId }: StatePriorityManagerProps) {
                 <StateItem
                   key={state.id}
                   state={state}
-                  onEdit={() => setStateDialog({ open: true, state })}
+                  onEdit={() =>
+                    openModal({
+                      title: "Edit State",
+                      description: "Update ticket state for this project",
+                      render: ({ close }) => (
+                        <StateForm projectId={projectId} closeModal={close} state={state} />
+                      ),
+                    })
+                  }
                 />
               ))
             )}
@@ -62,7 +72,16 @@ export function StatePriorityManager({ projectId }: StatePriorityManagerProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Ticket Priorities</CardTitle>
-          <Button size="sm" onClick={() => setPriorityDialog({ open: true })}>
+          <Button
+            size="sm"
+            onClick={() =>
+              openModal({
+                title: "Create Priority",
+                description: "Add a new ticket priority for this project",
+                render: ({ close }) => <PriorityForm projectId={projectId} closeModal={close} />,
+              })
+            }
+          >
             <Plus className="h-4 w-4 mr-1" />
             Add Priority
           </Button>
@@ -76,29 +95,25 @@ export function StatePriorityManager({ projectId }: StatePriorityManagerProps) {
                 <PriorityItem
                   key={priority.id}
                   priority={priority}
-                  onEdit={() => setPriorityDialog({ open: true, priority })}
+                  onEdit={() =>
+                    openModal({
+                      title: "Create Priority",
+                      description: "Add a new ticket priority for this project",
+                      render: ({ close }) => (
+                        <PriorityForm
+                          projectId={projectId}
+                          closeModal={close}
+                          priority={priority}
+                        />
+                      ),
+                    })
+                  }
                 />
               ))
             )}
           </div>
         </CardContent>
       </Card>
-      {stateDialog.open && (
-        <StateDialog
-          projectId={projectId}
-          state={stateDialog.state}
-          open={stateDialog.open}
-          onOpenChange={(open) => setStateDialog({ open })}
-        />
-      )}
-      {priorityDialog.open && (
-        <PriorityDialog
-          projectId={projectId}
-          priority={priorityDialog.priority}
-          open={priorityDialog.open}
-          onOpenChange={(open) => setPriorityDialog({ open })}
-        />
-      )}
       <MemberList projectId={projectId} currentUserId={user!.id!} />
     </div>
   );

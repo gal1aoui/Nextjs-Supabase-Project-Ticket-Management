@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { projectService } from "@/services/project.service";
-import type { ProjectCreate, ProjectUpdate } from "@/types/project";
+import type { ProjectFormSchema, ProjectUpdateSchema } from "@/types/project";
 
 export const projectKeys = {
   all: ["projects"] as const,
@@ -34,7 +34,7 @@ export function useProjectStats(id: string) {
 export function useCreateProject() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: ProjectCreate) => projectService.create(data),
+    mutationFn: (data: ProjectFormSchema) => projectService.create(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: projectKeys.all });
     },
@@ -44,7 +44,7 @@ export function useCreateProject() {
 export function useUpdateProject() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: ProjectUpdate) => projectService.update(data),
+    mutationFn: (data: ProjectUpdateSchema) => projectService.update(data),
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: projectKeys.all });
       qc.invalidateQueries({ queryKey: projectKeys.detail(variables.id) });

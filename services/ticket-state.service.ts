@@ -1,6 +1,6 @@
 import { supabaseClient } from "@/lib/supabase/client";
 import type { TicketState } from "@/types/database";
-import type { TicketStateCreate, TicketStateUpdate } from "@/types/ticket-state";
+import type { TicketStateFormSchema, TicketStateUpdateSchema } from "@/types/ticket-state";
 
 export const ticketStateService = {
   async getByProject(projectId: string): Promise<TicketState[]> {
@@ -14,12 +14,12 @@ export const ticketStateService = {
     return data;
   },
 
-  async create(state: TicketStateCreate): Promise<TicketState> {
+  async create(state: TicketStateFormSchema, project_id: string): Promise<TicketState> {
     // Get max order for project
     const { data: states } = await supabaseClient
       .from("ticket_states")
       .select("order")
-      .eq("project_id", state.project_id)
+      .eq("project_id", project_id)
       .order("order", { ascending: false })
       .limit(1);
 
@@ -27,7 +27,7 @@ export const ticketStateService = {
 
     const { data, error } = await supabaseClient
       .from("ticket_states")
-      .insert({ ...state, order: state.order ?? maxOrder + 1 })
+      .insert({ ...state, order: state.order ?? maxOrder + 1, project_id })
       .select()
       .single();
 
@@ -35,7 +35,7 @@ export const ticketStateService = {
     return data;
   },
 
-  async update(state: TicketStateUpdate): Promise<TicketState> {
+  async update(state: TicketStateUpdateSchema): Promise<TicketState> {
     const { id, ...updates } = state;
 
     const { data, error } = await supabaseClient
