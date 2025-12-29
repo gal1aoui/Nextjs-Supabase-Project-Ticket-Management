@@ -3,7 +3,7 @@ import { projectMemberService } from "@/services/project-member.service";
 import type { ProjectMemberInvite, ProjectMemberUpdate } from "@/types/project-member";
 
 export const projectMemberKeys = {
-  byProject: (projectId: string) => ["project-members", projectId] as const,
+  byProject: (projectId: string) => ["project-members", projectId] as const
 };
 
 export function useProjectMembers(projectId: string) {
@@ -34,6 +34,16 @@ export function useUpdateMember() {
   });
 }
 
+export function useAcceptMemberInvite() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (memberId: string) => projectMemberService.acceptInvite(memberId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["project-members"] });
+    },
+  });
+}
+
 export function useRemoveMember() {
   const qc = useQueryClient();
   return useMutation({
@@ -41,5 +51,13 @@ export function useRemoveMember() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["project-members"] });
     },
+  });
+}
+
+export function useShowUserInvites(memberId: string) {
+  return useQuery({
+    queryKey: projectMemberKeys.byProject(memberId),
+    queryFn: () => projectMemberService.showUserInvites(memberId),
+    enabled: !!memberId,
   });
 }

@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateTicketPriority, useUpdateTicketPriority } from "@/stores/ticket-priority.store";
+import { useCreateTicketPriority, useDeleteTicketPriority, useUpdateTicketPriority } from "@/stores/ticket-priority.store";
 import type { TicketPriority } from "@/types/database";
 import { type TicketPriorityFormSchema, ticketPriorityFormSchema } from "@/types/ticket-priority";
+import DeleteDialog from "@/components/delete-alert-dialog";
 
 interface PriorityFormProps {
   projectId: string;
@@ -27,9 +28,25 @@ export default function PriorityForm({
     color: priority?.color || "#3B82F6",
   });
   const [error, setError] = useState<string | undefined>(undefined);
+  const [deletingPriorityId, setDeletingPriorityId] = useState<string | null>(null);
 
+  const deletePriority = useDeleteTicketPriority();
   const createPriority = useCreateTicketPriority(projectId);
   const updatePriority = useUpdateTicketPriority();
+
+  const handleDelete = async (priorityId: string) => {
+    if (!deletingPriorityId) return;
+
+    try {
+      await deletePriority.mutateAsync(priorityId);
+      closeModal();
+      toast.success("Priority deleted");
+    } catch (_) {
+      toast.error(
+        `Failed to delete priority: ${deletePriority.error?.message}`
+      );
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +91,7 @@ export default function PriorityForm({
                 return { ...prev, name: e.target.value };
               })
             }
-            placeholder="To Do"
+            placeholder="High"
           />
           {error && <p className="text-xs text-destructive">{error}</p>}
         </div>
@@ -104,9 +121,25 @@ export default function PriorityForm({
         </div>
       </div>
       <DialogFooter>
-        <Button type="button" variant="outline" onClick={() => closeModal}>
-          Cancel
-        </Button>
+        {priority && (
+          <>
+            <Button
+              variant="destructive"
+              onClick={(e: React.FormEvent) => {
+                e.preventDefault();
+                setDeletingPriorityId(priority.id)}}
+            >
+              Delete
+            </Button>
+            <DeleteDialog
+              description="This action cannot be undone. This will permanently delete the
+            project priority"
+              openState={!!deletingPriorityId}
+              onOpenChange={(open) => !open && setDeletingPriorityId(null)}
+              deleteAction={() => handleDelete(priority.id)}
+            />
+          </>
+        )}
         <Button type="submit">{priority ? "Update" : "Create"}</Button>
       </DialogFooter>
     </form>

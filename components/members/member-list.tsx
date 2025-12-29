@@ -66,7 +66,6 @@ export function MemberList({ projectId, currentUserId }: MemberListProps) {
                 <TableHead>Username</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

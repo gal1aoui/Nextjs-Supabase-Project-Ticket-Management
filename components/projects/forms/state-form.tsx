@@ -5,9 +5,17 @@ import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateTicketState, useUpdateTicketState } from "@/stores/ticket-state.store";
+import {
+  useCreateTicketState,
+  useDeleteTicketState,
+  useUpdateTicketState,
+} from "@/stores/ticket-state.store";
 import type { TicketState } from "@/types/database";
-import { type TicketStateFormSchema, ticketStateFormSchema } from "@/types/ticket-state";
+import {
+  type TicketStateFormSchema,
+  ticketStateFormSchema,
+} from "@/types/ticket-state";
+import DeleteDialog from "@/components/delete-alert-dialog";
 
 interface StateDialogProps {
   projectId: string;
@@ -15,21 +23,41 @@ interface StateDialogProps {
   closeModal: () => void;
 }
 
-export default function StateForm({ projectId, state, closeModal }: Readonly<StateDialogProps>) {
+export default function StateForm({
+  projectId,
+  state,
+  closeModal,
+}: Readonly<StateDialogProps>) {
   const [form, setForm] = useState<TicketStateFormSchema>({
     name: state?.name || "",
     color: state?.color || "#3B82F6",
   });
   const [error, setError] = useState<string | undefined>(undefined);
+  const [deletingStateId, setDeletingStateId] = useState<string | null>(null);
 
+  const deleteState = useDeleteTicketState();
   const createState = useCreateTicketState(projectId);
   const updateState = useUpdateTicketState();
+
+  const handleDelete = async (priorityId: string) => {
+    if (!deletingStateId) return;
+
+    try {
+      await deleteState.mutateAsync(priorityId);
+      closeModal();
+      toast.success("Priority deleted");
+    } catch (_) {
+      toast.error(`Failed to delete priority: ${deleteState.error?.message}`);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = ticketStateFormSchema.safeParse(form);
     if (!parsed.success) {
-      setError(z.treeifyError(parsed.error).properties?.name?.errors[0] ?? undefined);
+      setError(
+        z.treeifyError(parsed.error).properties?.name?.errors[0] ?? undefined
+      );
       return;
     }
 
@@ -95,9 +123,26 @@ export default function StateForm({ projectId, state, closeModal }: Readonly<Sta
         </div>
       </div>
       <DialogFooter>
-        <Button type="button" variant="outline" onClick={() => closeModal}>
-          Cancel
-        </Button>
+        {state && (
+          <>
+            <Button
+              variant="destructive"
+              onClick={(e: React.FormEvent) => {
+                e.preventDefault();
+                setDeletingStateId(state.id);
+              }}
+            >
+              Delete
+            </Button>
+            <DeleteDialog
+              description="This action cannot be undone. This will permanently delete the
+                  project state"
+              openState={!!deletingStateId}
+              onOpenChange={(open) => !open && setDeletingStateId(null)}
+              deleteAction={() => handleDelete(state.id)}
+            />
+          </>
+        )}
         <Button type="submit">{state ? "Update" : "Create"}</Button>
       </DialogFooter>
     </form>

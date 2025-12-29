@@ -89,8 +89,6 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
             </TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
-
-          <InviteMemberDialog projectId={projectId} />
         </div>
 
         <TabsContent value="board" className="space-y-4">

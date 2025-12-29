@@ -1,6 +1,21 @@
 import { createClient } from "@/lib/supabase/client";
-import type { ProjectMember, ProjectMembersData } from "@/types/database";
+import type { ProjectMember } from "@/types/database";
 import type { ProjectMemberInvite, ProjectMemberUpdate } from "@/types/project-member";
+
+interface ProjectMembersData {
+  user_id: string;
+  status: string;
+  role_id: string;
+  invited_at: string
+}
+
+export interface ProjectInvitesData {
+  project_id: string;
+  user_id: string;
+  role_id: string;
+  invited_by: string;
+  invited_at: string;
+}
 
 export const projectMemberService = {
   async getByProject(projectId: string): Promise<ProjectMembersData[]> {
@@ -69,4 +84,18 @@ export const projectMemberService = {
     if (error) throw error;
     return data;
   },
+
+  async showUserInvites(memberId: string) {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from("project_members")
+      .select("*")
+      .eq("user_id", memberId)
+      .eq("status", "pending")
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  }
 };

@@ -13,7 +13,7 @@ import {
 import { useModal } from "@/contexts/modal-context";
 import { useProjectStats } from "@/stores/project.store";
 import type { Project } from "@/types/database";
-import { ProjectForm } from "./forms/project-form";
+import { ProjectForm } from "../forms/project-form";
 
 interface ProjectCardProps {
   project: Project;

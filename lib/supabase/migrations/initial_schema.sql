@@ -342,6 +342,11 @@ create policy "Project admins can remove members" on project_members
     has_project_permission(project_id, auth.uid(), 'manage_members')
   );
 
+create policy "Invited users can see their pending invites" on project_members
+  for select using (
+    auth.uid() = user_id and status = 'pending'
+  );
+
 -- Ticket states policies
 create policy "Members can view ticket states" on ticket_states
   for select using (is_project_member(project_id, auth.uid()));

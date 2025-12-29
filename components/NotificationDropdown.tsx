@@ -17,6 +17,8 @@ import { useNotifications } from "@/contexts/NotificationContext";
 export function NotificationDropdown() {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
+
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

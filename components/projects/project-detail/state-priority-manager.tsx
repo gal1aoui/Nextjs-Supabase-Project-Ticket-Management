@@ -10,8 +10,8 @@ import { useTicketPriorities } from "@/stores/ticket-priority.store";
 import { useTicketStates } from "@/stores/ticket-state.store";
 import PriorityForm from "../forms/priority-form";
 import StateForm from "../forms/state-form";
-import PriorityItem from "./priority-item";
-import StateItem from "./state-item";
+import PriorityItem from "../items/priority-card-item";
+import StateItem from "../items/state-card-item";
 
 interface StatePriorityManagerProps {
   projectId: string;
@@ -26,7 +26,7 @@ export function StatePriorityManager({ projectId }: StatePriorityManagerProps) {
   const { data: user } = useUser();
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-4 md:grid-cols-3">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Ticket States</CardTitle>
