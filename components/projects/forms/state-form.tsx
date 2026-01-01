@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
+import DeleteDialog from "@/components/delete-alert-dialog";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -11,11 +12,7 @@ import {
   useUpdateTicketState,
 } from "@/stores/ticket-state.store";
 import type { TicketState } from "@/types/database";
-import {
-  type TicketStateFormSchema,
-  ticketStateFormSchema,
-} from "@/types/ticket-state";
-import DeleteDialog from "@/components/delete-alert-dialog";
+import { type TicketStateFormSchema, ticketStateFormSchema } from "@/types/ticket-state";
 
 interface StateDialogProps {
   projectId: string;
@@ -23,11 +20,7 @@ interface StateDialogProps {
   closeModal: () => void;
 }
 
-export default function StateForm({
-  projectId,
-  state,
-  closeModal,
-}: Readonly<StateDialogProps>) {
+export default function StateForm({ projectId, state, closeModal }: Readonly<StateDialogProps>) {
   const [form, setForm] = useState<TicketStateFormSchema>({
     name: state?.name || "",
     color: state?.color || "#3B82F6",
@@ -55,9 +48,7 @@ export default function StateForm({
     e.preventDefault();
     const parsed = ticketStateFormSchema.safeParse(form);
     if (!parsed.success) {
-      setError(
-        z.treeifyError(parsed.error).properties?.name?.errors[0] ?? undefined
-      );
+      setError(z.treeifyError(parsed.error).properties?.name?.errors[0] ?? undefined);
       return;
     }
 

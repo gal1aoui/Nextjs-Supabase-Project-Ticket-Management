@@ -16,10 +16,7 @@ export default function StateItem({ state, onEdit }: Readonly<StateItemProps>) {
     >
       <div className="flex items-center gap-2">
         {state.color && (
-          <div
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: state.color }}
-          />
+          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: state.color }} />
         )}
         <span className="font-medium">{state.name}</span>
       </div>

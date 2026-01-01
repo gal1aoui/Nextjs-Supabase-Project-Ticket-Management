@@ -60,10 +60,21 @@ const dateFormatter = (dateTime: string, isShort?: boolean) => {
   return new Date(dateTime).toLocaleString("en-US", options);
 };
 
+const getUserInitials = (name: string | null) => {
+  if (!name) return "??";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
+
 export {
   handleUnauthenticatedUserRedirect,
   handleAuthenticatedUserRedirect,
   handleUnverifiedUserRedirect,
   generateOtpCode,
   dateFormatter,
+  getUserInitials,
 };

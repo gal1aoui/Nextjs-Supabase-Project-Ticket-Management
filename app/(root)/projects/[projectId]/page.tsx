@@ -1,10 +1,9 @@
 "use client";
 
-import { CalendarIcon, LayoutDashboard, Users } from "lucide-react";
+import { CalendarIcon, LayoutDashboard, UserPlus, Users } from "lucide-react";
 import { use, useState } from "react";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { CalendarView } from "@/components/meetings/calendar-view";
-import { CreateMeetingDialog } from "@/components/meetings/create-meeting-dialog";
 import { MeetingDetailDialog } from "@/components/meetings/meeting-detail-dialog";
 import { InviteMemberDialog } from "@/components/members/invite-member-dialog";
 import { MemberList } from "@/components/members/member-list";
@@ -15,15 +14,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUser } from "@/hooks/use-user";
 import type { MeetingWithRelations } from "@/lib/utils";
 import { useProject } from "@/stores/project.store";
+import { useModal } from "@/contexts/modal-context";
+import MeetingForm from "@/components/meetings/forms/meeting-form";
+import { Button } from "@/components/ui/button";
 
 export default function ProjectDetailPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = use(params);
   const { data: project, isLoading } = useProject(projectId);
   const { data: user, isLoading: userLoading } = useUser();
 
-  const [createMeetingOpen, setCreateMeetingOpen] = useState(false);
+  const { openModal } = useModal();
+
   const [selectedMeeting, setSelectedMeeting] = useState<MeetingWithRelations | null>(null);
-  const [defaultMeetingDate, setDefaultMeetingDate] = useState<Date | undefined>();
+  const [defaultMeetingDate, setDefaultMeetingDate] = useState<Date | undefined>(new Date());
 
   if (isLoading || userLoading) {
     return (
@@ -51,7 +54,17 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
 
   const handleCreateClick = (date: Date) => {
     setDefaultMeetingDate(date);
-    setCreateMeetingOpen(true);
+    openModal({
+      title: "Schedule Meeting",
+      description: "Create a new meeting for your project team",
+      render: ({ close }) => (
+        <MeetingForm
+          defaulMeetingDate={defaultMeetingDate}
+          projectId={projectId}
+          closeModal={close}
+        />
+      ),
+    });
   };
 
   return (
@@ -60,13 +73,20 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
         <div className="flex items-center gap-4">
           <div>
             <div className="flex items-center gap-6">
-              <h2 className="text-3xl font-bold tracking-tight">{project.name}</h2>
+              <h2 className="text-3xl font-bold tracking-tight">
+                {project.name}
+              </h2>
               {project.color && (
-                <div className="w-4 h-4 rounded-full" style={{ backgroundColor: project.color }} />
+                <div
+                  className="w-4 h-4 rounded-full"
+                  style={{ backgroundColor: project.color }}
+                />
               )}
             </div>
             {project.description && (
-              <p className="text-muted-foreground mt-1">{project.description}</p>
+              <p className="text-muted-foreground mt-1">
+                {project.description}
+              </p>
             )}
           </div>
         </div>
@@ -106,7 +126,24 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
 
         <TabsContent value="members" className="space-y-4">
           <div className="flex justify-end">
-            <InviteMemberDialog projectId={projectId} />
+            <Button
+              onClick={() =>
+                openModal({
+                  title: "Invite Team Member",
+                  description:
+                    "Search for a user and assign them a role in your project",
+                  render: ({ close }) => (
+                    <InviteMemberDialog
+                      closeModal={close}
+                      projectId={projectId}
+                    />
+                  ),
+                })
+              }
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Invite Member
+            </Button>
           </div>
           <MemberList projectId={projectId} currentUserId={user.id} />
         </TabsContent>
@@ -116,15 +153,6 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
           <StatePriorityManager projectId={projectId} />
         </TabsContent>
       </Tabs>
-
-      {createMeetingOpen && (
-        <CreateMeetingDialog
-          projectId={projectId}
-          open={createMeetingOpen}
-          onOpenChange={setCreateMeetingOpen}
-          defaultDate={defaultMeetingDate}
-        />
-      )}
 
       <MeetingDetailDialog
         meeting={selectedMeeting}

@@ -16,8 +16,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useProjectMembers, useRemoveMember } from "@/stores/project-member.store";
-import ActiveMemberItem from "./active-member-item";
-import PendingMemberItem from "./pending-member-item";
+import ActiveMemberItem from "./items/active-member-item";
+import PendingMemberItem from "./items/pending-member-item";
 
 interface MemberListProps {
   projectId: string;

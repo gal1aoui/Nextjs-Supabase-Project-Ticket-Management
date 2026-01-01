@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useUser } from "@/hooks/use-user";
+import { getUserInitials } from "@/lib/helpers";
 import type { MeetingWithRelations } from "@/lib/utils";
 import { useDeleteMeeting, useUpdateAttendeeStatus } from "@/stores/meeting.store";
 
@@ -71,16 +72,6 @@ export function MeetingDetailDialog({
       toast.error("Failed to update status");
       console.error(error);
     }
-  };
-
-  const getInitials = (name: string | null) => {
-    if (!name) return "??";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
   };
 
   const getStatusBadge = (status: string) => {
@@ -212,7 +203,7 @@ export function MeetingDetailDialog({
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={attendee.profile.avatar_url || undefined} />
                         <AvatarFallback className="text-xs">
-                          {getInitials(attendee.profile.full_name)}
+                          {getUserInitials(attendee.profile.full_name)}
                         </AvatarFallback>
                       </Avatar>
                       <div>

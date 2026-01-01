@@ -6,7 +6,7 @@ interface ProjectMembersData {
   user_id: string;
   status: string;
   role_id: string;
-  invited_at: string
+  invited_at: string;
 }
 
 export interface ProjectInvitesData {
@@ -85,17 +85,30 @@ export const projectMemberService = {
     return data;
   },
 
-  async showUserInvites(memberId: string) {
+  async declineInvite(memberId: string): Promise<void> {
     const supabase = createClient();
+
+    const { error } = await supabase.from("project_members").delete().eq("id", memberId);
+
+    if (error) throw error;
+  },
+
+  async getPendingInvitations(): Promise<ProjectMember[]> {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) throw new Error("User not authenticated");
 
     const { data, error } = await supabase
       .from("project_members")
       .select("*")
-      .eq("user_id", memberId)
+      .eq("user_id", user.id)
       .eq("status", "pending")
-      .maybeSingle();
+      .order("invited_at", { ascending: false });
 
     if (error) throw error;
     return data;
-  }
+  },
 };

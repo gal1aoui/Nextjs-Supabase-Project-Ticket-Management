@@ -1,12 +1,9 @@
 "use client";
 
 import { format } from "date-fns";
-import { Calendar, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateMeeting } from "@/stores/meeting.store";
 import { useProjectMembers } from "@/stores/project-member.store";
+import MeetingAttendeesMemberCard from "./items/meeting-attendees-member-item";
 
 interface CreateMeetingDialogProps {
   projectId: string;
@@ -34,15 +32,6 @@ export function CreateMeetingDialog({
   onOpenChange,
   defaultDate,
 }: CreateMeetingDialogProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [startTime, setStartTime] = useState(
-    defaultDate ? format(defaultDate, "yyyy-MM-dd'T'HH:mm") : ""
-  );
-  const [endTime, setEndTime] = useState("");
-  const [location, setLocation] = useState("");
-  const [meetingUrl, setMeetingUrl] = useState("");
-  const [selectedAttendees, setSelectedAttendees] = useState<string[]>([]);
 
   const createMeeting = useCreateMeeting();
   const { data: members = [] } = useProjectMembers(projectId);
@@ -89,16 +78,6 @@ export function CreateMeetingDialog({
     setSelectedAttendees((prev) =>
       prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
     );
-  };
-
-  const getInitials = (name: string | null) => {
-    if (!name) return "??";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
   };
 
   return (
@@ -178,22 +157,13 @@ export function CreateMeetingDialog({
               <Label>Attendees ({selectedAttendees.length} selected)</Label>
               <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
                 {activeMembers.map((member) => (
-                  <div key={member.user_id} className="flex items-center gap-3">
-                    <Checkbox
-                      checked={selectedAttendees.includes(member.user_id)}
-                      onCheckedChange={() => toggleAttendee(member.user_id)}
-                    />
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={member.profile.avatar_url || undefined} />
-                      <AvatarFallback className="text-xs">
-                        {getInitials(member.profile.full_name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium">{member.profile.full_name}</div>
-                      <div className="text-xs text-muted-foreground">{member.role.name}</div>
-                    </div>
-                  </div>
+                  <MeetingAttendeesMemberCard
+                    key={member.user_id}
+                    userId={member.user_id}
+                    roleId={member.role_id}
+                    includeAttendee={selectedAttendees.includes(member.user_id)}
+                    toggleAttendee={() => toggleAttendee(member.user_id)}
+                  />
                 ))}
               </div>
             </div>

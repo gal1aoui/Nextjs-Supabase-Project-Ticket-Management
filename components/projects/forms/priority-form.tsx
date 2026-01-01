@@ -3,14 +3,18 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
+import DeleteDialog from "@/components/delete-alert-dialog";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateTicketPriority, useDeleteTicketPriority, useUpdateTicketPriority } from "@/stores/ticket-priority.store";
+import {
+  useCreateTicketPriority,
+  useDeleteTicketPriority,
+  useUpdateTicketPriority,
+} from "@/stores/ticket-priority.store";
 import type { TicketPriority } from "@/types/database";
 import { type TicketPriorityFormSchema, ticketPriorityFormSchema } from "@/types/ticket-priority";
-import DeleteDialog from "@/components/delete-alert-dialog";
 
 interface PriorityFormProps {
   projectId: string;
@@ -42,9 +46,7 @@ export default function PriorityForm({
       closeModal();
       toast.success("Priority deleted");
     } catch (_) {
-      toast.error(
-        `Failed to delete priority: ${deletePriority.error?.message}`
-      );
+      toast.error(`Failed to delete priority: ${deletePriority.error?.message}`);
     }
   };
 
@@ -127,7 +129,8 @@ export default function PriorityForm({
               variant="destructive"
               onClick={(e: React.FormEvent) => {
                 e.preventDefault();
-                setDeletingPriorityId(priority.id)}}
+                setDeletingPriorityId(priority.id);
+              }}
             >
               Delete
             </Button>

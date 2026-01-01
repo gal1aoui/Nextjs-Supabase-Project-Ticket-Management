@@ -1,28 +1,22 @@
 "use client";
 
-import type { User } from "@supabase/supabase-js";
+import { AvatarImage } from "@radix-ui/react-avatar";
 import { useUser } from "@/hooks/use-user";
+import { getUserInitials } from "@/lib/helpers";
+import type { Profile } from "@/types/database";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Skeleton } from "./ui/skeleton";
 
 interface UserAvatarProps {
-  user?: User | null;
+  user?: Profile;
   isLoading?: boolean;
 }
 
 export default function UserAvatar({ user, isLoading }: Readonly<UserAvatarProps>) {
   const { data: currentUser, isLoading: currentUserLoadingState } = useUser();
   const data = {
-    user: user ?? currentUser,
+    user: user?.full_name ?? currentUser?.user_metadata.name,
     isLoading: isLoading ?? currentUserLoadingState,
-  };
-
-  const getInitials = () => {
-    return `${data.user?.user_metadata.name}`
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
   };
 
   if (isLoading) {
@@ -31,8 +25,9 @@ export default function UserAvatar({ user, isLoading }: Readonly<UserAvatarProps
 
   return (
     <Avatar>
+      <AvatarImage src={data.user?.avatar_url || undefined} />
       <AvatarFallback className="bg-primary text-primary-foreground">
-        {getInitials()}
+        {getUserInitials(data.user)}
       </AvatarFallback>
     </Avatar>
   );

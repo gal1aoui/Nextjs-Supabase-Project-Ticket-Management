@@ -4,25 +4,18 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import DeleteDialog from "@/components/delete-alert-dialog";
+import MemberInviteCardItem from "@/components/members/invitation-list";
 import { ProjectForm } from "@/components/projects/forms/project-form";
 import { ProjectCard } from "@/components/projects/items/project-card-item";
 import ProjectsSkeleton from "@/components/projects/projects-card-skeleton";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/contexts/modal-context";
 import { useDeleteProject, useProjects } from "@/stores/project.store";
-import MemberInviteCardItem from "@/components/members/member-invite-card-item";
-import { useUser } from "@/hooks/use-user";
-import { useShowUserInvites } from "@/stores/project-member.store";
-import type { ProjectInvitesData } from "@/services/project-member.service";
 
 export default function ProjectsPage() {
   const { data: projects = [], isLoading: projectLoading } = useProjects();
   const deleteProject = useDeleteProject();
   const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
-
-  const {data: user, isLoading: userLoading} = useUser();
-
-  const { data: not, isLoading: invitesLoading } = useShowUserInvites(user?.id || "");
 
   const { openModal } = useModal();
 
@@ -38,7 +31,7 @@ export default function ProjectsPage() {
     }
   };
 
-  if (projectLoading || userLoading || invitesLoading) {
+  if (projectLoading) {
     return (
       <div className="flex-1 space-y-4 p-8 pt-6">
         <div className="flex items-center justify-between">
@@ -54,9 +47,7 @@ export default function ProjectsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Projects</h2>
-          <p className="text-muted-foreground">
-            Manage and organize your project boards
-          </p>
+          <p className="text-muted-foreground">Manage and organize your project boards</p>
         </div>
         <Button
           onClick={() =>
@@ -71,29 +62,7 @@ export default function ProjectsPage() {
           New Project
         </Button>
       </div>
-
-      {Array.isArray(not) &&
-        not.length &&
-        not?.map((n) => (
-          <MemberInviteCardItem
-            key={n.invited_at}
-            id={`${n?.id}`}
-            profileId={n.invited_by}
-            projectId={n.project_id}
-            roleId={n.role_id}
-          />
-        ))}
-
-      {not as ProjectInvitesData && (
-        <MemberInviteCardItem
-          key={`${not.invited_at}`}
-          id={`${not?.id}`}
-          profileId={`${not?.invited_by}`}
-          projectId={`${not?.project_id}`}
-          roleId={`${not?.role_id}`}
-        />
-      )}
-
+      <MemberInviteCardItem />
       {projects.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground mb-4">
@@ -103,11 +72,7 @@ export default function ProjectsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              onDelete={setDeletingProjectId}
-            />
+            <ProjectCard key={project.id} project={project} onDelete={setDeletingProjectId} />
           ))}
         </div>
       )}
