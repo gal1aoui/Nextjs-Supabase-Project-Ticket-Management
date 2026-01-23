@@ -2,26 +2,29 @@
 
 import { redirect } from "next/navigation";
 import { routes } from "@/app/routes";
+import WelcomeEmail from "@/components/emails/WelcomeEmail";
 import { sendEmail } from "@/services/mailer.service";
 import { signUpNewUser } from "@/services/register.service";
 import type { RegisterInput } from "@/types/authentication";
-import WelcomeEmail from "../../../components/emails/WelcomeEmail";
 
 export async function registerAction(formData: RegisterInput) {
-  const { supabaseError, error, otp } = await signUpNewUser(formData);
+  const result = await signUpNewUser(formData);
 
-  if (supabaseError || error) {
-    return supabaseError ? { serverError: supabaseError } : { error };
+  if (!result.success) {
+    return {
+      error: result.error.validation,
+      serverError: result.error.server,
+    };
   }
 
-  const mailer = await sendEmail({
+  const emailResult = await sendEmail({
     to: formData.email,
-    subject: "Welcome to the Platform 🎉",
-    react: WelcomeEmail({ name: formData.name, verificationCode: otp! }),
+    subject: "Welcome to the Platform",
+    react: WelcomeEmail({ name: formData.name, verificationCode: result.data.otp }),
   });
 
-  if (mailer.error) {
-    return { serverError: mailer.error };
+  if (!emailResult.success) {
+    return { serverError: emailResult.error };
   }
 
   redirect(routes.dashboard.home);

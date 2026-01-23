@@ -1,63 +1,52 @@
+import { handleSupabaseError, requireAuth } from "@/lib/errors";
 import { supabaseClient } from "@/lib/supabase/client";
 import type { Project } from "@/types/database";
 import type { ProjectFormSchema, ProjectUpdateSchema } from "@/types/project";
 
 export const projectService = {
   async getAll(): Promise<Project[]> {
-    const { data, error } = await supabaseClient
-      .from("projects")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) throw error;
-    return data;
+    return handleSupabaseError(() =>
+      supabaseClient.from("projects").select("*").order("created_at", { ascending: false })
+    );
   },
 
   async getById(id: string): Promise<Project> {
-    const { data, error } = await supabaseClient.from("projects").select("*").eq("id", id).single();
-
-    if (error) throw error;
-    return data;
+    return handleSupabaseError(() =>
+      supabaseClient.from("projects").select("*").eq("id", id).single()
+    );
   },
 
   async create(project: ProjectFormSchema): Promise<Project> {
-    const {
-      data: { user },
-    } = await supabaseClient.auth.getUser();
+    const userId = await requireAuth(supabaseClient);
 
-    if (!user) throw new Error("User not authenticated");
-
-    const { data, error } = await supabaseClient
-      .from("projects")
-      .insert({
-        ...project,
-        created_by: user.id,
-        workspace_id: "2ced7500-507e-4a5f-8128-661b91a48324",
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    return handleSupabaseError(() =>
+      supabaseClient
+        .from("projects")
+        .insert({
+          ...project,
+          created_by: userId,
+          workspace_id: "2ced7500-507e-4a5f-8128-661b91a48324",
+        })
+        .select()
+        .single()
+    );
   },
 
   async update(project: ProjectUpdateSchema): Promise<Project> {
     const { id, ...updates } = project;
 
-    const { data, error } = await supabaseClient
-      .from("projects")
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    return handleSupabaseError(() =>
+      supabaseClient
+        .from("projects")
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .select()
+        .single()
+    );
   },
 
   async delete(id: string): Promise<void> {
-    const { error } = await supabaseClient.from("projects").delete().eq("id", id);
-    if (error) throw error;
+    await handleSupabaseError(() => supabaseClient.from("projects").delete().eq("id", id).select());
   },
 
   async getStats(projectId: string) {

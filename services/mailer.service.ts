@@ -1,5 +1,6 @@
 "use server";
 
+import { failure, type Result, success } from "@/lib/errors";
 import { FROM, resend } from "@/lib/mailer";
 
 interface EmailProps {
@@ -8,7 +9,13 @@ interface EmailProps {
   react: React.ReactElement;
 }
 
-export async function sendEmail({ to = "", subject, react }: EmailProps) {
+interface EmailData {
+  id: string;
+}
+
+export type EmailResult = Result<EmailData, string>;
+
+export async function sendEmail({ to = "", subject, react }: EmailProps): Promise<EmailResult> {
   const { data, error } = await resend.emails.send({
     from: FROM,
     to,
@@ -17,9 +24,8 @@ export async function sendEmail({ to = "", subject, react }: EmailProps) {
   });
 
   if (error) {
-    console.error("Error sending email:", error);
-    return { success: false, error: error.message };
+    return failure(error.message);
   }
-  console.log("Email sent successfully:", data);
-  return { success: true, data };
+
+  return success(data as EmailData);
 }

@@ -1,36 +1,38 @@
 "use server";
 
 import z from "zod";
+import { failure, type Result, success } from "@/lib/errors";
 import { generateOtpCode } from "@/lib/helpers";
 import { createClient } from "@/lib/supabase/server";
 import { type RegisterInput, registerSchema } from "@/types/authentication";
 
-export async function signUpNewUser(formData: RegisterInput) {
-  const supabase = createClient();
+type ValidationErrors = Record<string, { errors: string[] }>;
 
-  const form = {
-    email: formData.email,
-    name: formData.name,
-    password: formData.password,
-    confirmPassword: formData.confirmPassword,
-  };
+export type RegisterResult = Result<
+  { otp: string },
+  { validation?: ValidationErrors; server?: string }
+>;
 
-  const parsed = registerSchema.safeParse(form);
+export async function signUpNewUser(formData: RegisterInput): Promise<RegisterResult> {
+  const parsed = registerSchema.safeParse(formData);
 
   if (!parsed.success) {
-    return { error: z.treeifyError(parsed.error).properties };
+    return failure({
+      validation: z.treeifyError(parsed.error).properties as ValidationErrors,
+    });
   }
 
   const { email, password, name } = parsed.data;
 
   const otp = generateOtpCode();
-  const username = `${name.split(" ")[0][0]}${name.split(" ")[1]}`;
-  console.log("username:", username);
+  const nameParts = name.split(" ");
+  const username =
+    nameParts.length > 1 ? `${nameParts[0][0]}${nameParts[1]}` : nameParts[0].toLowerCase();
 
-  const { error } = await (await supabase).auth.signUp({
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signUp({
     email,
     password,
-
     options: {
       emailRedirectTo: "/login",
       data: {
@@ -42,9 +44,8 @@ export async function signUpNewUser(formData: RegisterInput) {
   });
 
   if (error) {
-    console.log("Supabase sign-up error:", error);
-    return { supabaseError: error.message };
+    return failure({ server: error.message });
   }
 
-  return { success: true, otp };
+  return success({ otp });
 }

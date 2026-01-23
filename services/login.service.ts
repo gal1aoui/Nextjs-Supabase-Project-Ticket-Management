@@ -1,29 +1,33 @@
 import z from "zod";
+import { failure, type Result, success } from "@/lib/errors";
 import { createClient } from "@/lib/supabase/client";
 import { type LoginInput, loginSchema } from "@/types/authentication";
 
-const supabase = createClient();
+type ValidationErrors = Record<string, { errors: string[] }>;
 
-export async function signInWithEmail(formData: LoginInput) {
-  const form = {
-    email: formData.email,
-    password: formData.password,
-  };
+export type LoginResult = Result<
+  { user: Record<string, unknown> },
+  { validation?: ValidationErrors; server?: string }
+>;
 
-  const parsed = loginSchema.safeParse(form);
+export async function signInWithEmail(formData: LoginInput): Promise<LoginResult> {
+  const parsed = loginSchema.safeParse(formData);
 
   if (!parsed.success) {
-    return { error: z.treeifyError(parsed.error).properties };
+    return failure({
+      validation: z.treeifyError(parsed.error).properties as ValidationErrors,
+    });
   }
 
+  const supabase = createClient();
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: formData.email,
-    password: formData.password,
+    email: parsed.data.email,
+    password: parsed.data.password,
   });
 
   if (error) {
-    return { supabaseError: error.message };
+    return failure({ server: error.message });
   }
 
-  return { user: data.user.user_metadata };
+  return success({ user: data.user.user_metadata });
 }
