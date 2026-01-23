@@ -53,6 +53,7 @@ export default function InvitationItem({
       toast.error(`Failed to accept request: ${declineInvitation.error?.message}`);
     }
   };
+  
   return (
     <Card className="p-4">
       <div className="flex items-start justify-between gap-4">
