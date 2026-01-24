@@ -3,6 +3,7 @@
 import { useDroppable } from "@/contexts/drag-drop-context";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DropOverlay } from "@/components/ui/drop-indicator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Ticket, TicketPriority, TicketState } from "@/types/database";
 import { TicketCard } from "./ticket-card";
@@ -29,10 +30,11 @@ export function Column({ state, tickets, priorities, onTicketClick, onTicketDrop
   return (
     <Card
       {...droppableProps}
-      className={`flex flex-col transition-all duration-200 ${
-        isOver ? "ring-2 ring-primary bg-primary/5 scale-[1.02]" : ""
+      className={`relative flex flex-col transition-all duration-200 ${
+        isOver ? "scale-[1.02]" : ""
       }`}
     >
+      <DropOverlay isOver={isOver} color="blue" />
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between text-sm font-medium">
           <div className="flex items-center gap-2">
