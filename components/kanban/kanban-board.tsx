@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { useTickets, useUpdateTicket } from "@/stores/ticket.store";
+import { DragDropProvider } from "@/contexts/drag-drop-context";
 import { useTicketPriorities } from "@/stores/ticket-priority.store";
 import { useTicketStates } from "@/stores/ticket-state.store";
+import { useTickets, useUpdateTicket } from "@/stores/ticket.store";
 import type { Ticket } from "@/types/database";
 import { ProjectKanbanSkeleton } from "../projects/project-detail/project-detail-skeleton";
 import { Column } from "./column";
@@ -54,7 +55,7 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   const selectedPriority = priorities.find((p) => p.id === selectedTicket?.priority_id);
 
   return (
-    <>
+    <DragDropProvider>
       <div className="flex-1 space-y-4 p-8 pt-6">
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold tracking-tight">Kanban Board</h2>
@@ -99,6 +100,6 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
         open={!!editingTicket}
         onOpenChange={(open) => !open && setEditingTicket(null)}
       />
-    </>
+    </DragDropProvider>
   );
 }

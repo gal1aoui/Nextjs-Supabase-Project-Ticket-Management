@@ -83,13 +83,13 @@ function mapSupabaseErrorCode(error: PostgrestError | AuthError): ErrorCodeType 
 // Result type for operations that can fail
 export type Result<T, E = ApiError> = { success: true; data: T } | { success: false; error: E };
 
-// Helper to create success result
-export function success<T>(data: T): Result<T> {
+// Helper to create success result (returns narrow type for proper inference)
+export function success<T>(data: T): { success: true; data: T } {
   return { success: true, data };
 }
 
-// Helper to create error result
-export function failure<E = ApiError>(error: E): Result<never, E> {
+// Helper to create error result (returns narrow type for proper inference)
+export function failure<E>(error: E): { success: false; error: E } {
   return { success: false, error };
 }
 

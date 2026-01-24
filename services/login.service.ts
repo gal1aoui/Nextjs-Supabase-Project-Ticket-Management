@@ -1,14 +1,15 @@
+"use server";
+
 import z from "zod";
-import { failure, type Result, success } from "@/lib/errors";
-import { createClient } from "@/lib/supabase/client";
+import { type Result, failure, success } from "@/lib/errors";
+import { createClient } from "@/lib/supabase/server";
 import { type LoginInput, loginSchema } from "@/types/authentication";
 
 type ValidationErrors = Record<string, { errors: string[] }>;
 
-export type LoginResult = Result<
-  { user: Record<string, unknown> },
-  { validation?: ValidationErrors; server?: string }
->;
+type LoginError = { validation?: ValidationErrors; server?: string };
+
+export type LoginResult = Result<{ user: Record<string, unknown> }, LoginError>;
 
 export async function signInWithEmail(formData: LoginInput): Promise<LoginResult> {
   const parsed = loginSchema.safeParse(formData);
@@ -19,10 +20,12 @@ export async function signInWithEmail(formData: LoginInput): Promise<LoginResult
     });
   }
 
-  const supabase = createClient();
+  const { email, password } = parsed.data;
+
+  const supabase = await createClient();  
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: parsed.data.email,
-    password: parsed.data.password,
+    email,
+    password,
   });
 
   if (error) {

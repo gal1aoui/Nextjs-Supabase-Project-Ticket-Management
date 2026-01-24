@@ -1,9 +1,6 @@
 "use client";
 
-import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { pointerOutsideOfPreview } from "@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview";
-import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
-import { useEffect, useRef } from "react";
+import { useDraggable } from "@/contexts/drag-drop-context";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Ticket, TicketPriority } from "@/types/database";
@@ -17,35 +14,17 @@ interface TicketCardProps {
 }
 
 export function TicketCard({ ticket, priority, onclick }: TicketCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const dragHandleRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = cardRef.current;
-    const dragHandle = dragHandleRef.current;
-    if (!el || !dragHandle) return;
-
-    return draggable({
-      element: el,
-      dragHandle,
-      getInitialData: () => ({ ticket }),
-      onGenerateDragPreview: ({ nativeSetDragImage }) => {
-        setCustomNativeDragPreview({
-          nativeSetDragImage,
-          getOffset: pointerOutsideOfPreview({ x: "16px", y: "16px" }),
-          render: ({ container }) => {
-            const preview = el.cloneNode(true) as HTMLElement;
-            preview.style.width = `${el.offsetWidth}px`;
-            preview.style.transform = "rotate(3deg)";
-            container.appendChild(preview);
-          },
-        });
-      },
-    });
-  }, [ticket]);
+  const { draggableProps } = useDraggable({
+    type: "ticket",
+    item: ticket,
+  });
 
   return (
-    <Card ref={cardRef} onClick={onclick} className="cursor-pointer hover:bg-accent gap-2 p-2">
+    <Card
+      {...draggableProps}
+      onClick={onclick}
+      className="cursor-grab active:cursor-grabbing hover:bg-accent gap-2 p-2 transition-all duration-200 active:opacity-50 active:scale-[0.98]"
+    >
       <CardHeader className="flex items-center justify-between p-0">
         {priority && (
           <Badge
@@ -61,7 +40,7 @@ export function TicketCard({ ticket, priority, onclick }: TicketCardProps) {
         )}
         <UserAvatar />
       </CardHeader>
-      <div ref={dragHandleRef} className="cursor-grab active:cursor-grabbing space-y-2">
+      <div className="space-y-2">
         <CardTitle>{ticket.title}</CardTitle>
         <CardDescription className="p-1 line-clamp-2 wrap-break-word">
           {ticket.description}

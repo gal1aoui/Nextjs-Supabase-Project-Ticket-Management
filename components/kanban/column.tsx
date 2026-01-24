@@ -1,8 +1,6 @@
 "use client";
 
-import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
-import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { useEffect, useRef, useState } from "react";
+import { useDroppable } from "@/contexts/drag-drop-context";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -14,39 +12,25 @@ interface ColumnProps {
   tickets: Ticket[];
   priorities: TicketPriority[];
   onTicketClick?: (ticket: Ticket) => void;
-  onTicketDrop?: (ticketId: string, newStateId: string, destinationIndex?: number) => void;
+  onTicketDrop?: (ticketId: string, newStateId: string) => void;
 }
 
 export function Column({ state, tickets, priorities, onTicketClick, onTicketDrop }: ColumnProps) {
-  const columnRef = useRef<HTMLDivElement>(null);
-  const [isDraggedOver, setIsDraggedOver] = useState(false);
-
-  useEffect(() => {
-    const el = columnRef.current;
-    if (!el) return;
-
-    return combine(
-      dropTargetForElements({
-        element: el,
-        getData: () => ({ stateId: state.id }),
-        onDragEnter: () => setIsDraggedOver(true),
-        onDragLeave: () => setIsDraggedOver(false),
-        onDrop: ({ source }) => {
-          setIsDraggedOver(false);
-          const ticket = source.data.ticket as Ticket;
-          if (ticket && ticket.state_id !== state.id) {
-            onTicketDrop?.(ticket.id, state.id);
-          }
-        },
-      })
-    );
-  }, [state.id, onTicketDrop]);
+  const { isOver, droppableProps } = useDroppable<Ticket>({
+    id: state.id,
+    accept: "ticket",
+    onDrop: (ticket) => {
+      if (ticket.state_id !== state.id) {
+        onTicketDrop?.(ticket.id, state.id);
+      }
+    },
+  });
 
   return (
     <Card
-      ref={columnRef}
-      className={`flex flex-col transition-colors ${
-        isDraggedOver ? "ring-2 ring-primary bg-accent/50" : ""
+      {...droppableProps}
+      className={`flex flex-col transition-all duration-200 ${
+        isOver ? "ring-2 ring-primary bg-primary/5 scale-[1.02]" : ""
       }`}
     >
       <CardHeader className="pb-3">
@@ -67,16 +51,14 @@ export function Column({ state, tickets, priorities, onTicketClick, onTicketDrop
           <div className="space-y-2">
             {tickets.map((ticket) => {
               const priority = priorities.find((p) => p.id === ticket.priority_id);
-              const handleActivate = () => onTicketClick?.(ticket);
               return (
-                <button
+                <TicketCard
                   key={ticket.id}
-                  type="button"
-                  onClick={handleActivate}
-                  className="w-full text-left p-0 bg-transparent border-0"
-                >
-                  <TicketCard ticket={ticket} priority={priority} assigneeInitials="AC" />
-                </button>
+                  ticket={ticket}
+                  priority={priority}
+                  assigneeInitials="AC"
+                  onclick={() => onTicketClick?.(ticket)}
+                />
               );
             })}
           </div>
