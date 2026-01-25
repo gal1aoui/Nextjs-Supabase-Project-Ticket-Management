@@ -1,7 +1,7 @@
 "use server";
 
 import z from "zod";
-import { type Result, failure, success } from "@/lib/errors";
+import { failure, type Result, success } from "@/lib/errors";
 import { createClient } from "@/lib/supabase/server";
 import { type LoginInput, loginSchema } from "@/types/authentication";
 
@@ -22,7 +22,7 @@ export async function signInWithEmail(formData: LoginInput): Promise<LoginResult
 
   const { email, password } = parsed.data;
 
-  const supabase = await createClient();  
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,

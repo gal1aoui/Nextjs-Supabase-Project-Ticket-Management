@@ -139,11 +139,7 @@ export const meetingService = {
     const supabase = createClient();
 
     await handleSupabaseVoid(() =>
-      supabase
-        .from("meeting_attendees")
-        .delete()
-        .eq("meeting_id", meetingId)
-        .eq("user_id", userId)
+      supabase.from("meeting_attendees").delete().eq("meeting_id", meetingId).eq("user_id", userId)
     );
   },
 };

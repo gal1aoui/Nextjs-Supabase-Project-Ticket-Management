@@ -13,7 +13,7 @@ import UserAvatar from "@/components/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Spinner } from "@/components/ui/spinner";
-import { ModalProvider } from "@/contexts/modal-context";
+import { ModalProvider } from "@/contexts/modal/modal-context";
 import { profileService } from "@/services/profile.service";
 
 const ThemeToggle = dynamic(() => import("@/components/ThemeToggle"), {

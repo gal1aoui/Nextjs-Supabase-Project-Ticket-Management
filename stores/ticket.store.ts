@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ticketService } from "@/services/ticket.service";
-import type { TicketCreate, TicketUpdate } from "@/types/ticket";
+import { type ReorderTicketParams, ticketService } from "@/services/ticket.service";
+import type { Ticket, TicketCreate, TicketUpdate } from "@/types/ticket";
 
 export const ticketKeys = {
   byProject: (projectId: string) => ["tickets", projectId] as const,
@@ -10,7 +10,7 @@ export const ticketKeys = {
 export function useTickets(projectId: string) {
   return useQuery({
     queryKey: ticketKeys.byProject(projectId),
-    queryFn: () => ticketService.getByProject(projectId),
+    queryFn: () => ticketService.getByProject(projectId) as Promise<Ticket[]>,
     enabled: !!projectId,
   });
 }
@@ -18,7 +18,7 @@ export function useTickets(projectId: string) {
 export function useTicket(id: string) {
   return useQuery({
     queryKey: ticketKeys.detail(id),
-    queryFn: () => ticketService.getById(id),
+    queryFn: () => ticketService.getById(id) as Promise<Ticket>,
     enabled: !!id,
   });
 }
@@ -50,6 +50,49 @@ export function useDeleteTicket() {
     mutationFn: (id: string) => ticketService.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["tickets"] });
+    },
+  });
+}
+
+export function useReorderTicket() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (params: ReorderTicketParams) => ticketService.reorder(params),
+    onMutate: async (params) => {
+      await qc.cancelQueries({ queryKey: ["tickets"] });
+
+      const queries = qc.getQueriesData<Ticket[]>({ queryKey: ["tickets"] });
+
+      for (const [queryKey, tickets] of queries) {
+        if (!tickets) continue;
+
+        const ticket = tickets.find((t) => t.id === params.ticketId);
+        if (!ticket) continue;
+
+        const movedTicket: Ticket = {
+          ...ticket,
+          state_id: params.newStateId,
+          sort_order: params.newSortOrder,
+        };
+
+        const otherTickets = tickets.filter((t) => t.id !== params.ticketId);
+        const finalTickets = [...otherTickets, movedTicket];
+
+        qc.setQueryData(queryKey, finalTickets);
+        return { queryKey, previousTickets: tickets };
+      }
+    },
+    onError: (_, __, context) => {
+      // Rollback on error
+      if (context?.queryKey && context?.previousTickets) {
+        qc.setQueryData(context.queryKey, context.previousTickets);
+      }
+    },
+    onSettled: (data) => {
+      // Refetch to ensure consistency
+      if (data) {
+        qc.invalidateQueries({ queryKey: ticketKeys.byProject(data.project_id) });
+      }
     },
   });
 }

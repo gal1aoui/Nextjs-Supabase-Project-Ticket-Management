@@ -1,13 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { projectMemberService } from "@/services/project-member.service";
 import type { ProjectMemberInvite, ProjectMemberUpdate } from "@/types/project-member";
-import { useRouter } from "next/navigation";
 
 export const projectMemberKeys = {
   byProject: (projectId: string) => ["project-members", projectId] as const,
 };
-
-
 
 export function useProjectMembers(projectId: string) {
   return useQuery({
@@ -44,8 +42,8 @@ export function useAcceptMemberInvitation(projectId: string) {
     mutationFn: (memberId: string) => projectMemberService.acceptInvite(memberId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["project-members"] });
-      qc.invalidateQueries({ queryKey: ['projects'] });
-      router.push(`/projects/${projectId}`)
+      qc.invalidateQueries({ queryKey: ["projects"] });
+      router.push(`/projects/${projectId}`);
     },
   });
 }
@@ -57,7 +55,7 @@ export function useDeclineMemberInvitation() {
     mutationFn: (memberId: string) => projectMemberService.declineInvite(memberId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["project-members"] });
-      router.push('/projects')
+      router.push("/projects");
     },
   });
 }

@@ -4,19 +4,19 @@ import { CalendarIcon, LayoutDashboard, UserPlus, Users } from "lucide-react";
 import { use, useState } from "react";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { CalendarView } from "@/components/meetings/calendar-view";
+import MeetingForm from "@/components/meetings/forms/meeting-form";
 import { MeetingDetailDialog } from "@/components/meetings/meeting-detail-dialog";
 import { InviteMemberDialog } from "@/components/members/invite-member-dialog";
 import { MemberList } from "@/components/members/member-list";
 import ProjectDetailSkeleton from "@/components/projects/project-detail/project-detail-skeleton";
 import { ProjectStats } from "@/components/projects/project-detail/project-stats";
 import { StatePriorityManager } from "@/components/projects/project-detail/state-priority-manager";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useUser } from "@/hooks/use-user";
-import type { MeetingWithRelations } from "@/lib/utils";
-import { useProject } from "@/stores/project.store";
-import { useModal } from "@/contexts/modal-context";
-import MeetingForm from "@/components/meetings/forms/meeting-form";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useModal } from "@/contexts/modal/modal-context";
+import { useUser } from "@/hooks/use-user";
+import { useProject } from "@/stores/project.store";
+import type { MeetingWithRelations } from "@/types/meeting";
 
 export default function ProjectDetailPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = use(params);
@@ -25,7 +25,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
 
   const { openModal } = useModal();
 
-  const [selectedMeeting, setSelectedMeeting] = useState<MeetingWithRelations | null>(null);
+  const [_, setSelectedMeeting] = useState<MeetingWithRelations | null>(null);
   const [defaultMeetingDate, setDefaultMeetingDate] = useState<Date | undefined>(new Date());
 
   if (isLoading || userLoading) {
@@ -73,20 +73,13 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
         <div className="flex items-center gap-4">
           <div>
             <div className="flex items-center gap-6">
-              <h2 className="text-3xl font-bold tracking-tight">
-                {project.name}
-              </h2>
+              <h2 className="text-3xl font-bold tracking-tight">{project.name}</h2>
               {project.color && (
-                <div
-                  className="w-4 h-4 rounded-full"
-                  style={{ backgroundColor: project.color }}
-                />
+                <div className="w-4 h-4 rounded-full" style={{ backgroundColor: project.color }} />
               )}
             </div>
             {project.description && (
-              <p className="text-muted-foreground mt-1">
-                {project.description}
-              </p>
+              <p className="text-muted-foreground mt-1">{project.description}</p>
             )}
           </div>
         </div>
@@ -130,13 +123,9 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
               onClick={() =>
                 openModal({
                   title: "Invite Team Member",
-                  description:
-                    "Search for a user and assign them a role in your project",
+                  description: "Search for a user and assign them a role in your project",
                   render: ({ close }) => (
-                    <InviteMemberDialog
-                      closeModal={close}
-                      projectId={projectId}
-                    />
+                    <InviteMemberDialog closeModal={close} projectId={projectId} />
                   ),
                 })
               }
@@ -153,12 +142,6 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
           <StatePriorityManager projectId={projectId} />
         </TabsContent>
       </Tabs>
-
-      <MeetingDetailDialog
-        meeting={selectedMeeting}
-        open={!!selectedMeeting}
-        onOpenChange={(open) => !open && setSelectedMeeting(null)}
-      />
     </div>
   );
 }

@@ -53,7 +53,7 @@ export default function InvitationItem({
       toast.error(`Failed to accept request: ${declineInvitation.error?.message}`);
     }
   };
-  
+
   return (
     <Card className="p-4">
       <div className="flex items-start justify-between gap-4">
@@ -80,11 +80,7 @@ export default function InvitationItem({
           </div>
         </div>
         <div className="flex gap-2">
-          <Button
-            size="sm"
-            onClick={handleAcceptInvite}
-            disabled={acceptInvitation.isPending}
-          >
+          <Button size="sm" onClick={handleAcceptInvite} disabled={acceptInvitation.isPending}>
             <Check className="h-4 w-4 mr-1" />
             Accept
           </Button>

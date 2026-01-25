@@ -3,6 +3,12 @@ import { supabaseClient } from "@/lib/supabase/client";
 import type { Ticket } from "@/types/database";
 import type { TicketCreate, TicketUpdate } from "@/types/ticket";
 
+export interface ReorderTicketParams {
+  ticketId: string;
+  newStateId: string;
+  newSortOrder: number;
+}
+
 export const ticketService = {
   async getByProject(projectId: string): Promise<Ticket[]> {
     return handleSupabaseError(() =>
@@ -10,7 +16,7 @@ export const ticketService = {
         .from("tickets")
         .select("*")
         .eq("project_id", projectId)
-        .order("updated_at", { ascending: false })
+        .order("sort_order", { ascending: true })
     );
   },
 
@@ -47,5 +53,20 @@ export const ticketService = {
 
   async delete(id: string): Promise<void> {
     await handleSupabaseError(() => supabaseClient.from("tickets").delete().eq("id", id).select());
+  },
+
+  async reorder({ ticketId, newStateId, newSortOrder }: ReorderTicketParams): Promise<Ticket> {
+    return handleSupabaseError(() =>
+      supabaseClient
+        .from("tickets")
+        .update({
+          state_id: newStateId,
+          sort_order: newSortOrder,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", ticketId)
+        .select()
+        .single()
+    );
   },
 };

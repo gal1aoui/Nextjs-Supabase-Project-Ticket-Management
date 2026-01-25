@@ -1,16 +1,22 @@
-import { DialogContent, DialogFooter, DialogHeader } from "@/components/ui/dialog";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateMeeting } from "@/stores/meeting.store";
 import { useProjectMembers } from "@/stores/project-member.store";
 import type { MeetingFormSchema } from "@/types/meeting";
-import { useState } from "react";
-import { toast } from "sonner";
 import MeetingAttendeesMemberCard from "../items/meeting-attendees-member-item";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 
 interface MeetingFormProps {
   projectId: string;
@@ -18,14 +24,18 @@ interface MeetingFormProps {
   closeModal: () => void;
 }
 
-export default function MeetingForm({projectId, defaulMeetingDate, closeModal}:MeetingFormProps) {
-    const [form, setForm] = useState<Partial<MeetingFormSchema>>();
-    const [selectedAttendees, setSelectedAttendees] = useState<string[]>([])
+export default function MeetingForm({
+  projectId,
+  defaulMeetingDate,
+  closeModal,
+}: MeetingFormProps) {
+  const [form, setForm] = useState<Partial<MeetingFormSchema>>();
+  const [selectedAttendees, setSelectedAttendees] = useState<string[]>([]);
 
-    const createMeeting = useCreateMeeting();
-    const { data: members = [] } = useProjectMembers(projectId);
+  const createMeeting = useCreateMeeting();
+  const { data: members = [] } = useProjectMembers(projectId);
 
-    const activeMembers = members.filter((m) => m.status === "active");
+  const activeMembers = members.filter((m) => m.status === "active");
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -96,7 +106,10 @@ export default function MeetingForm({projectId, defaulMeetingDate, closeModal}:M
             <Calendar
               mode="range"
               defaultMonth={form?.startDate || defaulMeetingDate}
-              selected={{ from: form?.startDate || defaulMeetingDate, to: form?.endDate || defaulMeetingDate }}
+              selected={{
+                from: form?.startDate || defaulMeetingDate,
+                to: form?.endDate || defaulMeetingDate,
+              }}
               onSelect={(range) => {
                 if (range?.from) {
                   setForm((prev) => {

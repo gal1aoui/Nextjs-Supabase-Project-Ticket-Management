@@ -4,7 +4,7 @@ import { Plus } from "lucide-react";
 import { MemberList } from "@/components/members/member-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useModal } from "@/contexts/modal-context";
+import { useModal } from "@/contexts/modal/modal-context";
 import { useUser } from "@/hooks/use-user";
 import { useTicketPriorities } from "@/stores/ticket-priority.store";
 import { useTicketStates } from "@/stores/ticket-state.store";

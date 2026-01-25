@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useModal } from "@/contexts/modal-context";
+import { useModal } from "@/contexts/modal/modal-context";
 import { useProjectStats } from "@/stores/project.store";
 import type { Project } from "@/types/database";
 import { ProjectForm } from "../forms/project-form";

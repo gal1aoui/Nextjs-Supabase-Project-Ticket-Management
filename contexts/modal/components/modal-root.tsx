@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { ModalState } from "@/contexts/modal-context";
+import type { ModalState } from "@/contexts/modal/modal-context";
 
 interface ModalRootProps {
   open: boolean;
@@ -18,7 +18,7 @@ interface ModalRootProps {
 export function ModalRoot({ open, state, close }: ModalRootProps) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && close()}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         {(state.title || state.description) && (
           <DialogHeader>
             {state.title && <DialogTitle>{state.title}</DialogTitle>}

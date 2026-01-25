@@ -7,7 +7,7 @@
 -- Uncomment when seeding with demo data:
 
 /*
-insert into tickets (id, title, description, project_id, state_id, assigned_to, priority_id, created_by) values
+insert into tickets (id, title, description, project_id, state_id, assigned_to, priority_id, sort_order, created_by) values
   (
     '70000000-0000-0000-0000-000000000001',
     'Fix mobile responsive issues',
@@ -16,6 +16,7 @@ insert into tickets (id, title, description, project_id, state_id, assigned_to, 
     '10000000-0000-0000-0000-000000000002',
     'your-user-id',
     '40000000-0000-0000-0000-000000000003',
+    0,
     'your-user-id'
   ),
   (
@@ -26,6 +27,7 @@ insert into tickets (id, title, description, project_id, state_id, assigned_to, 
     '10000000-0000-0000-0000-000000000001',
     'your-user-id',
     '40000000-0000-0000-0000-000000000001',
+    0,
     'your-user-id'
   ),
   (
@@ -36,6 +38,7 @@ insert into tickets (id, title, description, project_id, state_id, assigned_to, 
     '10000000-0000-0000-0000-000000000003',
     'your-user-id',
     '40000000-0000-0000-0000-000000000004',
+    0,
     'your-user-id'
   )
 on conflict (id) do nothing;

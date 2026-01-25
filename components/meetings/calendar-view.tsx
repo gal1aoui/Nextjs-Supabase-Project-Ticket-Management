@@ -30,10 +30,10 @@ import {
   formatDateForView,
   getCalendarDays,
   getDateRange,
-  groupMeetingsByDate,
-  type MeetingWithRelations,
+  groupMeetingsByDate
 } from "@/lib/utils";
 import { useMeetingsByDateRange } from "@/stores/meeting.store";
+import type { MeetingWithRelations } from "@/types/meeting";
 
 interface CalendarViewProps {
   projectId: string;

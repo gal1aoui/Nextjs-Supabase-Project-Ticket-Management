@@ -1,5 +1,5 @@
-import { Badge } from "@/components/ui/badge";
 import UserAvatar from "@/components/UserAvatar";
+import { Badge } from "@/components/ui/badge";
 import { useProfile } from "@/stores/profile.store";
 
 interface PendingMemberItemProps {

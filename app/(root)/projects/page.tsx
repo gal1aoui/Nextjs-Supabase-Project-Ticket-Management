@@ -9,7 +9,7 @@ import { ProjectForm } from "@/components/projects/forms/project-form";
 import { ProjectCard } from "@/components/projects/items/project-card-item";
 import ProjectsSkeleton from "@/components/projects/projects-card-skeleton";
 import { Button } from "@/components/ui/button";
-import { useModal } from "@/contexts/modal-context";
+import { useModal } from "@/contexts/modal/modal-context";
 import { useDeleteProject, useProjects } from "@/stores/project.store";
 
 export default function ProjectsPage() {

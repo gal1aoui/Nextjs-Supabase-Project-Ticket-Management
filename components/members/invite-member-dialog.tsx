@@ -27,10 +27,7 @@ interface InviteMemberDialogProps {
   closeModal: () => void;
 }
 
-export function InviteMemberDialog({
-  projectId,
-  closeModal,
-}: InviteMemberDialogProps) {
+export function InviteMemberDialog({ projectId, closeModal }: InviteMemberDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
   const [roleId, setRoleId] = useState("");
@@ -94,9 +91,7 @@ export function InviteMemberDialog({
         {searchQuery.length >= 2 && !selectedUser && (
           <div className="max-h-48 overflow-y-auto border rounded-md">
             {searchResults.length === 0 ? (
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                No users found
-              </div>
+              <div className="p-4 text-center text-sm text-muted-foreground">No users found</div>
             ) : (
               searchResults.map((user) => (
                 <button
@@ -110,15 +105,11 @@ export function InviteMemberDialog({
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user.avatar_url || undefined} />
-                    <AvatarFallback>
-                      {getUserInitials(user.full_name)}
-                    </AvatarFallback>
+                    <AvatarFallback>{getUserInitials(user.full_name)}</AvatarFallback>
                   </Avatar>
                   <div className="text-left">
                     <div className="font-medium">{user.full_name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      @{user.username}
-                    </div>
+                    <div className="text-xs text-muted-foreground">@{user.username}</div>
                   </div>
                 </button>
               ))
@@ -131,21 +122,13 @@ export function InviteMemberDialog({
           <div className="flex items-center gap-3 p-3 border rounded-md bg-accent">
             <Avatar className="h-10 w-10">
               <AvatarImage src={selectedUser.avatar_url || undefined} />
-              <AvatarFallback>
-                {getUserInitials(selectedUser.full_name)}
-              </AvatarFallback>
+              <AvatarFallback>{getUserInitials(selectedUser.full_name)}</AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <div className="font-medium">{selectedUser.full_name}</div>
-              <div className="text-sm text-muted-foreground">
-                @{selectedUser.username}
-              </div>
+              <div className="text-sm text-muted-foreground">@{selectedUser.username}</div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedUser(null)}
-            >
+            <Button variant="ghost" size="sm" onClick={() => setSelectedUser(null)}>
               Change
             </Button>
           </div>
@@ -164,9 +147,7 @@ export function InviteMemberDialog({
                   <div>
                     <div className="font-medium">{role.name}</div>
                     {role.description && (
-                      <div className="text-xs text-muted-foreground">
-                        {role.description}
-                      </div>
+                      <div className="text-xs text-muted-foreground">{role.description}</div>
                     )}
                   </div>
                 </SelectItem>

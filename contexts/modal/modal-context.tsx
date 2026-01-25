@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, type ReactNode, useCallback, useContext, useState } from "react";
-import { ModalRoot } from "@/components/modal-root";
+import { ModalRoot } from "@/contexts/modal/components/modal-root";
 
 export type ModalState = {
   title?: ReactNode;
