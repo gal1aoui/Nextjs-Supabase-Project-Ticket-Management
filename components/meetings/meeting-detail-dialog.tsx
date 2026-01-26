@@ -20,8 +20,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useUser } from "@/hooks/use-user";
 import { getUserInitials } from "@/lib/helpers";
-import type { MeetingWithRelations } from "@/lib/utils";
 import { useDeleteMeeting, useUpdateAttendeeStatus } from "@/stores/meeting.store";
+import type { MeetingWithRelations } from "@/types/meeting";
 
 interface MeetingDetailDialogProps {
   meeting: MeetingWithRelations | null;

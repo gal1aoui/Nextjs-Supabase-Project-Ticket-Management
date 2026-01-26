@@ -44,8 +44,8 @@ export const meetingService = {
         .from("meetings")
         .select(MEETING_SELECT)
         .eq("project_id", projectId)
-        .gte("start_time", startDate.toISOString())
-        .lte("start_time", endDate.toISOString())
+        .gte("start_date", startDate.toISOString())
+        .lte("end_date", endDate.toISOString())
         .order("start_time", { ascending: true }),
     ) as Promise<MeetingWithRelations[]>;
   },
@@ -63,7 +63,7 @@ export const meetingService = {
   async create(meeting: MeetingCreate): Promise<Meeting> {
     const userId = await requireAuth(supabaseClient);
 
-    const { attendee_ids, ...meetingData } = meeting;
+    const { attendees, ...meetingData } = meeting;
 
     const data = await handleSupabaseError<Meeting>(() =>
       supabaseClient
@@ -73,8 +73,8 @@ export const meetingService = {
         .single(),
     );
 
-    if (attendee_ids && attendee_ids.length > 0) {
-      const attendees = attendee_ids
+    if (attendees && attendees.length > 0) {
+      const attendee_ids = attendees
         .filter((id) => id !== userId)
         .map((user_id) => ({
           meeting_id: data.id,
@@ -82,7 +82,7 @@ export const meetingService = {
           status: "invited" as const,
         }));
 
-      if (attendees.length > 0) {
+      if (attendee_ids.length > 0) {
         const { error: attendeeError } = await supabaseClient
           .from("meeting_attendees")
           .insert(attendees);

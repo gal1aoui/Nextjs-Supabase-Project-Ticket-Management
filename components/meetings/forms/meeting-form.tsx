@@ -15,7 +15,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateMeeting } from "@/stores/meeting.store";
 import { useProjectMembers } from "@/stores/project-member.store";
-import type { MeetingFormSchema } from "@/types/meeting";
+import type { Meeting, MeetingFormSchema } from "@/types/meeting";
 import MeetingAttendeesMemberCard from "../items/meeting-attendees-member-item";
 
 interface MeetingFormProps {
@@ -29,7 +29,17 @@ export default function MeetingForm({
   defaulMeetingDate,
   closeModal,
 }: MeetingFormProps) {
-  const [form, setForm] = useState<Partial<MeetingFormSchema>>();
+  const [form, setForm] = useState<MeetingFormSchema>({
+        title: "",
+        description: "",
+        start_date: new Date(),
+        end_date: new Date(),
+        start_time: "00:00:00",
+        end_time: "12:00:00",
+        location: "In-Person",
+        meetingUrl: "",
+        attendees: [],
+  });
   const [selectedAttendees, setSelectedAttendees] = useState<string[]>([]);
 
   const createMeeting = useCreateMeeting();
@@ -39,7 +49,7 @@ export default function MeetingForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form?.title || !form.startTime || !form.endTime) {
+    if (!form?.title || !form.start_time || !form.end_time) {
       toast.error("Please fill in required fields");
       return;
     }
@@ -49,11 +59,13 @@ export default function MeetingForm({
         project_id: projectId,
         title: form.title,
         description: form.description || undefined,
-        start_time: new Date(form.startTime).toISOString(),
-        end_time: new Date(form.endTime).toISOString(),
-        location: form.location || undefined,
-        meeting_url: form.meetingUrl || undefined,
-        attendee_ids: form.attendees,
+        start_time: form.start_time,
+        end_time: form.end_time,
+        start_date: form.start_date,
+        end_date: form.end_date,
+        location: form.location,
+        meetingUrl: form.meetingUrl || undefined,
+        attendees: form.attendees,
       });
 
       closeModal();
@@ -102,65 +114,66 @@ export default function MeetingForm({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="state">State *</Label>
+            <Label htmlFor="state">Date *</Label>
             <Calendar
               mode="range"
-              defaultMonth={form?.startDate || defaulMeetingDate}
+              defaultMonth={form?.start_date || defaulMeetingDate}
               selected={{
-                from: form?.startDate || defaulMeetingDate,
-                to: form?.endDate || defaulMeetingDate,
+                from: form?.start_date || defaulMeetingDate,
+                to: form?.end_date || defaulMeetingDate,
               }}
               onSelect={(range) => {
                 if (range?.from) {
                   setForm((prev) => {
                     return {
                       ...prev,
-                      startDate: range.from,
-                      endDate: range.to,
+                      start_date: range.from,
+                      end_date: range.to,
                     };
                   });
                 }
               }}
               numberOfMonths={2}
-              className="rounded-lg border shadow-sm"
+              className="rounded-lg border shadow-sm mx-auto"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="start-time">Start Time *</Label>
-              <Input
-                id="start-time"
-                type="datetime-local"
-                value={form?.startTime}
-                onChange={(e) =>
-                  setForm((prev) => {
-                    return { ...prev, startTime: e.target.value };
-                  })
-                }
-              />
+          {form.start_date?.getDay() === form.end_date?.getDay() && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="start-time">Start Time *</Label>
+                <Input
+                  id="start-time"
+                  type="time"
+                  value={form?.start_time}
+                  onChange={(e) =>
+                    setForm((prev) => {
+                      return { ...prev, start_time: e.target.value };
+                    })
+                  }
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="end-time">End Time *</Label>
+                <Input
+                  id="end-time"
+                  type="time"
+                  value={form?.end_time}
+                  onChange={(e) =>
+                    setForm((prev) => {
+                      return { ...prev, end_time: e.target.value };
+                    })
+                  }
+                />
+              </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="end-time">End Time *</Label>
-              <Input
-                id="end-time"
-                type="datetime-local"
-                value={form?.endTime}
-                onChange={(e) =>
-                  setForm((prev) => {
-                    return { ...prev, endTime: e.target.value };
-                  })
-                }
-              />
-            </div>
-          </div>
-
+          )}
           <div className="grid gap-2">
             <Label htmlFor="location">Location</Label>
             <Select
               value={form?.location}
               onValueChange={(value) =>
                 setForm((prev) => {
-                  return { ...prev, endTime: value };
+                  return { ...prev, location: value as Meeting["location"]};
                 })
               }
             >

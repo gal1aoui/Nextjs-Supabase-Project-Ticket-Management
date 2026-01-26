@@ -12,7 +12,7 @@ export type Meeting = {
   description: string | null;
   start_time: string;
   end_time: string;
-  location: string | null;
+  location: "In-Person" | "Online";
   meeting_url: string | null;
   created_by: string | null;
   created_at: string;
@@ -34,63 +34,55 @@ export type MeetingWithRelations = Meeting & {
 };
 
 // ===========================================
-// Service Schemas (API operations)
+// Form Schemas (UI forms)
 // ===========================================
 
-export const meetingCreateSchema = z
+export const meetingFormSchema = z
   .object({
-    project_id: z.string().uuid("Invalid project ID"),
-    title: z.string().min(1, "Title is required").max(200),
+    title: z.string().min(3, "Meeting title is required").max(200),
     description: z.string().optional(),
-    start_time: z.string().datetime(),
-    end_time: z.string().datetime(),
-    location: z.string().optional(),
-    meeting_url: z.string().url().optional().or(z.literal("")),
-    attendee_ids: z.array(z.string().uuid()).optional(),
+    start_date: z.date().optional(),
+    end_date: z.date().optional(),
+    start_time: z.iso.time(),
+    end_time: z.iso.time(),
+    attendees: z.array(z.uuid()).optional(),
+    location: z.enum(["In-Person", "Online"]).default("Online"),
+    meetingUrl: z.url().optional().or(z.literal("")),
+    color: z
+      .string()
+      .regex(/^#[0-9A-F]{6}$/i)
+      .optional(),
   })
   .refine((data) => new Date(data.end_time) > new Date(data.start_time), {
     message: "End time must be after start time",
     path: ["end_time"],
   });
 
+export type MeetingFormSchema = z.infer<typeof meetingFormSchema>;
+
+// ===========================================
+// Service Schemas (API operations)
+// ===========================================
+
+const meetingCreateSchema = z
+  .object({
+    project_id: z.uuid("Invalid project ID"),
+  });
+
+const meetingCreate = z.intersection(meetingFormSchema, meetingCreateSchema);
+export type MeetingCreate = z.infer<typeof meetingCreate>;
+
 export const meetingUpdateSchema = z.object({
-  id: z.string().uuid(),
-  title: z.string().min(1).max(200).optional(),
-  description: z.string().optional(),
-  start_time: z.string().datetime().optional(),
-  end_time: z.string().datetime().optional(),
-  location: z.string().optional(),
-  meeting_url: z.string().url().optional().or(z.literal("")),
+  id: z.uuid(),
 });
 
+const meetingUpdate = z.intersection(meetingFormSchema, meetingUpdateSchema);
+export type MeetingUpdate = z.infer<typeof meetingUpdate>;
+
 export const attendeeUpdateSchema = z.object({
-  meeting_id: z.string().uuid(),
-  user_id: z.string().uuid(),
+  meeting_id: z.uuid(),
+  user_id: z.uuid(),
   status: z.enum(["invited", "accepted", "declined", "tentative"]),
 });
 
-export type MeetingCreate = z.infer<typeof meetingCreateSchema>;
-export type MeetingUpdate = z.infer<typeof meetingUpdateSchema>;
 export type AttendeeUpdate = z.infer<typeof attendeeUpdateSchema>;
-
-// ===========================================
-// Form Schemas (UI forms)
-// ===========================================
-
-export const meetingFormSchema = z.object({
-  title: z.string().min(3, "Meeting title is required").max(200),
-  description: z.string().optional(),
-  startDate: z.date().optional(),
-  endDate: z.date().optional(),
-  startTime: z.string().optional(),
-  endTime: z.string().optional(),
-  attendees: z.array(z.string().email()).optional(),
-  location: z.enum(["In-Person", "Online"]).default("Online"),
-  meetingUrl: z.string().optional(),
-  color: z
-    .string()
-    .regex(/^#[0-9A-F]{6}$/i)
-    .optional(),
-});
-
-export type MeetingFormSchema = z.infer<typeof meetingFormSchema>;

@@ -40,8 +40,8 @@ export default function DayView({
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="text-sm font-medium text-primary">
-                      {format(new Date(meeting.start_time), "HH:mm")} -{" "}
-                      {format(new Date(meeting.end_time), "HH:mm")}
+                      {meeting.start_time} -{" "}
+                      {meeting.end_time}
                     </div>
                     <Badge variant="secondary">
                       {meeting.attendees.length} attendees
