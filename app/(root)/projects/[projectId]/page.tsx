@@ -25,7 +25,6 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
   const { openModal } = useModal();
 
   const [_, setSelectedMeeting] = useState<MeetingWithRelations | null>(null);
-  const [defaultMeetingDate, setDefaultMeetingDate] = useState<Date | undefined>(new Date());
 
   if (isLoading || userLoading) {
     return (
@@ -52,13 +51,12 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
   }
 
   const handleCreateClick = (date: Date) => {
-    setDefaultMeetingDate(date);
     openModal({
       title: "Schedule Meeting",
       description: "Create a new meeting for your project team",
       render: ({ close }) => (
         <MeetingForm
-          defaulMeetingDate={defaultMeetingDate}
+          defaulMeetingDate={date}
           projectId={projectId}
           closeModal={close}
         />

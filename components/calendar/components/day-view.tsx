@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { MeetingWithRelations } from "@/types/meeting";
-import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
 interface DayViewProps {

@@ -18,7 +18,7 @@ interface ModalRootProps {
 export function ModalRoot({ open, state, close }: ModalRootProps) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && close()}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[70vw] max-h-[90vh] w-fit overflow-y-auto">
         {(state.title || state.description) && (
           <DialogHeader>
             {state.title && <DialogTitle>{state.title}</DialogTitle>}

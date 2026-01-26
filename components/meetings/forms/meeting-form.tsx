@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { DialogContent, DialogFooter } from "@/components/ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -17,6 +17,8 @@ import { useCreateMeeting } from "@/stores/meeting.store";
 import { useProjectMembers } from "@/stores/project-member.store";
 import type { Meeting, MeetingFormSchema } from "@/types/meeting";
 import MeetingAttendeesMemberCard from "../items/meeting-attendees-member-item";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { isWeekend } from "date-fns";
 
 interface MeetingFormProps {
   projectId: string;
@@ -32,8 +34,8 @@ export default function MeetingForm({
   const [form, setForm] = useState<MeetingFormSchema>({
         title: "",
         description: "",
-        start_date: new Date(),
-        end_date: new Date(),
+        start_date: defaulMeetingDate || new Date(),
+        end_date: defaulMeetingDate || new Date(),
         start_time: "00:00:00",
         end_time: "12:00:00",
         location: "In-Person",
@@ -82,7 +84,6 @@ export default function MeetingForm({
     );
   };
   return (
-    <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
       <form onSubmit={handleSubmit}>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
@@ -113,32 +114,32 @@ export default function MeetingForm({
               rows={3}
             />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="state">Date *</Label>
-            <Calendar
-              mode="range"
-              defaultMonth={form?.start_date || defaulMeetingDate}
-              selected={{
-                from: form?.start_date || defaulMeetingDate,
-                to: form?.end_date || defaulMeetingDate,
-              }}
-              onSelect={(range) => {
-                if (range?.from) {
-                  setForm((prev) => {
-                    return {
-                      ...prev,
-                      start_date: range.from,
-                      end_date: range.to,
-                    };
-                  });
-                }
-              }}
-              numberOfMonths={2}
-              className="rounded-lg border shadow-sm mx-auto"
-            />
-          </div>
+          <Card className="rounded-lg border mx-auto w-fit px-0">
+            <CardContent>
+              <Calendar
+                mode="range"
+                defaultMonth={defaulMeetingDate || form?.start_date}
+                selected={{
+                  from: defaulMeetingDate || form?.start_date,
+                  to: defaulMeetingDate || form?.end_date,
+                }}
+                disabled={isWeekend}
+                onSelect={(range) => {
+                  if (range?.from) {
+                    setForm((prev) => {
+                      return {
+                        ...prev,
+                        start_date: range.from,
+                        end_date: range.to,
+                      };
+                    });
+                  }
+                }}
+                numberOfMonths={2}
+              />
+            </CardContent>
           {form.start_date?.getDay() === form.end_date?.getDay() && (
-            <div className="grid grid-cols-2 gap-4">
+            <CardFooter className="bg-card border-t grid grid-cols-2 gap-2">
               <div className="grid gap-2">
                 <Label htmlFor="start-time">Start Time *</Label>
                 <Input
@@ -165,8 +166,9 @@ export default function MeetingForm({
                   }
                 />
               </div>
-            </div>
+            </CardFooter>
           )}
+          </Card>
           <div className="grid gap-2">
             <Label htmlFor="location">Location</Label>
             <Select
@@ -178,7 +180,7 @@ export default function MeetingForm({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select state" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="In-Person">In-Person</SelectItem>
@@ -229,6 +231,5 @@ export default function MeetingForm({
           </Button>
         </DialogFooter>
       </form>
-    </DialogContent>
   );
 }
