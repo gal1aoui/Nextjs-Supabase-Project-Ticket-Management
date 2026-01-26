@@ -3,9 +3,8 @@
 import { CalendarIcon, LayoutDashboard, UserPlus, Users } from "lucide-react";
 import { use, useState } from "react";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
-import { CalendarView } from "@/components/meetings/calendar-view";
+import { CalendarView } from "@/components/calendar/calendar-view";
 import MeetingForm from "@/components/meetings/forms/meeting-form";
-import { MeetingDetailDialog } from "@/components/meetings/meeting-detail-dialog";
 import { InviteMemberDialog } from "@/components/members/invite-member-dialog";
 import { MemberList } from "@/components/members/member-list";
 import ProjectDetailSkeleton from "@/components/projects/project-detail/project-detail-skeleton";

@@ -12,7 +12,7 @@ create table meetings (
   end_time timestamptz not null,
   location text,
   meeting_url text,
-  created_by uuid references auth.users(id) on delete set null,
+  created_by uuid references profiles(id) on delete set null,
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
   constraint valid_time_range check (end_time > start_time)

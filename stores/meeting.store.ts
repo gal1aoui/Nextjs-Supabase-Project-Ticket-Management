@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { AttendeeUpdate, MeetingCreate, MeetingUpdate } from "@/lib/utils";
 import { meetingService } from "@/services/meeting.service";
+import type { AttendeeUpdate, MeetingCreate, MeetingUpdate } from "@/types/meeting";
 
 export const meetingKeys = {
   byProject: (projectId: string) => ["meetings", projectId] as const,
@@ -10,7 +10,7 @@ export const meetingKeys = {
 };
 
 export function useMeetings(projectId: string) {
-  return useQuery({
+    return useQuery({
     queryKey: meetingKeys.byProject(projectId),
     queryFn: () => meetingService.getByProject(projectId),
     enabled: !!projectId,

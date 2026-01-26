@@ -1,5 +1,10 @@
-import { ApiError, handleSupabaseError, handleSupabaseVoid, requireAuth } from "@/lib/errors";
-import { createClient } from "@/lib/supabase/client";
+import {
+  ApiError,
+  handleSupabaseError,
+  handleSupabaseVoid,
+  requireAuth,
+} from "@/lib/errors";
+import { createClient, supabaseClient } from "@/lib/supabase/client";
 import type {
   AttendeeUpdate,
   Meeting,
@@ -10,65 +15,62 @@ import type {
 
 const MEETING_SELECT = `
   *,
-  creator:profiles!meetings_created_by_fkey(*),
-  project:projects(*),
-  attendees:meeting_attendees(
+  creator:profiles!meetings_created_by_fkey (*),
+  project:projects!meetings_project_id_fkey (*),
+  attendees:meeting_attendees!meeting_attendees_meeting_id_fkey (
     *,
-    profile:profiles(*)
+    profile:profiles!meeting_attendees_profile_id_fkey (*)
   )
 `;
 
 export const meetingService = {
   async getByProject(projectId: string): Promise<MeetingWithRelations[]> {
-    const supabase = createClient();
-
     return handleSupabaseError(() =>
-      supabase
+      supabaseClient
         .from("meetings")
         .select(MEETING_SELECT)
         .eq("project_id", projectId)
-        .order("start_time", { ascending: true })
+        .order("start_time", { ascending: true }),
     ) as Promise<MeetingWithRelations[]>;
   },
 
   async getByDateRange(
     projectId: string,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Promise<MeetingWithRelations[]> {
-    const supabase = createClient();
-
     return handleSupabaseError(() =>
-      supabase
+      supabaseClient
         .from("meetings")
         .select(MEETING_SELECT)
         .eq("project_id", projectId)
         .gte("start_time", startDate.toISOString())
         .lte("start_time", endDate.toISOString())
-        .order("start_time", { ascending: true })
+        .order("start_time", { ascending: true }),
     ) as Promise<MeetingWithRelations[]>;
   },
 
   async getById(id: string): Promise<MeetingWithRelations> {
-    const supabase = createClient();
-
     return handleSupabaseError(() =>
-      supabase.from("meetings").select(MEETING_SELECT).eq("id", id).single()
+      supabaseClient
+        .from("meetings")
+        .select(MEETING_SELECT)
+        .eq("id", id)
+        .single(),
     ) as Promise<MeetingWithRelations>;
   },
 
   async create(meeting: MeetingCreate): Promise<Meeting> {
-    const supabase = createClient();
-    const userId = await requireAuth(supabase);
+    const userId = await requireAuth(supabaseClient);
 
     const { attendee_ids, ...meetingData } = meeting;
 
     const data = await handleSupabaseError<Meeting>(() =>
-      supabase
+      supabaseClient
         .from("meetings")
         .insert({ ...meetingData, created_by: userId })
         .select()
-        .single()
+        .single(),
     );
 
     if (attendee_ids && attendee_ids.length > 0) {
@@ -81,7 +83,9 @@ export const meetingService = {
         }));
 
       if (attendees.length > 0) {
-        const { error: attendeeError } = await supabase.from("meeting_attendees").insert(attendees);
+        const { error: attendeeError } = await supabaseClient
+          .from("meeting_attendees")
+          .insert(attendees);
 
         if (attendeeError) {
           throw ApiError.fromSupabaseError(attendeeError);
@@ -93,45 +97,41 @@ export const meetingService = {
   },
 
   async update(meeting: MeetingUpdate): Promise<Meeting> {
-    const supabase = createClient();
     const { id, ...updates } = meeting;
 
     return handleSupabaseError(() =>
-      supabase
+      supabaseClient
         .from("meetings")
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq("id", id)
         .select()
-        .single()
+        .single(),
     );
   },
 
   async delete(id: string): Promise<void> {
-    const supabase = createClient();
-
-    await handleSupabaseVoid(() => supabase.from("meetings").delete().eq("id", id));
+    await handleSupabaseVoid(() =>
+      supabaseClient.from("meetings").delete().eq("id", id),
+    );
   },
 
   async updateAttendeeStatus(update: AttendeeUpdate): Promise<void> {
-    const supabase = createClient();
     const { meeting_id, user_id, status } = update;
 
     await handleSupabaseVoid(() =>
-      supabase
+      supabaseClient
         .from("meeting_attendees")
         .update({ status })
         .eq("meeting_id", meeting_id)
-        .eq("user_id", user_id)
+        .eq("user_id", user_id),
     );
   },
 
   async addAttendee(meetingId: string, userId: string): Promise<void> {
-    const supabase = createClient();
-
     await handleSupabaseVoid(() =>
-      supabase
+      supabaseClient
         .from("meeting_attendees")
-        .insert({ meeting_id: meetingId, user_id: userId, status: "invited" })
+        .insert({ meeting_id: meetingId, user_id: userId, status: "invited" }),
     );
   },
 
@@ -139,7 +139,11 @@ export const meetingService = {
     const supabase = createClient();
 
     await handleSupabaseVoid(() =>
-      supabase.from("meeting_attendees").delete().eq("meeting_id", meetingId).eq("user_id", userId)
+      supabase
+        .from("meeting_attendees")
+        .delete()
+        .eq("meeting_id", meetingId)
+        .eq("user_id", userId),
     );
   },
 };
