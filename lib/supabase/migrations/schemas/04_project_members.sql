@@ -6,9 +6,9 @@
 create table project_members (
   id uuid primary key default uuid_generate_v4(),
   project_id uuid references projects(id) on delete cascade,
-  user_id uuid references auth.users(id) on delete cascade,
+  user_id uuid references profiles(id) on delete cascade,
   role_id uuid references roles(id) on delete restrict,
-  invited_by uuid references auth.users(id) on delete set null,
+  invited_by uuid references profiles(id) on delete set null,
   invited_at timestamptz default now(),
   joined_at timestamptz,
   status text default 'pending' check (status in ('pending', 'active', 'inactive')),

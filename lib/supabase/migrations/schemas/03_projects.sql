@@ -10,7 +10,7 @@ create table projects (
   color text,
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
-  created_by uuid references auth.users(id) on delete cascade
+  created_by uuid references profiles(id) on delete cascade
 );
 
 -- Indexes

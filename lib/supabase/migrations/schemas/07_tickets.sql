@@ -9,12 +9,12 @@ create table tickets (
   description text,
   project_id uuid references projects(id) on delete cascade,
   state_id uuid references ticket_states(id) on delete restrict,
-  assigned_to uuid references auth.users(id) on delete set null,
+  assigned_to uuid references profiles(id) on delete set null,
   priority_id uuid references ticket_priorities(id) on delete set null,
   sort_order integer not null default 0,
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
-  created_by uuid references auth.users(id) on delete set null
+  created_by uuid references profiles(id) on delete set null
 );
 
 -- Indexes
