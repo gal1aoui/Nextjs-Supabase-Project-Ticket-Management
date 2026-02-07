@@ -47,7 +47,7 @@ export const meetingFormSchema = z
     end_time: z.iso.time(),
     attendees: z.array(z.uuid()).optional(),
     location: z.enum(["In-Person", "Online"]).default("Online"),
-    meetingUrl: z.url().optional().or(z.literal("")),
+    meeting_url: z.url().optional().or(z.literal("")),
     color: z
       .string()
       .regex(/^#[0-9A-F]{6}$/i)

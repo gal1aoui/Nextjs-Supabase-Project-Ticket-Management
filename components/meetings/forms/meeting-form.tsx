@@ -39,7 +39,7 @@ export default function MeetingForm({
         start_time: "00:00:00",
         end_time: "12:00:00",
         location: "In-Person",
-        meetingUrl: "",
+        meeting_url: "",
         attendees: [],
   });
   const [selectedAttendees, setSelectedAttendees] = useState<string[]>([]);
@@ -66,7 +66,7 @@ export default function MeetingForm({
         start_date: form.start_date,
         end_date: form.end_date,
         location: form.location,
-        meetingUrl: form.meetingUrl || undefined,
+        meeting_url: form.meeting_url || undefined,
         attendees: form.attendees,
       });
 
@@ -195,10 +195,10 @@ export default function MeetingForm({
               <Input
                 id="meeting-url"
                 type="url"
-                value={form?.meetingUrl}
+                value={form?.meeting_url}
                 onChange={(e) =>
                   setForm((prev) => {
-                    return { ...prev, meetingUrl: e.target.value };
+                    return { ...prev, meeting_url: e.target.value };
                   })
                 }
                 placeholder="https://meet.google.com/..."

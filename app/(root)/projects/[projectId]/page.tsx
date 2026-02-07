@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarIcon, LayoutDashboard, UserPlus, Users } from "lucide-react";
-import { use, useState } from "react";
+import { use } from "react";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { CalendarView } from "@/components/calendar/calendar-view";
 import MeetingForm from "@/components/meetings/forms/meeting-form";
@@ -15,16 +15,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useModal } from "@/contexts/modal/modal-context";
 import { useUser } from "@/hooks/use-user";
 import { useProject } from "@/stores/project.store";
-import type { MeetingWithRelations } from "@/types/meeting";
-
 export default function ProjectDetailPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = use(params);
   const { data: project, isLoading } = useProject(projectId);
   const { data: user, isLoading: userLoading } = useUser();
 
   const { openModal } = useModal();
-
-  const [_, setSelectedMeeting] = useState<MeetingWithRelations | null>(null);
 
   if (isLoading || userLoading) {
     return (
@@ -109,7 +105,6 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
         <TabsContent value="calendar" className="space-y-4">
           <CalendarView
             projectId={projectId}
-            onMeetingClick={setSelectedMeeting}
             onCreateClick={handleCreateClick}
           />
         </TabsContent>

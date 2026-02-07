@@ -1,8 +1,22 @@
+"use client";
+
+import { format } from "date-fns";
+import {
+  CalendarIcon,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  MapPin,
+  Users,
+  Video,
+} from "lucide-react";
+import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { getUserInitials } from "@/lib/helpers";
 import type { MeetingWithRelations } from "@/types/meeting";
-import { CalendarIcon } from "lucide-react";
 
 interface DayViewProps {
   currentDate: Date;
@@ -11,58 +25,144 @@ interface DayViewProps {
   onCreateClick: (date: Date) => void;
 }
 
+const MAX_VISIBLE = 5;
+
+function MeetingCard({
+  meeting,
+  onClick,
+  index,
+}: {
+  meeting: MeetingWithRelations;
+  onClick: (meeting: MeetingWithRelations) => void;
+  index: number;
+}) {
+  return (
+    <Card
+      className="p-4 cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 animate-in fade-in slide-in-from-left-3 border-l-4 border-l-primary"
+      style={{ animationDelay: `${index * 50}ms`, animationFillMode: "both" }}
+      onClick={() => onClick(meeting)}
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-1.5 text-sm font-semibold text-primary">
+              <Clock className="h-4 w-4" />
+              {format(new Date(meeting.start_time), "HH:mm")} -{" "}
+              {format(new Date(meeting.end_time), "HH:mm")}
+            </div>
+            <Badge variant="secondary" className="text-xs">
+              <Users className="h-3 w-3 mr-1" />
+              {meeting.attendees.length}
+            </Badge>
+          </div>
+
+          <h3 className="text-lg font-semibold mb-1 truncate">
+            {meeting.title}
+          </h3>
+
+          {meeting.description && (
+            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+              {meeting.description}
+            </p>
+          )}
+
+          <div className="flex items-center gap-4">
+            {meeting.location && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5" />
+                {meeting.location}
+              </div>
+            )}
+            {meeting.meeting_url && (
+              <div className="flex items-center gap-1.5 text-xs text-primary">
+                <Video className="h-3.5 w-3.5" />
+                Video call
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Attendee avatars */}
+        <div className="flex -space-x-2 ml-4 shrink-0">
+          {meeting.attendees.slice(0, 3).map((attendee) => (
+            <Avatar key={attendee.id} className="h-7 w-7 border-2 border-background">
+              <AvatarImage src={attendee.profile.avatar_url || undefined} />
+              <AvatarFallback className="text-[10px]">
+                {getUserInitials(attendee.profile.full_name)}
+              </AvatarFallback>
+            </Avatar>
+          ))}
+          {meeting.attendees.length > 3 && (
+            <div className="h-7 w-7 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[10px] font-medium">
+              +{meeting.attendees.length - 3}
+            </div>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 export default function DayView({
   currentDate,
   meetings,
   onCreateClick,
   onMeetingClick,
 }: Readonly<DayViewProps>) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const hasOverflow = meetings.length > MAX_VISIBLE;
+  const visibleMeetings = isExpanded
+    ? meetings
+    : meetings.slice(0, MAX_VISIBLE);
+
   return (
     <Card className="p-6">
       <div className="space-y-3">
         {meetings.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <CalendarIcon className="h-12 w-12 mx-auto mb-4 opacity-20" />
-            <p>No meetings scheduled for this day</p>
-            <Button className="mt-4" onClick={() => onCreateClick(currentDate)}>
+          <div className="text-center py-16 text-muted-foreground animate-in fade-in duration-500">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center">
+              <CalendarIcon className="h-8 w-8 opacity-40" />
+            </div>
+            <p className="text-lg font-medium mb-1">No meetings scheduled</p>
+            <p className="text-sm mb-4">
+              This day is free. Schedule a meeting to get started.
+            </p>
+            <Button onClick={() => onCreateClick(currentDate)}>
               Schedule Meeting
             </Button>
           </div>
         ) : (
-          meetings.map((meeting) => (
-            <Card
-              key={meeting.id}
-              className="p-4 cursor-pointer hover:shadow-md"
-              onClick={() => onMeetingClick(meeting)}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="text-sm font-medium text-primary">
-                      {meeting.start_time} -{" "}
-                      {meeting.end_time}
-                    </div>
-                    <Badge variant="secondary">
-                      {meeting.attendees.length} attendees
-                    </Badge>
-                  </div>
-                  <h3 className="text-lg font-semibold mb-1">
-                    {meeting.title}
-                  </h3>
-                  {meeting.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {meeting.description}
-                    </p>
-                  )}
-                  {meeting.location && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      📍 {meeting.location}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </Card>
-          ))
+          <>
+            {visibleMeetings.map((meeting, index) => (
+              <MeetingCard
+                key={meeting.id}
+                meeting={meeting}
+                onClick={onMeetingClick}
+                index={index}
+              />
+            ))}
+
+            {hasOverflow && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-muted-foreground hover:text-foreground"
+                onClick={() => setIsExpanded((prev) => !prev)}
+              >
+                {isExpanded ? (
+                  <>
+                    <ChevronUp className="h-4 w-4 mr-1.5" />
+                    Show less
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-4 w-4 mr-1.5" />
+                    Show {meetings.length - MAX_VISIBLE} more meetings
+                  </>
+                )}
+              </Button>
+            )}
+          </>
         )}
       </div>
     </Card>

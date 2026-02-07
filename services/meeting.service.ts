@@ -50,6 +50,55 @@ export const meetingService = {
     ) as Promise<MeetingWithRelations[]>;
   },
 
+  async getUserMeetingsByDateRange(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<MeetingWithRelations[]> {
+    // Get meeting IDs where user is an attendee
+    const attendeeRows = await handleSupabaseError(() =>
+      supabaseClient
+        .from("meeting_attendees")
+        .select("meeting_id")
+        .eq("user_id", userId),
+    ) as { meeting_id: string }[];
+
+    const attendeeMeetingIds = attendeeRows.map((r) => r.meeting_id);
+
+    // Fetch meetings created by user in date range
+    const created = await handleSupabaseError(() =>
+      supabaseClient
+        .from("meetings")
+        .select(MEETING_SELECT)
+        .eq("created_by", userId)
+        .gte("start_time", startDate.toISOString())
+        .lte("start_time", endDate.toISOString())
+        .order("start_time", { ascending: true }),
+    ) as MeetingWithRelations[];
+
+    // Fetch meetings where user is an attendee in date range
+    let attending: MeetingWithRelations[] = [];
+    if (attendeeMeetingIds.length > 0) {
+      attending = await handleSupabaseError(() =>
+        supabaseClient
+          .from("meetings")
+          .select(MEETING_SELECT)
+          .in("id", attendeeMeetingIds)
+          .gte("start_time", startDate.toISOString())
+          .lte("start_time", endDate.toISOString())
+          .order("start_time", { ascending: true }),
+      ) as MeetingWithRelations[];
+    }
+
+    // Deduplicate and sort
+    const uniqueMap = new Map(
+      [...created, ...attending].map((m) => [m.id, m]),
+    );
+    return Array.from(uniqueMap.values()).sort(
+      (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime(),
+    );
+  },
+
   async getById(id: string): Promise<MeetingWithRelations> {
     return handleSupabaseError(() =>
       supabaseClient

@@ -6,6 +6,8 @@ export const meetingKeys = {
   byProject: (projectId: string) => ["meetings", projectId] as const,
   byDateRange: (projectId: string, start: Date, end: Date) =>
     ["meetings", projectId, start.toISOString(), end.toISOString()] as const,
+  byUserDateRange: (userId: string, start: Date, end: Date) =>
+    ["meetings", "user", userId, start.toISOString(), end.toISOString()] as const,
   detail: (id: string) => ["meetings", "detail", id] as const,
 };
 
@@ -22,6 +24,14 @@ export function useMeetingsByDateRange(projectId: string, startDate: Date, endDa
     queryKey: meetingKeys.byDateRange(projectId, startDate, endDate),
     queryFn: () => meetingService.getByDateRange(projectId, startDate, endDate),
     enabled: !!projectId,
+  });
+}
+
+export function useUserMeetingsByDateRange(userId: string, startDate: Date, endDate: Date) {
+  return useQuery({
+    queryKey: meetingKeys.byUserDateRange(userId, startDate, endDate),
+    queryFn: () => meetingService.getUserMeetingsByDateRange(userId, startDate, endDate),
+    enabled: !!userId,
   });
 }
 
