@@ -1,8 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
-import { useReorderTicket, useTickets } from "@/stores/ticket.store";
+import { useTickets } from "@/stores/ticket.store";
 import { useTicketPriorities } from "@/stores/ticket-priority.store";
 import { useTicketStates } from "@/stores/ticket-state.store";
 import type { Ticket } from "@/types/ticket";
@@ -11,8 +10,6 @@ import { Column } from "./column";
 import { CreateTicketDialog } from "./create-ticket-dialog";
 import { EditTicketDialog } from "./edit-ticket-dialog";
 import { TicketDetailDialog } from "./ticket-detail-dialog";
-import { DragDropProvider } from "@/contexts/dnd/drag-drop-context";
-import type { Edge } from "@/contexts/dnd/types";
 
 interface KanbanBoardProps {
   projectId: string;
@@ -26,8 +23,6 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
 
-  const reorderTicket = useReorderTicket();
-
   const ticketsByState = useMemo(() => {
     const grouped: Record<string, Ticket[]> = {};
     states.forEach((state) => {
@@ -38,45 +33,6 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
     return grouped;
   }, [tickets, states]);
 
-  const handleTicketReorder = async (
-    draggedTicket: Ticket,
-    targetTicket: Ticket | null,
-    targetStateId: string,
-    edge: Edge | null
-  ) => {
-    const columnTickets = ticketsByState[targetStateId] || [];
-
-    let newSortOrder: number;
-
-    if (targetTicket === null) {
-      // Dropping on empty column or column background - place at end
-      newSortOrder = columnTickets.length;
-    } else {
-      // Dropping on a specific ticket
-      // Filter out the dragged ticket if it's in the same column
-      const filteredTickets = columnTickets.filter((t) => t.id !== draggedTicket.id);
-      const targetIndex = filteredTickets.findIndex((t) => t.id === targetTicket.id);
-
-      if (edge === "top") {
-        // Insert before target
-        newSortOrder = targetIndex;
-      } else {
-        // Insert after target (edge === "bottom" or null)
-        newSortOrder = targetIndex + 1;
-      }
-    }
-
-    try {
-      await reorderTicket.mutateAsync({
-        ticketId: draggedTicket.id,
-        newStateId: targetStateId,
-        newSortOrder,
-      });
-    } catch (_) {
-      toast.error(`Failed to move ticket: ${reorderTicket.error?.message}`);
-    }
-  };
-
   if (ticketsLoading || statesLoading) {
     return <ProjectKanbanSkeleton />;
   }
@@ -85,7 +41,7 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   const selectedPriority = priorities.find((p) => p.id === selectedTicket?.priority_id);
 
   return (
-    <DragDropProvider>
+    <>
       <div className="flex-1 space-y-4 p-8 pt-6">
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold tracking-tight">Kanban Board</h2>
@@ -105,7 +61,6 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
               tickets={ticketsByState[state.id] || []}
               priorities={priorities}
               onTicketClick={setSelectedTicket}
-              onTicketReorder={handleTicketReorder}
             />
           ))}
         </div>
@@ -130,6 +85,6 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
         open={!!editingTicket}
         onOpenChange={(open) => !open && setEditingTicket(null)}
       />
-    </DragDropProvider>
+    </>
   );
 }

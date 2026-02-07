@@ -6,24 +6,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import type { TicketPriority, TicketState } from "@/types/database";
 import type { Ticket } from "@/types/ticket";
 import { TicketCard } from "./ticket-card";
-import type { Edge } from "@/contexts/dnd/types";
-import { useColumnDroppable } from "@/contexts/dnd/hooks/use-column-droppable";
 
 interface ColumnProps {
   state: TicketState;
   tickets: Ticket[];
   priorities: TicketPriority[];
   onTicketClick?: (ticket: Ticket) => void;
-  onTicketReorder?: (
-    draggedTicket: Ticket,
-    targetTicket: Ticket | null,
-    targetStateId: string,
-    edge: Edge | null
-  ) => void;
-}
-
-function CardShadow({ height }: { height: number }) {
-  return <div className="shrink-0 rounded-lg bg-slate-200 dark:bg-slate-700" style={{ height }} />;
 }
 
 export function Column({
@@ -31,23 +19,9 @@ export function Column({
   tickets,
   priorities,
   onTicketClick,
-  onTicketReorder,
 }: ColumnProps) {
-  const { isCardOver, draggingRect, droppableProps } = useColumnDroppable<Ticket>({
-    accept: "ticket",
-    onDrop: (ticket) => {
-      // Dropping on column (not on a card) - add to end
-      onTicketReorder?.(ticket, null, state.id, null);
-    },
-  });
-
   return (
-    <Card
-      {...droppableProps}
-      className={`relative flex flex-col transition-all duration-200 ${
-        isCardOver ? "ring-2 ring-blue-500/50" : ""
-      }`}
-    >
+    <Card className="relative flex flex-col">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between text-sm font-medium">
           <div className="flex items-center gap-2">
@@ -73,14 +47,9 @@ export function Column({
                   priority={priority}
                   assigneeInitials="AC"
                   onclick={() => onTicketClick?.(ticket)}
-                  onReorder={(draggedTicket, edge) =>
-                    onTicketReorder?.(draggedTicket, ticket, state.id, edge)
-                  }
                 />
               );
             })}
-            {/* Shadow at end of column when dragging over column background */}
-            {isCardOver && draggingRect && <CardShadow height={draggingRect.height} />}
           </div>
         </ScrollArea>
       </CardContent>
