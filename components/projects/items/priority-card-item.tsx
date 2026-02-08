@@ -1,6 +1,6 @@
 "use client";
 
-import type { TicketPriority } from "@/types/database";
+import type { TicketPriority } from "@/types/ticket-priority";
 
 interface PriorityItemProps {
   priority: TicketPriority;

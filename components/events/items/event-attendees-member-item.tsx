@@ -4,19 +4,19 @@ import { useRole } from "@/stores/role.store";
 import UserAvatar from "../../UserAvatar";
 import { Checkbox } from "../../ui/checkbox";
 
-interface MeetingAttendeesMemberItemProps {
+interface EventAttendeesMemberItemProps {
   userId: string;
   roleId: string;
   includeAttendee: CheckedState | undefined;
   toggleAttendee: () => void;
 }
 
-export default function MeetingAttendeesMemberItem({
+export default function EventAttendeesMemberItem({
   userId,
   roleId,
   includeAttendee,
   toggleAttendee,
-}: Readonly<MeetingAttendeesMemberItemProps>) {
+}: Readonly<EventAttendeesMemberItemProps>) {
   const { data: profile } = useProfile(userId);
   const { data: role } = useRole(roleId);
   return (

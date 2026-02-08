@@ -1,13 +1,26 @@
 import { z } from "zod";
-import type { Database } from "./database";
 
-// Base ticket type from database
-type TicketRow = Database["public"]["Tables"]["tickets"]["Row"];
+// ===========================================
+// Database Types
+// ===========================================
 
-// Extended ticket type with sort_order (optional until database types are regenerated)
-export type Ticket = TicketRow & {
-  sort_order?: number;
+export type Ticket = {
+  id: string;
+  title: string;
+  description: string | null;
+  project_id: string;
+  state_id: string;
+  assigned_to: string | null;
+  priority_id: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
 };
+
+// ===========================================
+// Form Schemas (UI forms)
+// ===========================================
 
 export const ticketCreateSchema = z.object({
   title: z.string().min(1, "Title is required").max(200),

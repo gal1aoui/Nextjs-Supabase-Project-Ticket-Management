@@ -1,7 +1,6 @@
 import { handleSupabaseError } from "@/lib/errors";
 import { supabaseClient } from "@/lib/supabase/client";
-import type { TicketPriority } from "@/types/database";
-import type { TicketPriorityFormSchema, TicketPriorityUpdateSchema } from "@/types/ticket-priority";
+import type { TicketPriority, TicketPriorityFormSchema, TicketPriorityUpdateSchema } from "@/types/ticket-priority";
 
 export const ticketPriorityService = {
   async getByProject(projectId: string): Promise<TicketPriority[]> {
@@ -10,6 +9,16 @@ export const ticketPriorityService = {
         .from("ticket_priorities")
         .select("*")
         .eq("project_id", projectId)
+        .order("order", { ascending: true })
+    );
+  },
+
+  async getDefaults(): Promise<TicketPriority[]> {
+    return handleSupabaseError(() =>
+      supabaseClient
+        .from("ticket_priorities")
+        .select("*")
+        .is("project_id", null)
         .order("order", { ascending: true })
     );
   },

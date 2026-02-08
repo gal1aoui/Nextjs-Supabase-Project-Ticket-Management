@@ -20,7 +20,7 @@ import { getUserInitials } from "@/lib/helpers";
 import { useSearchProfiles } from "@/stores/profile.store";
 import { useInviteMember } from "@/stores/project-member.store";
 import { useRoles } from "@/stores/role.store";
-import type { Profile } from "@/types/database";
+import type { Profile } from "@/types/profile";
 
 interface InviteMemberDialogProps {
   projectId: string;

@@ -4,6 +4,7 @@ import type { TicketPriorityFormSchema, TicketPriorityUpdateSchema } from "@/typ
 
 export const ticketPriorityKeys = {
   byProject: (projectId: string) => ["ticket-priorities", projectId] as const,
+  defaults: ["ticket-priorities", "defaults"] as const,
 };
 
 export function useTicketPriorities(projectId: string) {
@@ -11,6 +12,13 @@ export function useTicketPriorities(projectId: string) {
     queryKey: ticketPriorityKeys.byProject(projectId),
     queryFn: () => ticketPriorityService.getByProject(projectId),
     enabled: !!projectId,
+  });
+}
+
+export function useDefaultTicketPriorities() {
+  return useQuery({
+    queryKey: ticketPriorityKeys.defaults,
+    queryFn: () => ticketPriorityService.getDefaults(),
   });
 }
 

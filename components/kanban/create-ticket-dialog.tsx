@@ -25,7 +25,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useModalDialog } from "@/hooks/use-modal";
 import { useCreateTicket } from "@/stores/ticket.store";
-import type { TicketPriority, TicketState } from "@/types/database";
+import type { TicketPriority } from "@/types/ticket-priority";
+import type { TicketState } from "@/types/ticket-state";
 
 interface CreateTicketDialogProps {
   projectId: string;

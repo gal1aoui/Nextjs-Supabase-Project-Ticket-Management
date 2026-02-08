@@ -10,7 +10,7 @@ import {
 } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import { MeetingDetailDialog } from "@/components/meetings/meeting-detail-dialog";
+import { EventDetailDialog } from "@/components/events/event-detail-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -24,10 +24,10 @@ import {
   formatDateForView,
   getCalendarDays,
   getDateRange,
-  groupMeetingsByDate,
+  groupEventsByDate,
 } from "@/lib/utils";
-import { useMeetingsByDateRange, useUserMeetingsByDateRange } from "@/stores/meeting.store";
-import type { MeetingWithRelations } from "@/types/meeting";
+import { useEventsByDateRange, useUserEventsByDateRange } from "@/stores/event.store";
+import type { EventWithRelations } from "@/types/event";
 import DayView from "./components/day-view";
 import MonthView from "./components/month-view";
 import WeekView from "./components/week-view";
@@ -41,24 +41,24 @@ interface CalendarViewProps {
 export function CalendarView({ projectId, userId, onCreateClick }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<CalendarsView>("month");
-  const [selectedMeeting, setSelectedMeeting] = useState<MeetingWithRelations | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventWithRelations | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
 
   const { start, end } = getDateRange(currentDate, view);
 
-  const projectQuery = useMeetingsByDateRange(projectId ?? "", start, end);
-  const userQuery = useUserMeetingsByDateRange(userId ?? "", start, end);
+  const projectQuery = useEventsByDateRange(projectId ?? "", start, end);
+  const userQuery = useUserEventsByDateRange(userId ?? "", start, end);
 
   const isProjectMode = !!projectId;
   const activeQuery = isProjectMode ? projectQuery : userQuery;
-  const meetings = activeQuery.data ?? [];
+  const events = activeQuery.data ?? [];
   const isLoading = activeQuery.isLoading;
 
   const days = getCalendarDays(currentDate, view);
-  const groupedMeetings = groupMeetingsByDate(meetings, days);
+  const groupedEvents = groupEventsByDate(events, days);
 
-  const handleMeetingClick = (meeting: MeetingWithRelations) => {
-    setSelectedMeeting(meeting);
+  const handleEventClick = (event: EventWithRelations) => {
+    setSelectedEvent(event);
     setDetailOpen(true);
   };
 
@@ -155,8 +155,8 @@ export function CalendarView({ projectId, userId, onCreateClick }: CalendarViewP
         <MonthView
           currentDate={currentDate}
           days={days}
-          groupedMeetings={groupedMeetings}
-          onMeetingClick={handleMeetingClick}
+          groupedEvents={groupedEvents}
+          onEventClick={handleEventClick}
           onCreateClick={handleCreateClick}
         />
       )}
@@ -164,8 +164,8 @@ export function CalendarView({ projectId, userId, onCreateClick }: CalendarViewP
       {view === "week" && (
         <WeekView
           days={days}
-          groupedMeetings={groupedMeetings}
-          onMeetingClick={handleMeetingClick}
+          groupedEvents={groupedEvents}
+          onEventClick={handleEventClick}
           onCreateClick={handleCreateClick}
         />
       )}
@@ -173,15 +173,15 @@ export function CalendarView({ projectId, userId, onCreateClick }: CalendarViewP
       {view === "day" && (
         <DayView
           currentDate={currentDate}
-          meetings={meetings}
+          events={events}
           onCreateClick={handleCreateClick}
-          onMeetingClick={handleMeetingClick}
+          onEventClick={handleEventClick}
         />
       )}
 
-      {/* Meeting Detail Dialog */}
-      <MeetingDetailDialog
-        meeting={selectedMeeting}
+      {/* Event Detail Dialog */}
+      <EventDetailDialog
+        event={selectedEvent}
         open={detailOpen}
         onOpenChange={setDetailOpen}
       />

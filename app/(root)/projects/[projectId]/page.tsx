@@ -1,12 +1,13 @@
 "use client";
 
-import { CalendarIcon, LayoutDashboard, UserPlus, Users } from "lucide-react";
+import { CalendarIcon, LayoutDashboard, Settings, UserPlus, Users } from "lucide-react";
 import { use } from "react";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { CalendarView } from "@/components/calendar/calendar-view";
-import MeetingForm from "@/components/meetings/forms/meeting-form";
+import EventForm from "@/components/events/forms/event-form";
 import { InviteMemberDialog } from "@/components/members/invite-member-dialog";
 import { MemberList } from "@/components/members/member-list";
+import { PermissionGate } from "@/components/permission-gate";
 import ProjectDetailSkeleton from "@/components/projects/project-detail/project-detail-skeleton";
 import { ProjectStats } from "@/components/projects/project-detail/project-stats";
 import { StatePriorityManager } from "@/components/projects/project-detail/state-priority-manager";
@@ -15,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useModal } from "@/contexts/modal/modal-context";
 import { useUser } from "@/hooks/use-user";
 import { useProject } from "@/stores/project.store";
+
 export default function ProjectDetailPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = use(params);
   const { data: project, isLoading } = useProject(projectId);
@@ -48,11 +50,11 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
 
   const handleCreateClick = (date: Date) => {
     openModal({
-      title: "Schedule Meeting",
-      description: "Create a new meeting for your project team",
+      title: "Schedule Event",
+      description: "Create a new event for your project team",
       render: ({ close }) => (
-        <MeetingForm
-          defaulMeetingDate={date}
+        <EventForm
+          defaultEventDate={date}
           projectId={projectId}
           closeModal={close}
         />
@@ -93,7 +95,12 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
               <Users className="h-4 w-4 mr-2" />
               Members
             </TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <PermissionGate projectId={projectId} permission={["manage_project", "manage_states", "manage_priorities", "manage_roles"]}>
+              <TabsTrigger value="settings">
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </TabsTrigger>
+            </PermissionGate>
           </TabsList>
         </div>
 
@@ -111,20 +118,22 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
 
         <TabsContent value="members" className="space-y-4">
           <div className="flex justify-end">
-            <Button
-              onClick={() =>
-                openModal({
-                  title: "Invite Team Member",
-                  description: "Search for a user and assign them a role in your project",
-                  render: ({ close }) => (
-                    <InviteMemberDialog closeModal={close} projectId={projectId} />
-                  ),
-                })
-              }
-            >
-              <UserPlus className="mr-2 h-4 w-4" />
-              Invite Member
-            </Button>
+            <PermissionGate projectId={projectId} permission="manage_members">
+              <Button
+                onClick={() =>
+                  openModal({
+                    title: "Invite Team Member",
+                    description: "Search for a user and assign them a role in your project",
+                    render: ({ close }) => (
+                      <InviteMemberDialog closeModal={close} projectId={projectId} />
+                    ),
+                  })
+                }
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                Invite Member
+              </Button>
+            </PermissionGate>
           </div>
           <MemberList projectId={projectId} currentUserId={user.id} />
         </TabsContent>

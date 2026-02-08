@@ -1,6 +1,7 @@
 "use client";
 
 import { UserX } from "lucide-react";
+import { PermissionGate } from "@/components/permission-gate";
 import { useProfile } from "@/stores/profile.store";
 import { useRole } from "@/stores/role.store";
 import UserAvatar from "../../UserAvatar";
@@ -13,6 +14,7 @@ interface ActiveMemberItemProps {
   role_id: string;
   status: string;
   currentUserId: string;
+  projectId: string;
   setRemovingMemberId: (id: string) => void;
 }
 
@@ -21,6 +23,7 @@ export default function ActiveMemberItem({
   role_id,
   status,
   currentUserId,
+  projectId,
   setRemovingMemberId,
 }: ActiveMemberItemProps) {
   const { data: user } = useProfile(user_id);
@@ -48,9 +51,11 @@ export default function ActiveMemberItem({
       </TableCell>
       <TableCell>
         {user?.id !== currentUserId && (
-          <Button variant="ghost" size="icon" onClick={() => setRemovingMemberId(user!.id)}>
-            <UserX className="h-4 w-4 text-destructive" />
-          </Button>
+          <PermissionGate projectId={projectId} permission="manage_members">
+            <Button variant="ghost" size="icon" onClick={() => setRemovingMemberId(user!.id)}>
+              <UserX className="h-4 w-4 text-destructive" />
+            </Button>
+          </PermissionGate>
         )}
       </TableCell>
     </TableRow>

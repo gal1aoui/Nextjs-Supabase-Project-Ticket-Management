@@ -5,25 +5,25 @@ import { ChevronDown, ChevronUp, Clock } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import type { MeetingWithRelations } from "@/types/meeting";
+import type { EventWithRelations } from "@/types/event";
 
 interface MonthViewProps {
   currentDate: Date;
   days: Date[];
-  groupedMeetings: Record<string, MeetingWithRelations[]>;
-  onMeetingClick: (meeting: MeetingWithRelations) => void;
+  groupedEvents: Record<string, EventWithRelations[]>;
+  onEventClick: (event: EventWithRelations) => void;
   onCreateClick: (date: Date) => void;
 }
 
 const daysName = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MAX_VISIBLE = 2;
 
-function MeetingPill({
-  meeting,
+function EventPill({
+  event,
   onClick,
 }: {
-  meeting: MeetingWithRelations;
-  onClick: (meeting: MeetingWithRelations) => void;
+  event: EventWithRelations;
+  onClick: (event: EventWithRelations) => void;
 }) {
   return (
     <button
@@ -31,15 +31,15 @@ function MeetingPill({
       className="group w-full flex items-center gap-1.5 text-xs px-2 py-1.5 rounded-md bg-primary/10 hover:bg-primary/20 transition-all hover:shadow-sm animate-in fade-in slide-in-from-top-1 duration-200"
       onClick={(e) => {
         e.stopPropagation();
-        onClick(meeting);
+        onClick(event);
       }}
     >
       <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 group-hover:scale-125 transition-transform" />
       <Clock className="h-3 w-3 text-muted-foreground shrink-0" />
       <span className="text-muted-foreground font-medium shrink-0">
-        {format(new Date(meeting.start_time), "HH:mm")}
+        {format(new Date(event.start_time), "HH:mm")}
       </span>
-      <span className="truncate font-medium">{meeting.title}</span>
+      <span className="truncate font-medium">{event.title}</span>
     </button>
   );
 }
@@ -47,8 +47,8 @@ function MeetingPill({
 export default function MonthView({
   currentDate,
   days,
-  groupedMeetings,
-  onMeetingClick,
+  groupedEvents,
+  onEventClick,
   onCreateClick,
 }: Readonly<MonthViewProps>) {
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
@@ -79,14 +79,14 @@ export default function MonthView({
 
       {days.map((day) => {
         const dateKey = format(day, "yyyy-MM-dd");
-        const dayMeetings = groupedMeetings[dateKey] || [];
+        const dayEvents = groupedEvents[dateKey] || [];
         const isCurrentMonth = isSameMonth(day, currentDate);
         const isDayToday = isToday(day);
         const isExpanded = expandedDays.has(dateKey);
-        const hasOverflow = dayMeetings.length > MAX_VISIBLE;
-        const visibleMeetings = isExpanded
-          ? dayMeetings
-          : dayMeetings.slice(0, MAX_VISIBLE);
+        const hasOverflow = dayEvents.length > MAX_VISIBLE;
+        const visibleEvents = isExpanded
+          ? dayEvents
+          : dayEvents.slice(0, MAX_VISIBLE);
 
         return (
           <Card
@@ -106,22 +106,22 @@ export default function MonthView({
               >
                 {format(day, "d")}
               </span>
-              {dayMeetings.length > 0 && (
+              {dayEvents.length > 0 && (
                 <Badge
                   variant="secondary"
                   className="text-[10px] h-5 px-1.5 font-semibold"
                 >
-                  {dayMeetings.length}
+                  {dayEvents.length}
                 </Badge>
               )}
             </div>
 
             <div className="space-y-1">
-              {visibleMeetings.map((meeting) => (
-                <MeetingPill
-                  key={meeting.id}
-                  meeting={meeting}
-                  onClick={onMeetingClick}
+              {visibleEvents.map((event) => (
+                <EventPill
+                  key={event.id}
+                  event={event}
+                  onClick={onEventClick}
                 />
               ))}
 
@@ -139,7 +139,7 @@ export default function MonthView({
                   ) : (
                     <>
                       <ChevronDown className="h-3 w-3" />
-                      +{dayMeetings.length - MAX_VISIBLE} more
+                      +{dayEvents.length - MAX_VISIBLE} more
                     </>
                   )}
                 </button>

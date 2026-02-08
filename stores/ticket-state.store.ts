@@ -4,6 +4,7 @@ import type { TicketStateFormSchema, TicketStateUpdateSchema } from "@/types/tic
 
 export const ticketStateKeys = {
   byProject: (projectId: string) => ["ticket-states", projectId] as const,
+  defaults: ["ticket-states", "defaults"] as const,
 };
 
 export function useTicketStates(projectId: string) {
@@ -11,6 +12,13 @@ export function useTicketStates(projectId: string) {
     queryKey: ticketStateKeys.byProject(projectId),
     queryFn: () => ticketStateService.getByProject(projectId),
     enabled: !!projectId,
+  });
+}
+
+export function useDefaultTicketStates() {
+  return useQuery({
+    queryKey: ticketStateKeys.defaults,
+    queryFn: () => ticketStateService.getDefaults(),
   });
 }
 

@@ -22,7 +22,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateTicket } from "@/stores/ticket.store";
-import type { Ticket, TicketPriority, TicketState } from "@/types/database";
+import type { Ticket } from "@/types/ticket";
+import type { TicketPriority } from "@/types/ticket-priority";
+import type { TicketState } from "@/types/ticket-state";
 
 interface EditTicketDialogProps {
   ticket: Ticket | null;

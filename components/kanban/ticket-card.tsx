@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { TicketPriority } from "@/types/database";
+import type { TicketPriority } from "@/types/ticket-priority";
 import type { Ticket } from "@/types/ticket";
 import UserAvatar from "../UserAvatar";
 import { getContrastColor } from "@/lib/utils";

@@ -3,6 +3,7 @@
 import { Calendar, Edit, Trash2, User } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { PermissionGate } from "@/components/permission-gate";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,7 +25,9 @@ import {
 } from "@/components/ui/dialog";
 import { dateFormatter } from "@/lib/helpers";
 import { useDeleteTicket } from "@/stores/ticket.store";
-import type { Ticket, TicketPriority, TicketState } from "@/types/database";
+import type { Ticket } from "@/types/ticket";
+import type { TicketPriority } from "@/types/ticket-priority";
+import type { TicketState } from "@/types/ticket-state";
 
 interface TicketDetailDialogProps {
   ticket: Ticket | null;
@@ -74,21 +77,25 @@ export function TicketDetailDialog({
                   <span>Created {new Date(ticket.created_at).toLocaleDateString()}</span>
                 </DialogDescription>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => {
-                    onOpenChange(false);
-                    onEdit?.(ticket);
-                  }}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="icon" onClick={() => setDeleteDialogOpen(true)}>
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </div>
+              <PermissionGate projectId={ticket.project_id} permission={["manage_tickets", "update_own_tickets"]}>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      onOpenChange(false);
+                      onEdit?.(ticket);
+                    }}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <PermissionGate projectId={ticket.project_id} permission="manage_tickets">
+                    <Button variant="outline" size="icon" onClick={() => setDeleteDialogOpen(true)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </PermissionGate>
+                </div>
+              </PermissionGate>
             </div>
           </DialogHeader>
 

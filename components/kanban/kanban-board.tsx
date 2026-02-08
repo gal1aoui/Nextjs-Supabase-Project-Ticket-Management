@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { PermissionGate } from "@/components/permission-gate";
 import { useTickets } from "@/stores/ticket.store";
 import { useTicketPriorities } from "@/stores/ticket-priority.store";
 import { useTicketStates } from "@/stores/ticket-state.store";
@@ -45,12 +46,14 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
       <div className="flex-1 space-y-4 p-8 pt-6">
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold tracking-tight">Kanban Board</h2>
-          <CreateTicketDialog
-            projectId={projectId}
-            states={states}
-            priorities={priorities}
-            userId={userId}
-          />
+          <PermissionGate projectId={projectId} permission={["create_tickets", "manage_tickets"]}>
+            <CreateTicketDialog
+              projectId={projectId}
+              states={states}
+              priorities={priorities}
+              userId={userId}
+            />
+          </PermissionGate>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">

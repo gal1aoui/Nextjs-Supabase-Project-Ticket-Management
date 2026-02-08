@@ -1,7 +1,6 @@
 import { handleSupabaseError } from "@/lib/errors";
 import { supabaseClient } from "@/lib/supabase/client";
-import type { TicketState } from "@/types/database";
-import type { TicketStateFormSchema, TicketStateUpdateSchema } from "@/types/ticket-state";
+import type { TicketState, TicketStateFormSchema, TicketStateUpdateSchema } from "@/types/ticket-state";
 
 export const ticketStateService = {
   async getByProject(projectId: string): Promise<TicketState[]> {
@@ -10,6 +9,16 @@ export const ticketStateService = {
         .from("ticket_states")
         .select("*")
         .eq("project_id", projectId)
+        .order("order", { ascending: true })
+    );
+  },
+
+  async getDefaults(): Promise<TicketState[]> {
+    return handleSupabaseError(() =>
+      supabaseClient
+        .from("ticket_states")
+        .select("*")
+        .is("project_id", null)
         .order("order", { ascending: true })
     );
   },

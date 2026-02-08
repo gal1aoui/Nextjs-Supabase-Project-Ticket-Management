@@ -3,7 +3,7 @@
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { useUser } from "@/hooks/use-user";
 import { getUserInitials } from "@/lib/helpers";
-import type { Profile } from "@/types/database";
+import type { Profile } from "@/types/profile";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Skeleton } from "./ui/skeleton";
 

@@ -5,48 +5,48 @@ import { ChevronDown, ChevronUp, Clock, MapPin, Users } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import type { MeetingWithRelations } from "@/types/meeting";
+import type { EventWithRelations } from "@/types/event";
 
 interface WeekViewProps {
   days: Date[];
-  groupedMeetings: Record<string, MeetingWithRelations[]>;
-  onMeetingClick: (meeting: MeetingWithRelations) => void;
+  groupedEvents: Record<string, EventWithRelations[]>;
+  onEventClick: (event: EventWithRelations) => void;
   onCreateClick: (date: Date) => void;
 }
 
 const MAX_VISIBLE = 3;
 
-function MeetingCard({
-  meeting,
+function EventCard({
+  event,
   onClick,
 }: {
-  meeting: MeetingWithRelations;
-  onClick: (meeting: MeetingWithRelations) => void;
+  event: EventWithRelations;
+  onClick: (event: EventWithRelations) => void;
 }) {
   return (
     <Card
       className="p-2.5 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 animate-in fade-in slide-in-from-bottom-2 border-l-3 border-l-primary"
       onClick={(e) => {
         e.stopPropagation();
-        onClick(meeting);
+        onClick(event);
       }}
     >
       <div className="flex items-center gap-1.5 mb-1">
         <Clock className="h-3 w-3 text-primary" />
         <span className="text-xs font-semibold text-primary">
-          {format(new Date(meeting.start_time), "HH:mm")}
+          {format(new Date(event.start_time), "HH:mm")}
         </span>
       </div>
-      <div className="text-sm font-medium truncate mb-1">{meeting.title}</div>
+      <div className="text-sm font-medium truncate mb-1">{event.title}</div>
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Users className="h-3 w-3" />
-          {meeting.attendees.length}
+          {event.attendees.length}
         </div>
-        {meeting.location && (
+        {event.location && (
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <MapPin className="h-3 w-3" />
-            <span className="truncate max-w-[60px]">{meeting.location}</span>
+            <span className="truncate max-w-[60px]">{event.location}</span>
           </div>
         )}
       </div>
@@ -56,8 +56,8 @@ function MeetingCard({
 
 export default function WeekView({
   days,
-  groupedMeetings,
-  onMeetingClick,
+  groupedEvents,
+  onEventClick,
   onCreateClick,
 }: Readonly<WeekViewProps>) {
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
@@ -79,13 +79,13 @@ export default function WeekView({
     <div className="grid grid-cols-7 gap-2">
       {days.map((day) => {
         const dateKey = format(day, "yyyy-MM-dd");
-        const dayMeetings = groupedMeetings[dateKey] || [];
+        const dayEvents = groupedEvents[dateKey] || [];
         const isDayToday = isToday(day);
         const isExpanded = expandedDays.has(dateKey);
-        const hasOverflow = dayMeetings.length > MAX_VISIBLE;
-        const visibleMeetings = isExpanded
-          ? dayMeetings
-          : dayMeetings.slice(0, MAX_VISIBLE);
+        const hasOverflow = dayEvents.length > MAX_VISIBLE;
+        const visibleEvents = isExpanded
+          ? dayEvents
+          : dayEvents.slice(0, MAX_VISIBLE);
 
         return (
           <Card
@@ -108,22 +108,22 @@ export default function WeekView({
               >
                 {format(day, "d")}
               </div>
-              {dayMeetings.length > 0 && (
+              {dayEvents.length > 0 && (
                 <Badge
                   variant="secondary"
                   className="mt-1.5 text-[10px] h-5 px-1.5"
                 >
-                  {dayMeetings.length} meeting{dayMeetings.length > 1 ? "s" : ""}
+                  {dayEvents.length} event{dayEvents.length > 1 ? "s" : ""}
                 </Badge>
               )}
             </div>
 
             <div className="space-y-2">
-              {visibleMeetings.map((meeting) => (
-                <MeetingCard
-                  key={meeting.id}
-                  meeting={meeting}
-                  onClick={onMeetingClick}
+              {visibleEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  onClick={onEventClick}
                 />
               ))}
 
@@ -141,7 +141,7 @@ export default function WeekView({
                   ) : (
                     <>
                       <ChevronDown className="h-3.5 w-3.5" />
-                      +{dayMeetings.length - MAX_VISIBLE} more
+                      +{dayEvents.length - MAX_VISIBLE} more
                     </>
                   )}
                 </button>

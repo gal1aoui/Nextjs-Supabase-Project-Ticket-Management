@@ -1,5 +1,22 @@
 import { z } from "zod";
 
+// ===========================================
+// Database Types
+// ===========================================
+
+export type TicketState = {
+  id: string;
+  name: string;
+  project_id: string;
+  order: number;
+  color: string | null;
+  created_at: string;
+};
+
+// ===========================================
+// Form Schemas (UI forms)
+// ===========================================
+
 export const ticketStateFormSchema = z.object({
   name: z.string().min(3, "Project name is required").max(100),
   color: z

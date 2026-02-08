@@ -1,7 +1,6 @@
 import { handleSupabaseError, requireAuth } from "@/lib/errors";
 import { createClient } from "@/lib/supabase/client";
-import type { ProjectMember } from "@/types/database";
-import type { ProjectMemberInvite, ProjectMemberUpdate } from "@/types/project-member";
+import type { ProjectMember, ProjectMemberInvite, ProjectMemberUpdate } from "@/types/project-member";
 
 interface ProjectMembersData {
   user_id: string;

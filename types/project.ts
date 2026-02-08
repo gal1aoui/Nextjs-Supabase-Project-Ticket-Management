@@ -1,5 +1,23 @@
 import { z } from "zod";
 
+// ===========================================
+// Database Types
+// ===========================================
+
+export type Project = {
+  id: string;
+  name: string;
+  description: string | null;
+  color: string | null;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+};
+
+// ===========================================
+// Form Schemas (UI forms)
+// ===========================================
+
 export const projectFormSchema = z.object({
   name: z.string().min(3, "Project name is required").max(100),
   description: z.string().optional(),

@@ -20,40 +20,40 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useUser } from "@/hooks/use-user";
 import { getUserInitials } from "@/lib/helpers";
-import { useDeleteMeeting, useUpdateAttendeeStatus } from "@/stores/meeting.store";
-import type { MeetingWithRelations } from "@/types/meeting";
+import { useDeleteEvent, useUpdateAttendeeStatus } from "@/stores/event.store";
+import { EVENT_TYPE_LABELS, type EventWithRelations } from "@/types/event";
 
-interface MeetingDetailDialogProps {
-  meeting: MeetingWithRelations | null;
+interface EventDetailDialogProps {
+  event: EventWithRelations | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEdit?: (meeting: MeetingWithRelations) => void;
+  onEdit?: (event: EventWithRelations) => void;
 }
 
-export function MeetingDetailDialog({
-  meeting,
+export function EventDetailDialog({
+  event,
   open,
   onOpenChange,
   onEdit,
-}: MeetingDetailDialogProps) {
+}: EventDetailDialogProps) {
   const { data: user } = useUser();
-  const deleteMeeting = useDeleteMeeting();
+  const deleteEvent = useDeleteEvent();
   const updateStatus = useUpdateAttendeeStatus();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  if (!meeting) return null;
+  if (!event) return null;
 
-  const userAttendee = meeting.attendees.find((a) => a.user_id === user?.id);
-  const isCreator = meeting.created_by === user?.id;
+  const userAttendee = event.attendees.find((a) => a.user_id === user?.id);
+  const isCreator = event.created_by === user?.id;
 
   const handleDelete = async () => {
     try {
-      await deleteMeeting.mutateAsync(meeting.id);
-      toast.success("Meeting deleted successfully");
+      await deleteEvent.mutateAsync(event.id);
+      toast.success("Event deleted successfully");
       setDeleteDialogOpen(false);
       onOpenChange(false);
     } catch (error) {
-      toast.error("Failed to delete meeting");
+      toast.error("Failed to delete event");
       console.error(error);
     }
   };
@@ -63,11 +63,11 @@ export function MeetingDetailDialog({
 
     try {
       await updateStatus.mutateAsync({
-        meeting_id: meeting.id,
+        event_id: event.id,
         user_id: user.id,
         status,
       });
-      toast.success(`Meeting ${status}`);
+      toast.success(`Event ${status}`);
     } catch (error) {
       toast.error("Failed to update status");
       console.error(error);
@@ -91,13 +91,18 @@ export function MeetingDetailDialog({
           <DialogHeader>
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <DialogTitle className="text-2xl mb-2">{meeting.title}</DialogTitle>
+                <div className="flex items-center gap-2 mb-1">
+                  <DialogTitle className="text-2xl">{event.title}</DialogTitle>
+                  {event.event_type !== "meeting" && (
+                    <Badge variant="secondary">{EVENT_TYPE_LABELS[event.event_type]}</Badge>
+                  )}
+                </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4" />
                   <span>
-                    {format(new Date(meeting.start_time), "PPP")} •{" "}
-                    {format(new Date(meeting.start_time), "p")} -{" "}
-                    {format(new Date(meeting.end_time), "p")}
+                    {format(new Date(event.start_time), "PPP")} •{" "}
+                    {format(new Date(event.start_time), "p")} -{" "}
+                    {format(new Date(event.end_time), "p")}
                   </span>
                 </div>
               </div>
@@ -108,7 +113,7 @@ export function MeetingDetailDialog({
                     size="icon"
                     onClick={() => {
                       onOpenChange(false);
-                      onEdit?.(meeting);
+                      onEdit?.(event);
                     }}
                   >
                     <Edit className="h-4 w-4" />
@@ -122,30 +127,37 @@ export function MeetingDetailDialog({
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* Project info */}
+            {event.project && (
+              <div className="flex items-center gap-2">
+                <Badge variant="outline">{event.project.name}</Badge>
+              </div>
+            )}
+
             {/* Description */}
-            {meeting.description && (
+            {event.description && (
               <div>
                 <h3 className="font-semibold mb-2">Description</h3>
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {meeting.description}
+                  {event.description}
                 </p>
               </div>
             )}
 
             {/* Location */}
-            {meeting.location && (
+            {event.location && (
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{meeting.location}</span>
+                <span className="text-sm">{event.location}</span>
               </div>
             )}
 
-            {/* Meeting URL */}
-            {meeting.meeting_url && (
+            {/* Event URL */}
+            {event.event_url && (
               <div className="flex items-center gap-2">
                 <Video className="h-4 w-4 text-muted-foreground" />
                 <a
-                  href={meeting.meeting_url}
+                  href={event.event_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-primary hover:underline"
@@ -188,42 +200,44 @@ export function MeetingDetailDialog({
             )}
 
             {/* Attendees */}
-            <div>
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Attendees ({meeting.attendees.length})
-              </h3>
-              <div className="space-y-2">
-                {meeting.attendees.map((attendee) => (
-                  <div
-                    key={attendee.id}
-                    className="flex items-center justify-between p-2 rounded-lg border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={attendee.profile.avatar_url || undefined} />
-                        <AvatarFallback className="text-xs">
-                          {getUserInitials(attendee.profile.full_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium text-sm">{attendee.profile.full_name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          @{attendee.profile.username}
+            {event.attendees.length > 0 && (
+              <div>
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Attendees ({event.attendees.length})
+                </h3>
+                <div className="space-y-2">
+                  {event.attendees.map((attendee) => (
+                    <div
+                      key={attendee.id}
+                      className="flex items-center justify-between p-2 rounded-lg border"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={attendee.profile.avatar_url || undefined} />
+                          <AvatarFallback className="text-xs">
+                            {getUserInitials(attendee.profile.full_name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium text-sm">{attendee.profile.full_name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            @{attendee.profile.username}
+                          </div>
                         </div>
                       </div>
+                      <Badge variant={getStatusBadge(attendee.status)}>{attendee.status}</Badge>
                     </div>
-                    <Badge variant={getStatusBadge(attendee.status)}>{attendee.status}</Badge>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Creator Info */}
-            {meeting.creator && (
+            {event.creator && (
               <div className="text-xs text-muted-foreground border-t pt-3">
-                Created by {meeting.creator.full_name} on{" "}
-                {format(new Date(meeting.created_at), "PPP")}
+                Created by {event.creator.full_name} on{" "}
+                {format(new Date(event.created_at), "PPP")}
               </div>
             )}
           </div>
@@ -233,9 +247,9 @@ export function MeetingDetailDialog({
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Meeting</AlertDialogTitle>
+            <AlertDialogTitle>Delete Event</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this meeting? This action cannot be undone and all
+              Are you sure you want to delete this event? This action cannot be undone and all
               attendees will be notified.
             </AlertDialogDescription>
           </AlertDialogHeader>

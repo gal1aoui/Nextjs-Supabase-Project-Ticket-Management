@@ -3,7 +3,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { TicketPriority, TicketState } from "@/types/database";
+import type { TicketPriority } from "@/types/ticket-priority";
+import type { TicketState } from "@/types/ticket-state";
 import type { Ticket } from "@/types/ticket";
 import { TicketCard } from "./ticket-card";
 

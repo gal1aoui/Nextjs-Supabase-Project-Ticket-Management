@@ -76,6 +76,7 @@ export function MemberList({ projectId, currentUserId }: MemberListProps) {
                   role_id={member.role_id}
                   status={member.status}
                   currentUserId={currentUserId}
+                  projectId={projectId}
                   setRemovingMemberId={setRemovingMemberId}
                 />
               ))}

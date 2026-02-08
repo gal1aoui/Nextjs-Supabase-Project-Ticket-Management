@@ -1,7 +1,6 @@
 import { handleSupabaseError, requireAuth } from "@/lib/errors";
 import { supabaseClient } from "@/lib/supabase/client";
-import type { Project } from "@/types/database";
-import type { ProjectFormSchema, ProjectUpdateSchema } from "@/types/project";
+import type { Project, ProjectFormSchema, ProjectUpdateSchema } from "@/types/project";
 
 export const projectService = {
   async getAll(): Promise<Project[]> {
@@ -25,7 +24,6 @@ export const projectService = {
         .insert({
           ...project,
           created_by: userId,
-          workspace_id: "2ced7500-507e-4a5f-8128-661b91a48324",
         })
         .select()
         .single()

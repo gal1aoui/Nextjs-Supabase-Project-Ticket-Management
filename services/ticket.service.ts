@@ -1,7 +1,6 @@
 import { handleSupabaseError, requireAuth } from "@/lib/errors";
 import { supabaseClient } from "@/lib/supabase/client";
-import type { Ticket } from "@/types/database";
-import type { TicketCreate, TicketUpdate } from "@/types/ticket";
+import type { Ticket, TicketCreate, TicketUpdate } from "@/types/ticket";
 
 export interface ReorderTicketParams {
   ticketId: string;

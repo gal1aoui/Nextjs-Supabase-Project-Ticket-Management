@@ -27,8 +27,8 @@ schemas/04_project_members.sql   -- Contains helper functions
 schemas/05_ticket_states.sql
 schemas/06_ticket_priorities.sql
 schemas/07_tickets.sql
-schemas/08_meetings.sql
-schemas/09_meeting_attendees.sql
+schemas/08_events.sql
+schemas/09_event_attendees.sql
 schemas/10_storage.sql
 ```
 
@@ -42,22 +42,22 @@ policies/04_project_members_policies.sql
 policies/05_ticket_states_policies.sql
 policies/06_ticket_priorities_policies.sql
 policies/07_tickets_policies.sql
-policies/08_meetings_policies.sql
-policies/09_meeting_attendees_policies.sql
+policies/08_events_policies.sql
+policies/09_event_attendees_policies.sql
 policies/10_storage_policies.sql
 ```
 
 ### 3. Seeds (required)
 ```sql
-seeds/01_roles.sql   -- Required: System roles
+seeds/01_roles.sql              -- Required: System roles
+seeds/03_demo_ticket_states.sql -- Required: Default template states
+seeds/04_demo_ticket_priorities.sql -- Required: Default template priorities
 ```
 
 ### 4. Seeds (optional - demo data)
 ```sql
 -- Uncomment and modify with real user IDs
 seeds/02_demo_projects.sql
-seeds/03_demo_ticket_states.sql
-seeds/04_demo_ticket_priorities.sql
 seeds/05_demo_tickets.sql
 ```
 
@@ -72,8 +72,8 @@ seeds/05_demo_tickets.sql
 | `ticket_states` | Workflow states (To Do, In Progress, etc.) |
 | `ticket_priorities` | Priority levels (Low, Medium, High, Urgent) |
 | `tickets` | Main ticket/task entity |
-| `meetings` | Project meetings with scheduling |
-| `meeting_attendees` | Meeting invitations and RSVPs |
+| `events` | Project events and personal events with scheduling |
+| `event_attendees` | Event invitations and RSVPs |
 
 ## Helper Functions
 
@@ -93,7 +93,7 @@ Returns `true` if user has the specified permission in the project.
 | `manage_tickets` | Full ticket CRUD |
 | `manage_states` | Create/modify ticket states |
 | `manage_priorities` | Create/modify priorities |
-| `manage_meetings` | Full meeting CRUD |
+| `manage_events` | Full event CRUD |
 | `create_tickets` | Create new tickets |
 | `update_own_tickets` | Update tickets created by self |
 | `update_tickets` | Update any ticket |
@@ -101,13 +101,23 @@ Returns `true` if user has the specified permission in the project.
 | `view_tickets` | View-only ticket access |
 | `view_reports` | Access to reports/analytics |
 
+## Event Types
+
+| Type | Description |
+|------|-------------|
+| `meeting` | Project meeting (requires project_id) |
+| `holiday` | Holiday event (personal, no project) |
+| `out_of_office` | Out of office (personal, no project) |
+| `sick_leave` | Sick leave (personal, no project) |
+| `personal` | General personal event (no project) |
+
 ## Triggers
 
 | Trigger | Table | Description |
 |---------|-------|-------------|
 | `on_auth_user_created` | `auth.users` | Auto-creates profile on signup |
 | `on_project_created` | `projects` | Auto-adds creator as Owner |
-| `on_meeting_created` | `meetings` | Auto-adds creator as attendee |
+| `on_event_created` | `events` | Auto-adds creator as attendee |
 
 ## RLS Performance Tips
 

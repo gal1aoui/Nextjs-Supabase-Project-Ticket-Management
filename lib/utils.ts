@@ -85,15 +85,15 @@ export function formatDateForView(date: Date, view: CalendarView): string {
   }
 }
 
-export function groupMeetingsByDate<T extends { start_time: string }>(
-  meetings: T[],
+export function groupEventsByDate<T extends { start_time: string }>(
+  events: T[],
   days: Date[]
 ): Record<string, T[]> {
   const grouped: Record<string, T[]> = {};
 
   days.forEach((day) => {
     const key = format(day, "yyyy-MM-dd");
-    grouped[key] = meetings.filter((meeting) => isSameDay(new Date(meeting.start_time), day));
+    grouped[key] = events.filter((event) => isSameDay(new Date(event.start_time), day));
   });
 
   return grouped;

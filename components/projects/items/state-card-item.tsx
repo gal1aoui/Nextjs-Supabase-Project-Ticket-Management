@@ -1,6 +1,6 @@
 "use client";
 
-import type { TicketState } from "@/types/database";
+import type { TicketState } from "@/types/ticket-state";
 
 interface StateItemProps {
   state: TicketState;

@@ -3,11 +3,14 @@
 -- ===========================================
 -- RLS policies for the ticket_states table
 
--- SELECT: Project members can view states
+-- SELECT: Project members can view states; anyone can view default templates
 create policy "Members can view ticket states"
   on ticket_states for select
   to authenticated
-  using (is_project_member(project_id, (select auth.uid())));
+  using (
+    project_id is null
+    or is_project_member(project_id, (select auth.uid()))
+  );
 
 -- INSERT: Users with manage_states permission
 create policy "Managers can create ticket states"

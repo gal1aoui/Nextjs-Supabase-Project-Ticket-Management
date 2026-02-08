@@ -9,8 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateProject, useUpdateProject } from "@/stores/project.store";
-import type { Project } from "@/types/database";
-import { type ProjectFormSchema, projectFormSchema } from "@/types/project";
+import { type Project, type ProjectFormSchema, projectFormSchema } from "@/types/project";
 
 interface ProjectFormProps {
   project?: Project;

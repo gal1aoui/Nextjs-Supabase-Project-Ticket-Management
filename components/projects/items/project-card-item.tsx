@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useModal } from "@/contexts/modal/modal-context";
 import { useProjectStats } from "@/stores/project.store";
-import type { Project } from "@/types/database";
+import type { Project } from "@/types/project";
 import { ProjectForm } from "../forms/project-form";
 
 interface ProjectCardProps {

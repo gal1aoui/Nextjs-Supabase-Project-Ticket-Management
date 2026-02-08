@@ -8,19 +8,19 @@ insert into roles (name, description, is_system, permissions) values
     'Owner',
     'Full project access - can manage all aspects of the project',
     true,
-    '["manage_project", "manage_members", "manage_roles", "manage_tickets", "manage_states", "manage_priorities", "manage_meetings", "view_reports"]'::jsonb
+    '["manage_project", "manage_members", "manage_roles", "manage_tickets", "manage_states", "manage_priorities", "manage_events", "view_reports"]'::jsonb
   ),
   (
     'Admin',
     'Project management access - can manage members, tickets, and settings',
     true,
-    '["manage_members", "manage_tickets", "manage_states", "manage_priorities", "manage_meetings", "view_reports"]'::jsonb
+    '["manage_members", "manage_tickets", "manage_states", "manage_priorities", "manage_events", "view_reports"]'::jsonb
   ),
   (
     'Manager',
-    'Can manage tickets, states, priorities, and meetings',
+    'Can manage tickets, states, priorities, and events',
     true,
-    '["manage_tickets", "manage_states", "manage_priorities", "manage_meetings", "view_reports"]'::jsonb
+    '["manage_tickets", "manage_states", "manage_priorities", "manage_events", "view_reports"]'::jsonb
   ),
   (
     'Product Owner',
@@ -30,9 +30,9 @@ insert into roles (name, description, is_system, permissions) values
   ),
   (
     'Scrum Master',
-    'Facilitates team processes and meetings',
+    'Facilitates team processes and events',
     true,
-    '["manage_tickets", "manage_states", "manage_meetings", "view_reports"]'::jsonb
+    '["manage_tickets", "manage_states", "manage_events", "view_reports"]'::jsonb
   ),
   (
     'Developer',
@@ -58,4 +58,4 @@ insert into roles (name, description, is_system, permissions) values
     true,
     '["view_tickets"]'::jsonb
   )
-on conflict (name) do nothing;
+on conflict (name, project_id) do nothing;

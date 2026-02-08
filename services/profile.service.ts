@@ -1,7 +1,6 @@
 import { handleSupabaseError, requireAuth } from "@/lib/errors";
 import { supabaseClient } from "@/lib/supabase/client";
-import type { Profile } from "@/types/database";
-import type { ProfileUpdate } from "@/types/profile";
+import type { Profile, ProfileUpdate } from "@/types/profile";
 
 export const profileService = {
   async getById(id: string): Promise<Profile> {

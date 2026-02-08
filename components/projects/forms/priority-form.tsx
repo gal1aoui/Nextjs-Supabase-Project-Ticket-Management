@@ -13,8 +13,7 @@ import {
   useDeleteTicketPriority,
   useUpdateTicketPriority,
 } from "@/stores/ticket-priority.store";
-import type { TicketPriority } from "@/types/database";
-import { type TicketPriorityFormSchema, ticketPriorityFormSchema } from "@/types/ticket-priority";
+import { type TicketPriority, type TicketPriorityFormSchema, ticketPriorityFormSchema } from "@/types/ticket-priority";
 
 interface PriorityFormProps {
   projectId: string;
