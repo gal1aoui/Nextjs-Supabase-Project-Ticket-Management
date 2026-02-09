@@ -5,16 +5,22 @@ import { ChevronDown, ChevronUp, Clock, MapPin, Users } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import type { EventWithRelations } from "@/types/event";
+import { isMultiDayEvent } from "@/lib/utils";
+import { EVENT_TYPE_LABELS, type EventWithRelations } from "@/types/event";
 
 interface WeekViewProps {
   days: Date[];
   groupedEvents: Record<string, EventWithRelations[]>;
   onEventClick: (event: EventWithRelations) => void;
-  onCreateClick: (date: Date) => void;
+  onCreateClick?: (date: Date) => void;
 }
 
 const MAX_VISIBLE = 3;
+
+const multiDayStyle = {
+  background:
+    "repeating-linear-gradient(135deg, transparent, transparent 3px, rgba(236, 72, 153, 0.12) 3px, rgba(236, 72, 153, 0.12) 6px)",
+};
 
 function EventCard({
   event,
@@ -23,33 +29,51 @@ function EventCard({
   event: EventWithRelations;
   onClick: (event: EventWithRelations) => void;
 }) {
+  const multiDay = isMultiDayEvent(event);
+
   return (
     <Card
-      className="p-2.5 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 animate-in fade-in slide-in-from-bottom-2 border-l-3 border-l-primary"
+      className={`p-2.5 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 animate-in fade-in slide-in-from-bottom-2 border-l-3 ${
+        multiDay ? "border-l-pink-500" : "border-l-primary"
+      }`}
+      style={multiDay ? multiDayStyle : undefined}
       onClick={(e) => {
         e.stopPropagation();
         onClick(event);
       }}
     >
       <div className="flex items-center gap-1.5 mb-1">
-        <Clock className="h-3 w-3 text-primary" />
-        <span className="text-xs font-semibold text-primary">
-          {format(new Date(event.start_time), "HH:mm")}
-        </span>
-      </div>
-      <div className="text-sm font-medium truncate mb-1">{event.title}</div>
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Users className="h-3 w-3" />
-          {event.attendees.length}
-        </div>
-        {event.location && (
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <MapPin className="h-3 w-3" />
-            <span className="truncate max-w-[60px]">{event.location}</span>
-          </div>
+        {multiDay ? (
+          <Badge
+            variant="outline"
+            className="text-[10px] h-4 px-1 border-pink-300 text-pink-600 dark:text-pink-300"
+          >
+            {EVENT_TYPE_LABELS[event.event_type]}
+          </Badge>
+        ) : (
+          <>
+            <Clock className="h-3 w-3 text-primary" />
+            <span className="text-xs font-semibold text-primary">
+              {event.start_time.slice(0, 5)}
+            </span>
+          </>
         )}
       </div>
+      <div className="text-sm font-medium truncate mb-1">{event.title}</div>
+      {!multiDay && (
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Users className="h-3 w-3" />
+            {event.attendees.length}
+          </div>
+          {event.location && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPin className="h-3 w-3" />
+              <span className="truncate max-w-[60px]">{event.location}</span>
+            </div>
+          )}
+        </div>
+      )}
     </Card>
   );
 }
@@ -93,7 +117,7 @@ export default function WeekView({
             className={`min-h-[400px] p-3 cursor-pointer transition-all duration-200 hover:bg-accent/50 ${
               isDayToday ? "ring-2 ring-primary shadow-md bg-primary/5" : ""
             }`}
-            onClick={() => onCreateClick(day)}
+            onClick={() => onCreateClick?.(day)}
           >
             <div className="text-center mb-3 pb-2 border-b">
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

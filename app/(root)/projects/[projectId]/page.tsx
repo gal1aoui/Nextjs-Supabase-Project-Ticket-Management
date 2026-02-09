@@ -14,6 +14,7 @@ import { StatePriorityManager } from "@/components/projects/project-detail/state
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useModal } from "@/contexts/modal/modal-context";
+import { useProjectPermissions } from "@/hooks/use-project-permissions";
 import { useUser } from "@/hooks/use-user";
 import { useProject } from "@/stores/project.store";
 
@@ -23,6 +24,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
   const { data: user, isLoading: userLoading } = useUser();
 
   const { openModal } = useModal();
+  const { hasPermission } = useProjectPermissions(projectId);
 
   if (isLoading || userLoading) {
     return (
@@ -48,10 +50,13 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
     );
   }
 
+  const canManageEvents = hasPermission("manage_events");
+
   const handleCreateClick = (date: Date) => {
     openModal({
       title: "Schedule Event",
       description: "Create a new event for your project team",
+      className: "sm:max-w-[50vw]",
       render: ({ close }) => (
         <EventForm
           defaultEventDate={date}
@@ -112,7 +117,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
         <TabsContent value="calendar" className="space-y-4">
           <CalendarView
             projectId={projectId}
-            onCreateClick={handleCreateClick}
+            onCreateClick={canManageEvents ? handleCreateClick : undefined}
           />
         </TabsContent>
 

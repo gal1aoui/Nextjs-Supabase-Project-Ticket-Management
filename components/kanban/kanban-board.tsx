@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { PermissionGate } from "@/components/permission-gate";
+import { useDrawer } from "@/contexts/drawer/drawer-context";
 import { useTickets } from "@/stores/ticket.store";
 import { useTicketPriorities } from "@/stores/ticket-priority.store";
 import { useTicketStates } from "@/stores/ticket-state.store";
@@ -10,7 +11,7 @@ import { ProjectKanbanSkeleton } from "../projects/project-detail/project-detail
 import { Column } from "./column";
 import { CreateTicketDialog } from "./create-ticket-dialog";
 import { EditTicketDialog } from "./edit-ticket-dialog";
-import { TicketDetailDialog } from "./ticket-detail-dialog";
+import { TicketDetailContent } from "./ticket-detail-content";
 
 interface KanbanBoardProps {
   projectId: string;
@@ -21,8 +22,8 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   const { data: tickets = [], isLoading: ticketsLoading } = useTickets(projectId);
   const { data: states = [], isLoading: statesLoading } = useTicketStates(projectId);
   const { data: priorities = [] } = useTicketPriorities(projectId);
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
+  const { openDrawer } = useDrawer();
 
   const ticketsByState = useMemo(() => {
     const grouped: Record<string, Ticket[]> = {};
@@ -38,8 +39,25 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
     return <ProjectKanbanSkeleton />;
   }
 
-  const selectedState = states.find((s) => s.id === selectedTicket?.state_id);
-  const selectedPriority = priorities.find((p) => p.id === selectedTicket?.priority_id);
+  const handleTicketClick = (ticket: Ticket) => {
+    const state = states.find((s) => s.id === ticket.state_id);
+    const priority = priorities.find((p) => p.id === ticket.priority_id);
+    openDrawer({
+      title: ticket.title,
+      render: ({ close }) => (
+        <TicketDetailContent
+          ticket={ticket}
+          state={state}
+          priority={priority}
+          onClose={close}
+          onEdit={(t) => {
+            close();
+            setEditingTicket(t);
+          }}
+        />
+      ),
+    });
+  };
 
   return (
     <>
@@ -63,23 +81,11 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
               state={state}
               tickets={ticketsByState[state.id] || []}
               priorities={priorities}
-              onTicketClick={setSelectedTicket}
+              onTicketClick={handleTicketClick}
             />
           ))}
         </div>
       </div>
-
-      <TicketDetailDialog
-        ticket={selectedTicket}
-        state={selectedState}
-        priority={selectedPriority}
-        open={!!selectedTicket}
-        onOpenChange={(open) => !open && setSelectedTicket(null)}
-        onEdit={(ticket) => {
-          setSelectedTicket(null);
-          setEditingTicket(ticket);
-        }}
-      />
 
       <EditTicketDialog
         ticket={editingTicket}

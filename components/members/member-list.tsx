@@ -72,6 +72,7 @@ export function MemberList({ projectId, currentUserId }: MemberListProps) {
               {activeMembers.map((member) => (
                 <ActiveMemberItem
                   key={member.user_id}
+                  id={member.id}
                   user_id={member.user_id}
                   role_id={member.role_id}
                   status={member.status}

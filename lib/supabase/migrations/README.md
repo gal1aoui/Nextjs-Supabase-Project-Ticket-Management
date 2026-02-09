@@ -21,9 +21,9 @@ When setting up a new database, run files in this order:
 -- Run in order: 00 → 10
 schemas/00_extensions.sql
 schemas/01_profiles.sql
-schemas/02_roles.sql
-schemas/03_projects.sql
-schemas/04_project_members.sql   -- Contains helper functions
+schemas/02_projects.sql
+schemas/03_roles.sql             -- References projects(id)
+schemas/04_project_members.sql   -- Contains helper functions & triggers
 schemas/05_ticket_states.sql
 schemas/06_ticket_priorities.sql
 schemas/07_tickets.sql
@@ -118,6 +118,23 @@ Returns `true` if user has the specified permission in the project.
 | `on_auth_user_created` | `auth.users` | Auto-creates profile on signup |
 | `on_project_created` | `projects` | Auto-adds creator as Owner |
 | `on_event_created` | `events` | Auto-adds creator as attendee |
+
+## RLS Policy Summary
+
+Every table with RLS enabled has policies for all 4 operations (SELECT, INSERT, UPDATE, DELETE):
+
+| Table | SELECT | INSERT | UPDATE | DELETE |
+|-------|--------|--------|--------|--------|
+| `profiles` | Everyone | Own profile | Own profile | Own profile |
+| `roles` | System roles + project members | `manage_roles` | `manage_roles` (custom only) | `manage_roles` (custom only) |
+| `projects` | Creator or member | Authenticated (own) | Creator or `manage_project` | Creator only |
+| `project_members` | Members or own invite | `manage_members` | `manage_members` or self | `manage_members` or self |
+| `ticket_states` | Templates + members | `manage_states` | `manage_states` | `manage_states` |
+| `ticket_priorities` | Templates + members | `manage_priorities` | `manage_priorities` | `manage_priorities` |
+| `tickets` | Members | `create_tickets` / `manage_tickets` | Tiered (own/any) | `manage_tickets` |
+| `events` | Members (project) / Creator (personal) | `manage_events` (project) / Own (personal) | Same as SELECT | Same as SELECT |
+| `event_attendees` | Via event access | Event manager or creator | Self RSVP or manager | Self leave or manager |
+| `storage.objects` | Public (avatars) | Authenticated | Own folder | Own folder |
 
 ## RLS Performance Tips
 

@@ -2,6 +2,8 @@
 -- Roles Policies
 -- ===========================================
 -- RLS policies for the roles table
+-- System roles (is_system=true) are read-only for everyone
+-- Custom roles (is_system=false) are scoped to a project
 
 -- SELECT: Authenticated users can view system roles and their project's custom roles
 create policy "Roles are viewable by authenticated users"
@@ -23,7 +25,7 @@ create policy "Members with manage_roles can create custom roles"
     and has_project_permission(project_id, (select auth.uid()), 'manage_roles')
   );
 
--- UPDATE: Users with manage_roles permission can update custom roles
+-- UPDATE: Users with manage_roles permission can update custom roles (not system roles)
 create policy "Members with manage_roles can update custom roles"
   on roles for update
   to authenticated
@@ -31,6 +33,10 @@ create policy "Members with manage_roles can update custom roles"
     is_system = false
     and project_id is not null
     and has_project_permission(project_id, (select auth.uid()), 'manage_roles')
+  )
+  with check (
+    is_system = false
+    and project_id is not null
   );
 
 -- DELETE: Users with manage_roles permission can delete custom roles (not system roles)

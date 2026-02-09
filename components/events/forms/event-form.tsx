@@ -1,7 +1,10 @@
+import { isSameDay, isWeekend } from "date-fns";
 import { useState } from "react";
 import { toast } from "sonner";
+import { MemberPicker } from "@/components/members/member-picker";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,11 +17,12 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateEvent } from "@/stores/event.store";
-import { useProjectMembers } from "@/stores/project-member.store";
-import { EVENT_TYPE_LABELS, EVENT_TYPES, type Event, type EventFormSchema, type EventType } from "@/types/event";
-import EventAttendeesMemberItem from "../items/event-attendees-member-item";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { isWeekend } from "date-fns";
+import {
+  EVENT_TYPE_LABELS,
+  EVENT_TYPES,
+  type EventFormSchema,
+  type EventType,
+} from "@/types/event";
 
 interface EventFormProps {
   projectId?: string;
@@ -37,8 +41,8 @@ export default function EventForm({
     event_type: projectId ? "meeting" : "personal",
     start_date: defaultEventDate || new Date(),
     end_date: defaultEventDate || new Date(),
-    start_time: "00:00:00",
-    end_time: "12:00:00",
+    start_time: "09:00",
+    end_time: "10:00",
     location: "In-Person",
     event_url: "",
     attendees: [],
@@ -46,11 +50,41 @@ export default function EventForm({
   const [selectedAttendees, setSelectedAttendees] = useState<string[]>([]);
 
   const createEvent = useCreateEvent();
-  const { data: members = [] } = useProjectMembers(projectId ?? "");
-
-  const activeMembers = members.filter((m) => m.status === "active");
   const isProjectEvent = !!projectId;
-  const isMeetingType = form.event_type === "meeting";
+
+  const isSingleDay =
+    form.start_date && form.end_date && isSameDay(form.start_date, form.end_date);
+
+  // Event types available based on single vs multi-day
+  const availableTypes = isProjectEvent
+    ? EVENT_TYPES
+    : EVENT_TYPES.filter((t) => (isSingleDay ? true : t !== "meeting"));
+
+  const handleDateRangeChange = (range: { from?: Date; to?: Date } | undefined) => {
+    if (!range?.from) return;
+
+    const from = range.from;
+    const to = range.to ?? from;
+    const sameDay = isSameDay(from, to);
+
+    setForm((prev) => {
+      const updates: Partial<EventFormSchema> = {
+        start_date: from,
+        end_date: to,
+      };
+
+      // Multi-day: auto-set full day times, switch away from meeting type
+      if (!sameDay) {
+        updates.start_time = "00:00";
+        updates.end_time = "23:59";
+        if (prev.event_type === "meeting") {
+          updates.event_type = isProjectEvent ? "holiday" : "personal";
+        }
+      }
+
+      return { ...prev, ...updates };
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,38 +117,30 @@ export default function EventForm({
     }
   };
 
-  const toggleAttendee = (userId: string) => {
-    setSelectedAttendees((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
-    );
-  };
-
   return (
     <form onSubmit={handleSubmit}>
       <div className="grid gap-4 py-4">
-        {/* Event Type - only show for personal events (no projectId) */}
-        {!isProjectEvent && (
-          <div className="grid gap-2">
-            <Label htmlFor="event-type">Event Type</Label>
-            <Select
-              value={form.event_type}
-              onValueChange={(value) =>
-                setForm((prev) => ({ ...prev, event_type: value as EventType }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {EVENT_TYPES.filter((t) => t !== "meeting").map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {EVENT_TYPE_LABELS[type]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+        {/* Event Type */}
+        <div className="grid gap-2">
+          <Label htmlFor="event-type">Event Type</Label>
+          <Select
+            value={form.event_type}
+            onValueChange={(value) =>
+              setForm((prev) => ({ ...prev, event_type: value as EventType }))
+            }
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {availableTypes.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {EVENT_TYPE_LABELS[type]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         <div className="grid gap-2">
           <Label htmlFor="title">Title *</Label>
@@ -136,7 +162,11 @@ export default function EventForm({
             onChange={(e) =>
               setForm((prev) => ({ ...prev, description: e.target.value }))
             }
-            placeholder={isProjectEvent ? "Discuss sprint goals and assign tasks" : "Add details about this event"}
+            placeholder={
+              isProjectEvent
+                ? "Discuss sprint goals and assign tasks"
+                : "Add details about this event"
+            }
             rows={3}
           />
         </div>
@@ -145,25 +175,17 @@ export default function EventForm({
           <CardContent>
             <Calendar
               mode="range"
-              defaultMonth={defaultEventDate || form?.start_date}
+              defaultMonth={form?.start_date}
               selected={{
-                from: defaultEventDate || form?.start_date,
-                to: defaultEventDate || form?.end_date,
+                from: form?.start_date,
+                to: form?.end_date,
               }}
               disabled={isWeekend}
-              onSelect={(range) => {
-                if (range?.from) {
-                  setForm((prev) => ({
-                    ...prev,
-                    start_date: range.from,
-                    end_date: range.to,
-                  }));
-                }
-              }}
+              onSelect={handleDateRangeChange}
               numberOfMonths={2}
             />
           </CardContent>
-          {form.start_date?.getDay() === form.end_date?.getDay() && (
+          {isSingleDay && (
             <CardFooter className="bg-card border-t grid grid-cols-2 gap-2">
               <div className="grid gap-2">
                 <Label htmlFor="start-time">Start Time *</Label>
@@ -172,7 +194,10 @@ export default function EventForm({
                   type="time"
                   value={form?.start_time}
                   onChange={(e) =>
-                    setForm((prev) => ({ ...prev, start_time: e.target.value }))
+                    setForm((prev) => ({
+                      ...prev,
+                      start_time: e.target.value,
+                    }))
                   }
                 />
               </div>
@@ -183,7 +208,10 @@ export default function EventForm({
                   type="time"
                   value={form?.end_time}
                   onChange={(e) =>
-                    setForm((prev) => ({ ...prev, end_time: e.target.value }))
+                    setForm((prev) => ({
+                      ...prev,
+                      end_time: e.target.value,
+                    }))
                   }
                 />
               </div>
@@ -192,14 +220,17 @@ export default function EventForm({
         </Card>
 
         {/* Location & URL - show for meetings and project events */}
-        {(isProjectEvent || isMeetingType) && (
+        {(isProjectEvent || form.event_type === "meeting") && (
           <>
             <div className="grid gap-2">
               <Label htmlFor="location">Location</Label>
               <Select
                 value={form?.location}
                 onValueChange={(value) =>
-                  setForm((prev) => ({ ...prev, location: value as Event["location"] }))
+                  setForm((prev) => ({
+                    ...prev,
+                    location: value as "In-Person" | "Online",
+                  }))
                 }
               >
                 <SelectTrigger>
@@ -220,7 +251,10 @@ export default function EventForm({
                   type="url"
                   value={form?.event_url}
                   onChange={(e) =>
-                    setForm((prev) => ({ ...prev, event_url: e.target.value }))
+                    setForm((prev) => ({
+                      ...prev,
+                      event_url: e.target.value,
+                    }))
                   }
                   placeholder="https://meet.google.com/..."
                 />
@@ -230,21 +264,13 @@ export default function EventForm({
         )}
 
         {/* Attendees - only for project events */}
-        {isProjectEvent && activeMembers.length > 0 && (
-          <div className="grid gap-2">
-            <Label>Attendees ({selectedAttendees.length} selected)</Label>
-            <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
-              {activeMembers.map((member) => (
-                <EventAttendeesMemberItem
-                  key={member.user_id}
-                  userId={member.user_id}
-                  roleId={member.role_id}
-                  includeAttendee={selectedAttendees.includes(member.user_id)}
-                  toggleAttendee={() => toggleAttendee(member.user_id)}
-                />
-              ))}
-            </div>
-          </div>
+        {isProjectEvent && (
+          <MemberPicker
+            projectId={projectId}
+            value={selectedAttendees}
+            onChange={setSelectedAttendees}
+            label="Attendees"
+          />
         )}
       </div>
 

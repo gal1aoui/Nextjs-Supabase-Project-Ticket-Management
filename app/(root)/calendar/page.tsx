@@ -1,17 +1,19 @@
 "use client";
 
 import { format } from "date-fns";
-import { Calendar, Clock, Plus, Video } from "lucide-react";
+import { Calendar, CalendarRange, Clock, Plus, Video } from "lucide-react";
 import { useMemo, useState } from "react";
 import { CalendarView } from "@/components/calendar/calendar-view";
 import EventForm from "@/components/events/forms/event-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useDrawer } from "@/contexts/drawer/drawer-context";
 import { useModal } from "@/contexts/modal/modal-context";
 import { useUser } from "@/hooks/use-user";
-import { getCalendarDays, getDateRange, groupEventsByDate } from "@/lib/utils";
+import { getCalendarDays, getDateRange, groupEventsByDate, isMultiDayEvent } from "@/lib/utils";
 import { useUserEventsByDateRange } from "@/stores/event.store";
+import { EventDetailContent } from "@/components/events/event-detail-content";
 import type { EventWithRelations } from "@/types/event";
 import { EVENT_TYPE_LABELS } from "@/types/event";
 
@@ -48,6 +50,14 @@ function CalendarPageContent({ userId }: { userId: string }) {
   const { start, end } = getDateRange(currentDate, "month");
   const { data: events = [] } = useUserEventsByDateRange(userId, start, end);
   const { openModal } = useModal();
+  const { openDrawer } = useDrawer();
+
+  const handleEventClick = (event: EventWithRelations) => {
+    openDrawer({
+      title: event.title,
+      render: ({ close }) => <EventDetailContent event={event} onClose={close} />,
+    });
+  };
 
   const todayEvents = useMemo(() => {
     const today = new Date();
@@ -59,7 +69,9 @@ function CalendarPageContent({ userId }: { userId: string }) {
 
   const upcomingCount = useMemo(() => {
     const now = new Date();
-    return events.filter((m) => new Date(m.start_time) > now).length;
+    return events.filter(
+      (m) => new Date(`${m.start_date}T${m.start_time}`) > now,
+    ).length;
   }, [events]);
 
   const projectSet = useMemo(() => {
@@ -74,6 +86,7 @@ function CalendarPageContent({ userId }: { userId: string }) {
     openModal({
       title: "Create Personal Event",
       description: "Add a personal event to your calendar",
+      className: "sm:max-w-[50vw]",
       render: ({ close }) => (
         <EventForm
           defaultEventDate={date}
@@ -164,7 +177,7 @@ function CalendarPageContent({ userId }: { userId: string }) {
           </h2>
           <div className="flex gap-3 overflow-x-auto pb-2">
             {todayEvents.map((event) => (
-              <TodayEventCard key={event.id} event={event} />
+              <TodayEventCard key={event.id} event={event} onClick={() => handleEventClick(event)} />
             ))}
           </div>
         </div>
@@ -181,15 +194,40 @@ function CalendarPageContent({ userId }: { userId: string }) {
   );
 }
 
-function TodayEventCard({ event }: { event: EventWithRelations }) {
+function TodayEventCard({ event, onClick }: { event: EventWithRelations; onClick: () => void }) {
+  const multiDay = isMultiDayEvent(event);
+
   return (
-    <Card className="min-w-60 p-3 border-l-3 border-l-primary hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 shrink-0">
+    <Card
+      className={`min-w-60 p-3 border-l-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 shrink-0 cursor-pointer ${
+        multiDay ? "border-l-pink-500" : "border-l-primary"
+      }`}
+      style={
+        multiDay
+          ? {
+              background:
+                "repeating-linear-gradient(135deg, transparent, transparent 3px, rgba(236, 72, 153, 0.12) 3px, rgba(236, 72, 153, 0.12) 6px)",
+            }
+          : undefined
+      }
+      onClick={onClick}
+    >
       <div className="flex items-center gap-1.5 mb-1.5">
-        <Clock className="h-3.5 w-3.5 text-primary" />
-        <span className="text-xs font-semibold text-primary">
-          {format(new Date(event.start_time), "HH:mm")} -{" "}
-          {format(new Date(event.end_time), "HH:mm")}
-        </span>
+        {multiDay ? (
+          <>
+            <CalendarRange className="h-3.5 w-3.5 text-pink-500" />
+            <span className="text-xs font-semibold text-pink-600 dark:text-pink-300">
+              {EVENT_TYPE_LABELS[event.event_type]}
+            </span>
+          </>
+        ) : (
+          <>
+            <Clock className="h-3.5 w-3.5 text-primary" />
+            <span className="text-xs font-semibold text-primary">
+              {event.start_time.slice(0, 5)} - {event.end_time.slice(0, 5)}
+            </span>
+          </>
+        )}
       </div>
       <p className="font-medium text-sm truncate">{event.title}</p>
       <div className="flex items-center gap-2 mt-1.5">

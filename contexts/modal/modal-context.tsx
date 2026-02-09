@@ -6,6 +6,7 @@ import { ModalRoot } from "@/contexts/modal/components/modal-root";
 export type ModalState = {
   title?: ReactNode;
   description?: ReactNode;
+  className?: string;
   data?: unknown;
   render?: (args: {
     // biome-ignore lint/suspicious/noExplicitAny: the data can be of any type
@@ -18,6 +19,7 @@ type ModalContextType = {
   openModal: <T>(config: {
     title?: ReactNode;
     description?: ReactNode;
+    className?: string;
     data?: T;
     render: (args: { data: T; close: () => void }) => ReactNode;
   }) => void;

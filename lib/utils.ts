@@ -4,7 +4,6 @@ import {
   endOfMonth,
   endOfWeek,
   format,
-  isSameDay,
   startOfMonth,
   startOfWeek,
 } from "date-fns";
@@ -53,11 +52,13 @@ export function getCalendarDays(date: Date, view: CalendarView) {
 
 export function getDateRange(date: Date, view: CalendarView): { start: Date; end: Date } {
   switch (view) {
-    case "day":
-      return {
-        start: new Date(date.setHours(0, 0, 0, 0)),
-        end: new Date(date.setHours(23, 59, 59, 999)),
-      };
+    case "day": {
+      const start = new Date(date);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(date);
+      end.setHours(23, 59, 59, 999);
+      return { start, end };
+    }
     case "week":
       return {
         start: startOfWeek(date, { weekStartsOn: 1 }),
@@ -85,7 +86,7 @@ export function formatDateForView(date: Date, view: CalendarView): string {
   }
 }
 
-export function groupEventsByDate<T extends { start_time: string }>(
+export function groupEventsByDate<T extends { start_date: string; end_date: string }>(
   events: T[],
   days: Date[]
 ): Record<string, T[]> {
@@ -93,8 +94,14 @@ export function groupEventsByDate<T extends { start_time: string }>(
 
   days.forEach((day) => {
     const key = format(day, "yyyy-MM-dd");
-    grouped[key] = events.filter((event) => isSameDay(new Date(event.start_time), day));
+    grouped[key] = events.filter(
+      (event) => key >= event.start_date && key <= event.end_date,
+    );
   });
 
   return grouped;
+}
+
+export function isMultiDayEvent(event: { start_date: string; end_date: string }) {
+  return event.start_date !== event.end_date;
 }

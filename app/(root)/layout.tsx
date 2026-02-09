@@ -13,6 +13,7 @@ import UserAvatar from "@/components/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Spinner } from "@/components/ui/spinner";
+import { DrawerProvider } from "@/contexts/drawer/drawer-context";
 import { ModalProvider } from "@/contexts/modal/modal-context";
 import { profileService } from "@/services/profile.service";
 
@@ -76,7 +77,9 @@ export default function Layout({
                 </div>
               </div>
             </header>
-            <ModalProvider>{children}</ModalProvider>
+            <ModalProvider>
+              <DrawerProvider>{children}</DrawerProvider>
+            </ModalProvider>
           </div>
         </div>
       </SidebarProvider>

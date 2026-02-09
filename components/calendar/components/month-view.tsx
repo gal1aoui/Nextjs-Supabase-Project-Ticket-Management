@@ -5,18 +5,24 @@ import { ChevronDown, ChevronUp, Clock } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import type { EventWithRelations } from "@/types/event";
+import { isMultiDayEvent } from "@/lib/utils";
+import { EVENT_TYPE_LABELS, type EventWithRelations } from "@/types/event";
 
 interface MonthViewProps {
   currentDate: Date;
   days: Date[];
   groupedEvents: Record<string, EventWithRelations[]>;
   onEventClick: (event: EventWithRelations) => void;
-  onCreateClick: (date: Date) => void;
+  onCreateClick?: (date: Date) => void;
 }
 
 const daysName = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MAX_VISIBLE = 2;
+
+const multiDayStyle = {
+  background:
+    "repeating-linear-gradient(135deg, transparent, transparent 3px, rgba(236, 72, 153, 0.12) 3px, rgba(236, 72, 153, 0.12) 6px)",
+};
 
 function EventPill({
   event,
@@ -25,21 +31,39 @@ function EventPill({
   event: EventWithRelations;
   onClick: (event: EventWithRelations) => void;
 }) {
+  const multiDay = isMultiDayEvent(event);
+
   return (
     <button
       type="button"
-      className="group w-full flex items-center gap-1.5 text-xs px-2 py-1.5 rounded-md bg-primary/10 hover:bg-primary/20 transition-all hover:shadow-sm animate-in fade-in slide-in-from-top-1 duration-200"
+      className={`group w-full flex items-center gap-1.5 text-xs px-2 py-1.5 rounded-md transition-all hover:shadow-sm animate-in fade-in slide-in-from-top-1 duration-200 ${
+        multiDay
+          ? "border border-pink-300/50 hover:border-pink-400/70"
+          : "bg-primary/10 hover:bg-primary/20"
+      }`}
+      style={multiDay ? multiDayStyle : undefined}
       onClick={(e) => {
         e.stopPropagation();
         onClick(event);
       }}
     >
-      <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 group-hover:scale-125 transition-transform" />
-      <Clock className="h-3 w-3 text-muted-foreground shrink-0" />
-      <span className="text-muted-foreground font-medium shrink-0">
-        {format(new Date(event.start_time), "HH:mm")}
-      </span>
-      <span className="truncate font-medium">{event.title}</span>
+      {multiDay ? (
+        <>
+          <span className="w-1.5 h-1.5 rounded-full bg-pink-500 shrink-0 group-hover:scale-125 transition-transform" />
+          <span className="truncate font-medium text-pink-700 dark:text-pink-300">
+            {EVENT_TYPE_LABELS[event.event_type]}
+          </span>
+        </>
+      ) : (
+        <>
+          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 group-hover:scale-125 transition-transform" />
+          <Clock className="h-3 w-3 text-muted-foreground shrink-0" />
+          <span className="text-muted-foreground font-medium shrink-0">
+            {event.start_time.slice(0, 5)}
+          </span>
+          <span className="truncate font-medium">{event.title}</span>
+        </>
+      )}
     </button>
   );
 }
@@ -94,7 +118,7 @@ export default function MonthView({
             className={`min-h-[110px] p-2 cursor-pointer transition-all duration-200 hover:bg-accent/50 hover:shadow-sm ${
               !isCurrentMonth ? "opacity-40" : ""
             } ${isDayToday ? "ring-2 ring-primary shadow-sm bg-primary/5" : ""}`}
-            onClick={() => onCreateClick(day)}
+            onClick={() => onCreateClick?.(day)}
           >
             <div className="flex justify-between items-center mb-1.5">
               <span

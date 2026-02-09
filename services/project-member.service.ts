@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { ProjectMember, ProjectMemberInvite, ProjectMemberUpdate } from "@/types/project-member";
 
 interface ProjectMembersData {
+  id: string;
   user_id: string;
   status: string;
   role_id: string;
@@ -24,7 +25,7 @@ export const projectMemberService = {
     return handleSupabaseError(() =>
       supabase
         .from("project_members")
-        .select("user_id, status, role_id, invited_at")
+        .select("id, user_id, status, role_id, invited_at")
         .eq("project_id", projectId)
     ) as Promise<ProjectMembersData[]>;
   },

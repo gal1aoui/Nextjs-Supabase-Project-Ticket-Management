@@ -80,7 +80,7 @@ export const eventFormSchema = z
       .regex(/^#[0-9A-F]{6}$/i)
       .optional(),
   })
-  .refine((data) => new Date(data.end_time) > new Date(data.start_time), {
+  .refine((data) => data.end_time > data.start_time, {
     message: "End time must be after start time",
     path: ["end_time"],
   });

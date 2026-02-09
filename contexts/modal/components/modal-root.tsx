@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { ModalState } from "@/contexts/modal/modal-context";
+import { cn } from "@/lib/utils";
 
 interface ModalRootProps {
   open: boolean;
@@ -18,7 +19,7 @@ interface ModalRootProps {
 export function ModalRoot({ open, state, close }: ModalRootProps) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && close()}>
-      <DialogContent className="sm:max-w-[70vw] max-h-[90vh] w-fit overflow-y-auto">
+      <DialogContent className={cn("max-h-[85vh] overflow-y-auto", state.className)}>
         {(state.title || state.description) && (
           <DialogHeader>
             {state.title && <DialogTitle>{state.title}</DialogTitle>}

@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import {
   ApiError,
   handleSupabaseError,
@@ -12,6 +13,10 @@ import type {
   EventUpdate,
   EventWithRelations,
 } from "@/types/event";
+
+function toDateStr(d: Date): string {
+  return format(d, "yyyy-MM-dd");
+}
 
 const EVENT_SELECT = `
   *,
@@ -44,8 +49,8 @@ export const eventService = {
         .from("events")
         .select(EVENT_SELECT)
         .eq("project_id", projectId)
-        .gte("start_date", startDate.toISOString())
-        .lte("end_date", endDate.toISOString())
+        .gte("start_date", toDateStr(startDate))
+        .lte("end_date", toDateStr(endDate))
         .order("start_time", { ascending: true }),
     ) as Promise<EventWithRelations[]>;
   },
@@ -55,6 +60,9 @@ export const eventService = {
     startDate: Date,
     endDate: Date,
   ): Promise<EventWithRelations[]> {
+    const startStr = toDateStr(startDate);
+    const endStr = toDateStr(endDate);
+
     // Get event IDs where user is an attendee
     const attendeeRows = (await handleSupabaseError(() =>
       supabaseClient
@@ -71,8 +79,8 @@ export const eventService = {
         .from("events")
         .select(EVENT_SELECT)
         .eq("created_by", userId)
-        .gte("start_date", startDate.toISOString())
-        .lte("end_date", endDate.toISOString())
+        .gte("start_date", startStr)
+        .lte("end_date", endStr)
         .order("start_time", { ascending: true }),
     )) as EventWithRelations[];
 
@@ -84,8 +92,8 @@ export const eventService = {
           .from("events")
           .select(EVENT_SELECT)
           .in("id", attendeeEventIds)
-          .gte("start_date", startDate.toISOString())
-          .lte("end_date", endDate.toISOString())
+          .gte("start_date", startStr)
+          .lte("end_date", endStr)
           .order("start_time", { ascending: true }),
       )) as EventWithRelations[];
     }
@@ -96,7 +104,8 @@ export const eventService = {
     );
     return Array.from(uniqueMap.values()).sort(
       (a, b) =>
-        new Date(a.start_time).getTime() - new Date(b.start_time).getTime(),
+        new Date(`${a.start_date}T${a.start_time}`).getTime() -
+        new Date(`${b.start_date}T${b.start_time}`).getTime(),
     );
   },
 
@@ -113,12 +122,17 @@ export const eventService = {
   async create(event: EventCreate): Promise<Event> {
     const userId = await requireAuth(supabaseClient);
 
-    const { attendees, ...eventData } = event;
+    const { attendees, start_date, end_date, ...eventData } = event;
 
     const data = await handleSupabaseError<Event>(() =>
       supabaseClient
         .from("events")
-        .insert({ ...eventData, created_by: userId })
+        .insert({
+          ...eventData,
+          start_date: start_date ? toDateStr(start_date as unknown as Date) : undefined,
+          end_date: end_date ? toDateStr(end_date as unknown as Date) : undefined,
+          created_by: userId,
+        })
         .select()
         .single(),
     );
@@ -147,12 +161,17 @@ export const eventService = {
   },
 
   async update(event: EventUpdate): Promise<Event> {
-    const { id, ...updates } = event;
+    const { id, start_date, end_date, ...updates } = event;
 
     return handleSupabaseError(() =>
       supabaseClient
         .from("events")
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update({
+          ...updates,
+          start_date: start_date ? toDateStr(start_date as unknown as Date) : undefined,
+          end_date: end_date ? toDateStr(end_date as unknown as Date) : undefined,
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", id)
         .select()
         .single(),

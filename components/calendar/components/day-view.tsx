@@ -1,8 +1,8 @@
 "use client";
 
-import { format } from "date-fns";
 import {
   CalendarIcon,
+  CalendarRange,
   ChevronDown,
   ChevronUp,
   Clock,
@@ -16,16 +16,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getUserInitials } from "@/lib/helpers";
-import type { EventWithRelations } from "@/types/event";
+import { isMultiDayEvent } from "@/lib/utils";
+import { EVENT_TYPE_LABELS, type EventWithRelations } from "@/types/event";
 
 interface DayViewProps {
   currentDate: Date;
   events: EventWithRelations[];
   onEventClick: (event: EventWithRelations) => void;
-  onCreateClick: (date: Date) => void;
+  onCreateClick?: (date: Date) => void;
 }
 
 const MAX_VISIBLE = 5;
+
+const multiDayStyle = {
+  background:
+    "repeating-linear-gradient(135deg, transparent, transparent 4px, rgba(236, 72, 153, 0.1) 4px, rgba(236, 72, 153, 0.1) 8px)",
+};
 
 function EventCard({
   event,
@@ -36,24 +42,45 @@ function EventCard({
   onClick: (event: EventWithRelations) => void;
   index: number;
 }) {
+  const multiDay = isMultiDayEvent(event);
+
   return (
     <Card
-      className="p-4 cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 animate-in fade-in slide-in-from-left-3 border-l-4 border-l-primary"
-      style={{ animationDelay: `${index * 50}ms`, animationFillMode: "both" }}
+      className={`p-4 cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 animate-in fade-in slide-in-from-left-3 border-l-4 ${
+        multiDay ? "border-l-pink-500" : "border-l-primary"
+      }`}
+      style={{
+        animationDelay: `${index * 50}ms`,
+        animationFillMode: "both",
+        ...(multiDay ? multiDayStyle : {}),
+      }}
       onClick={() => onClick(event)}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center gap-1.5 text-sm font-semibold text-primary">
-              <Clock className="h-4 w-4" />
-              {format(new Date(event.start_time), "HH:mm")} -{" "}
-              {format(new Date(event.end_time), "HH:mm")}
-            </div>
-            <Badge variant="secondary" className="text-xs">
-              <Users className="h-3 w-3 mr-1" />
-              {event.attendees.length}
-            </Badge>
+            {multiDay ? (
+              <div className="flex items-center gap-1.5 text-sm font-semibold text-pink-600 dark:text-pink-300">
+                <CalendarRange className="h-4 w-4" />
+                <Badge
+                  variant="outline"
+                  className="border-pink-300 text-pink-600 dark:text-pink-300 text-xs"
+                >
+                  {EVENT_TYPE_LABELS[event.event_type]}
+                </Badge>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 text-sm font-semibold text-primary">
+                <Clock className="h-4 w-4" />
+                {event.start_time.slice(0, 5)} - {event.end_time.slice(0, 5)}
+              </div>
+            )}
+            {event.attendees.length > 0 && (
+              <Badge variant="secondary" className="text-xs">
+                <Users className="h-3 w-3 mr-1" />
+                {event.attendees.length}
+              </Badge>
+            )}
           </div>
 
           <h3 className="text-lg font-semibold mb-1 truncate">
@@ -83,21 +110,23 @@ function EventCard({
         </div>
 
         {/* Attendee avatars */}
-        <div className="flex -space-x-2 ml-4 shrink-0">
-          {event.attendees.slice(0, 3).map((attendee) => (
-            <Avatar key={attendee.id} className="h-7 w-7 border-2 border-background">
-              <AvatarImage src={attendee.profile.avatar_url || undefined} />
-              <AvatarFallback className="text-[10px]">
-                {getUserInitials(attendee.profile.full_name)}
-              </AvatarFallback>
-            </Avatar>
-          ))}
-          {event.attendees.length > 3 && (
-            <div className="h-7 w-7 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[10px] font-medium">
-              +{event.attendees.length - 3}
-            </div>
-          )}
-        </div>
+        {event.attendees.length > 0 && (
+          <div className="flex -space-x-2 ml-4 shrink-0">
+            {event.attendees.slice(0, 3).map((attendee) => (
+              <Avatar key={attendee.id} className="h-7 w-7 border-2 border-background">
+                <AvatarImage src={attendee.profile.avatar_url || undefined} />
+                <AvatarFallback className="text-[10px]">
+                  {getUserInitials(attendee.profile.full_name)}
+                </AvatarFallback>
+              </Avatar>
+            ))}
+            {event.attendees.length > 3 && (
+              <div className="h-7 w-7 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[10px] font-medium">
+                +{event.attendees.length - 3}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </Card>
   );
@@ -125,11 +154,15 @@ export default function DayView({
             </div>
             <p className="text-lg font-medium mb-1">No events scheduled</p>
             <p className="text-sm mb-4">
-              This day is free. Schedule an event to get started.
+              {onCreateClick
+                ? "This day is free. Schedule an event to get started."
+                : "No events on this day."}
             </p>
-            <Button onClick={() => onCreateClick(currentDate)}>
-              Schedule Event
-            </Button>
+            {onCreateClick && (
+              <Button onClick={() => onCreateClick(currentDate)}>
+                Schedule Event
+              </Button>
+            )}
           </div>
         ) : (
           <>

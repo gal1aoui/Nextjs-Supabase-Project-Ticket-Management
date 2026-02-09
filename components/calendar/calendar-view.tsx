@@ -10,7 +10,7 @@ import {
 } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import { EventDetailDialog } from "@/components/events/event-detail-dialog";
+import { EventDetailContent } from "@/components/events/event-detail-content";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -26,6 +26,7 @@ import {
   getDateRange,
   groupEventsByDate,
 } from "@/lib/utils";
+import { useDrawer } from "@/contexts/drawer/drawer-context";
 import { useEventsByDateRange, useUserEventsByDateRange } from "@/stores/event.store";
 import type { EventWithRelations } from "@/types/event";
 import DayView from "./components/day-view";
@@ -41,8 +42,7 @@ interface CalendarViewProps {
 export function CalendarView({ projectId, userId, onCreateClick }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<CalendarsView>("month");
-  const [selectedEvent, setSelectedEvent] = useState<EventWithRelations | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
+  const { openDrawer } = useDrawer();
 
   const { start, end } = getDateRange(currentDate, view);
 
@@ -58,8 +58,10 @@ export function CalendarView({ projectId, userId, onCreateClick }: CalendarViewP
   const groupedEvents = groupEventsByDate(events, days);
 
   const handleEventClick = (event: EventWithRelations) => {
-    setSelectedEvent(event);
-    setDetailOpen(true);
+    openDrawer({
+      title: event.title,
+      render: ({ close }) => <EventDetailContent event={event} onClose={close} />,
+    });
   };
 
   const handleCreateClick = (date: Date) => {
@@ -179,12 +181,6 @@ export function CalendarView({ projectId, userId, onCreateClick }: CalendarViewP
         />
       )}
 
-      {/* Event Detail Dialog */}
-      <EventDetailDialog
-        event={selectedEvent}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-      />
     </div>
   );
 }

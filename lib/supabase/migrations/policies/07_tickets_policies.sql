@@ -3,7 +3,7 @@
 -- ===========================================
 -- RLS policies for the tickets table
 
--- SELECT: Project members can view tickets
+-- SELECT: Project members can view tickets (view_tickets is the minimum permission)
 create policy "Members can view tickets"
   on tickets for select
   to authenticated
@@ -14,7 +14,8 @@ create policy "Members can create tickets"
   on tickets for insert
   to authenticated
   with check (
-    is_project_member(project_id, (select auth.uid()))
+    project_id is not null
+    and is_project_member(project_id, (select auth.uid()))
     and (
       has_project_permission(project_id, (select auth.uid()), 'create_tickets')
       or has_project_permission(project_id, (select auth.uid()), 'manage_tickets')
@@ -38,10 +39,16 @@ create policy "Members can update tickets"
         and created_by = (select auth.uid())
       )
     )
+  )
+  with check (
+    project_id is not null
+    and is_project_member(project_id, (select auth.uid()))
   );
 
 -- DELETE: Only users with manage_tickets permission
 create policy "Project managers can delete tickets"
   on tickets for delete
   to authenticated
-  using (has_project_permission(project_id, (select auth.uid()), 'manage_tickets'));
+  using (
+    has_project_permission(project_id, (select auth.uid()), 'manage_tickets')
+  );
