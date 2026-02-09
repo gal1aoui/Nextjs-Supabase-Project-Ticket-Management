@@ -8,31 +8,31 @@ insert into roles (name, description, is_system, permissions) values
     'Owner',
     'Full project access - can manage all aspects of the project',
     true,
-    '["manage_project", "manage_members", "manage_roles", "manage_tickets", "manage_states", "manage_priorities", "manage_events", "view_reports"]'::jsonb
+    '["manage_project", "manage_members", "manage_roles", "manage_tickets", "manage_states", "manage_priorities", "manage_events", "manage_sprints", "view_reports"]'::jsonb
   ),
   (
     'Admin',
     'Project management access - can manage members, tickets, and settings',
     true,
-    '["manage_members", "manage_tickets", "manage_states", "manage_priorities", "manage_events", "view_reports"]'::jsonb
+    '["manage_members", "manage_tickets", "manage_states", "manage_priorities", "manage_events", "manage_sprints", "view_reports"]'::jsonb
   ),
   (
     'Manager',
     'Can manage tickets, states, priorities, and events',
     true,
-    '["manage_tickets", "manage_states", "manage_priorities", "manage_events", "view_reports"]'::jsonb
+    '["manage_tickets", "manage_states", "manage_priorities", "manage_events", "manage_sprints", "view_reports"]'::jsonb
   ),
   (
     'Product Owner',
     'Defines requirements and priorities',
     true,
-    '["manage_tickets", "manage_priorities", "view_reports"]'::jsonb
+    '["manage_tickets", "manage_priorities", "manage_sprints", "view_reports"]'::jsonb
   ),
   (
     'Scrum Master',
     'Facilitates team processes and events',
     true,
-    '["manage_tickets", "manage_states", "manage_events", "view_reports"]'::jsonb
+    '["manage_tickets", "manage_states", "manage_events", "manage_sprints", "view_reports"]'::jsonb
   ),
   (
     'Developer',

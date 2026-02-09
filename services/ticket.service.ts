@@ -54,6 +54,39 @@ export const ticketService = {
     await handleSupabaseError(() => supabaseClient.from("tickets").delete().eq("id", id).select());
   },
 
+  async getBacklog(projectId: string): Promise<Ticket[]> {
+    return handleSupabaseError(() =>
+      supabaseClient
+        .from("tickets")
+        .select("*")
+        .eq("project_id", projectId)
+        .is("sprint_id", null)
+        .order("sort_order", { ascending: true })
+    );
+  },
+
+  async getBySprint(projectId: string, sprintId: string): Promise<Ticket[]> {
+    return handleSupabaseError(() =>
+      supabaseClient
+        .from("tickets")
+        .select("*")
+        .eq("project_id", projectId)
+        .eq("sprint_id", sprintId)
+        .order("sort_order", { ascending: true })
+    );
+  },
+
+  async assignToSprint(ticketId: string, sprintId: string | null): Promise<Ticket> {
+    return handleSupabaseError(() =>
+      supabaseClient
+        .from("tickets")
+        .update({ sprint_id: sprintId, updated_at: new Date().toISOString() })
+        .eq("id", ticketId)
+        .select()
+        .single()
+    );
+  },
+
   async reorder({ ticketId, newStateId, newSortOrder }: ReorderTicketParams): Promise<Ticket> {
     return handleSupabaseError(() =>
       supabaseClient

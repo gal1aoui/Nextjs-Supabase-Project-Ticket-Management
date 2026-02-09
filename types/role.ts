@@ -12,6 +12,7 @@ export const AVAILABLE_PERMISSIONS = [
   { key: "manage_states", label: "Manage States", description: "Create/modify ticket states" },
   { key: "manage_priorities", label: "Manage Priorities", description: "Create/modify priorities" },
   { key: "manage_events", label: "Manage Events", description: "Full event CRUD" },
+  { key: "manage_sprints", label: "Manage Sprints", description: "Create/modify sprints" },
   { key: "create_tickets", label: "Create Tickets", description: "Create new tickets" },
   { key: "update_own_tickets", label: "Update Own Tickets", description: "Update tickets created by self" },
   { key: "update_tickets", label: "Update Tickets", description: "Update any ticket" },

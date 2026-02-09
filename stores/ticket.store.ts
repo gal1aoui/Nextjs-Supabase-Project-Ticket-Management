@@ -5,6 +5,8 @@ import type { Ticket, TicketCreate, TicketUpdate } from "@/types/ticket";
 export const ticketKeys = {
   byProject: (projectId: string) => ["tickets", projectId] as const,
   detail: (id: string) => ["tickets", "detail", id] as const,
+  backlog: (projectId: string) => ["tickets", "backlog", projectId] as const,
+  bySprint: (projectId: string, sprintId: string) => ["tickets", "sprint", projectId, sprintId] as const,
 };
 
 export function useTickets(projectId: string) {
@@ -50,6 +52,35 @@ export function useDeleteTicket() {
     mutationFn: (id: string) => ticketService.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["tickets"] });
+    },
+  });
+}
+
+export function useBacklogTickets(projectId: string) {
+  return useQuery({
+    queryKey: ticketKeys.backlog(projectId),
+    queryFn: () => ticketService.getBacklog(projectId) as Promise<Ticket[]>,
+    enabled: !!projectId,
+  });
+}
+
+export function useSprintTickets(projectId: string, sprintId: string) {
+  return useQuery({
+    queryKey: ticketKeys.bySprint(projectId, sprintId),
+    queryFn: () => ticketService.getBySprint(projectId, sprintId) as Promise<Ticket[]>,
+    enabled: !!projectId && !!sprintId,
+  });
+}
+
+export function useAssignTicketToSprint() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (params: { ticketId: string; sprintId: string | null }) =>
+      ticketService.assignToSprint(params.ticketId, params.sprintId),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ticketKeys.byProject(data.project_id) });
+      qc.invalidateQueries({ queryKey: ticketKeys.backlog(data.project_id) });
+      qc.invalidateQueries({ queryKey: ["tickets", "sprint"] });
     },
   });
 }

@@ -12,6 +12,7 @@ export type Ticket = {
   state_id: string;
   assigned_to: string | null;
   priority_id: string | null;
+  sprint_id: string | null;
   sort_order: number;
   created_at: string;
   updated_at: string;
@@ -29,6 +30,7 @@ export const ticketCreateSchema = z.object({
   state_id: z.uuid(),
   priority_id: z.uuid().optional(),
   assigned_to: z.uuid(),
+  sprint_id: z.uuid().optional(),
   sort_order: z.number().int().default(0),
 });
 
@@ -39,6 +41,7 @@ export const ticketUpdateSchema = z.object({
   state_id: z.uuid().optional(),
   priority_id: z.uuid().optional(),
   assigned_to: z.uuid().optional(),
+  sprint_id: z.uuid().nullable().optional(),
   sort_order: z.number().int().optional(),
 });
 

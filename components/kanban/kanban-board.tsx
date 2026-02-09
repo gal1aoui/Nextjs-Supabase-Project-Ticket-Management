@@ -89,6 +89,7 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
 
       <EditTicketDialog
         ticket={editingTicket}
+        projectId={projectId}
         states={states}
         priorities={priorities}
         open={!!editingTicket}

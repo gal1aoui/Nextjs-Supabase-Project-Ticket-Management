@@ -3,6 +3,7 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { SingleMemberPicker } from "@/components/members/single-member-picker";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -46,6 +47,7 @@ export function CreateTicketDialog({
   const [description, setDescription] = useState("");
   const [stateId, setStateId] = useState("");
   const [priorityId, setPriorityId] = useState("");
+  const [assignedTo, setAssignedTo] = useState<string | null>(userId);
 
   const createTicket = useCreateTicket();
 
@@ -63,7 +65,7 @@ export function CreateTicketDialog({
         description: description || undefined,
         project_id: projectId,
         state_id: stateId,
-        assigned_to: userId,
+        assigned_to: assignedTo || userId,
         priority_id: priorityId || undefined,
       });
 
@@ -71,6 +73,7 @@ export function CreateTicketDialog({
       setDescription("");
       setStateId("");
       setPriorityId("");
+      setAssignedTo(userId);
       closeModal();
       toast.success("Ticket created successfully");
     } catch (_) {
@@ -142,6 +145,13 @@ export function CreateTicketDialog({
                 </SelectContent>
               </Select>
             </div>
+            <SingleMemberPicker
+              projectId={projectId}
+              value={assignedTo}
+              onChange={setAssignedTo}
+              label="Assignee"
+              placeholder="Search members to assign..."
+            />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => closeModal()}>

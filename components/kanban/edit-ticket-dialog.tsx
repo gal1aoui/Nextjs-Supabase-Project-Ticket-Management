@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { SingleMemberPicker } from "@/components/members/single-member-picker";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -28,6 +29,7 @@ import type { TicketState } from "@/types/ticket-state";
 
 interface EditTicketDialogProps {
   ticket: Ticket | null;
+  projectId: string;
   states: TicketState[];
   priorities: TicketPriority[];
   open: boolean;
@@ -36,6 +38,7 @@ interface EditTicketDialogProps {
 
 export function EditTicketDialog({
   ticket,
+  projectId,
   states,
   priorities,
   open,
@@ -45,6 +48,7 @@ export function EditTicketDialog({
   const [description, setDescription] = useState("");
   const [stateId, setStateId] = useState("");
   const [priorityId, setPriorityId] = useState("");
+  const [assignedTo, setAssignedTo] = useState<string | null>(null);
 
   const updateTicket = useUpdateTicket();
 
@@ -54,6 +58,7 @@ export function EditTicketDialog({
       setDescription(ticket.description || "");
       setStateId(ticket.state_id);
       setPriorityId(ticket.priority_id || "");
+      setAssignedTo(ticket.assigned_to);
     }
   }, [ticket]);
 
@@ -72,6 +77,7 @@ export function EditTicketDialog({
         description: description || undefined,
         state_id: stateId,
         priority_id: priorityId || undefined,
+        assigned_to: assignedTo || undefined,
       });
 
       onOpenChange(false);
@@ -139,6 +145,13 @@ export function EditTicketDialog({
                 </SelectContent>
               </Select>
             </div>
+            <SingleMemberPicker
+              projectId={projectId}
+              value={assignedTo}
+              onChange={setAssignedTo}
+              label="Assignee"
+              placeholder="Search members to assign..."
+            />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

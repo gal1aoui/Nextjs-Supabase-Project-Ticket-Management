@@ -4,6 +4,8 @@ import { Calendar, Clock, Edit, Trash2, User } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { PermissionGate } from "@/components/permission-gate";
+import { CommentList } from "@/components/tickets/comments/comment-list";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,8 +19,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { dateFormatter } from "@/lib/helpers";
+import { dateFormatter, getUserInitials } from "@/lib/helpers";
 import { getContrastColor } from "@/lib/utils";
+import { useProfile } from "@/stores/profile.store";
 import { useDeleteTicket } from "@/stores/ticket.store";
 import type { Ticket } from "@/types/ticket";
 import type { TicketPriority } from "@/types/ticket-priority";
@@ -40,6 +43,7 @@ export function TicketDetailContent({
   onClose,
 }: TicketDetailContentProps) {
   const deleteTicket = useDeleteTicket();
+  const { data: assigneeProfile } = useProfile(ticket.assigned_to ?? "");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleDelete = async () => {
@@ -99,12 +103,22 @@ export function TicketDetailContent({
 
         {/* Details Card */}
         <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
-          {ticket.assigned_to && (
-            <div className="flex items-center gap-3">
-              <User className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="text-sm">{ticket.assigned_to}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            <User className="h-4 w-4 text-muted-foreground shrink-0" />
+            {ticket.assigned_to && assigneeProfile ? (
+              <div className="flex items-center gap-2">
+                <Avatar className="h-5 w-5">
+                  <AvatarImage src={assigneeProfile.avatar_url || undefined} />
+                  <AvatarFallback className="text-[8px]">
+                    {getUserInitials(assigneeProfile.full_name ?? null)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm">{assigneeProfile.full_name}</span>
+              </div>
+            ) : (
+              <span className="text-sm text-muted-foreground">Unassigned</span>
+            )}
+          </div>
           <div className="flex items-center gap-3">
             <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
             <span className="text-sm">Created {dateFormatter(ticket.created_at)}</span>
@@ -144,6 +158,9 @@ export function TicketDetailContent({
             </PermissionGate>
           </div>
         </PermissionGate>
+
+        {/* Comments */}
+        <CommentList ticketId={ticket.id} projectId={ticket.project_id} />
       </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

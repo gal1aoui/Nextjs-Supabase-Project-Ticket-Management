@@ -1,8 +1,9 @@
 "use client";
 
-import { CalendarIcon, LayoutDashboard, Settings, UserPlus, Users } from "lucide-react";
+import { CalendarIcon, FolderGit2, Layers, LayoutDashboard, Settings, UserPlus, Users } from "lucide-react";
 import { use } from "react";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
+import { SprintBoard } from "@/components/sprints/sprint-board";
 import { CalendarView } from "@/components/calendar/calendar-view";
 import EventForm from "@/components/events/forms/event-form";
 import { InviteMemberDialog } from "@/components/members/invite-member-dialog";
@@ -17,6 +18,7 @@ import { useModal } from "@/contexts/modal/modal-context";
 import { useProjectPermissions } from "@/hooks/use-project-permissions";
 import { useUser } from "@/hooks/use-user";
 import { useProject } from "@/stores/project.store";
+import { RepoOverview } from "@/components/repository/repo-overview";
 
 export default function ProjectDetailPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = use(params);
@@ -96,9 +98,17 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
               <CalendarIcon className="h-4 w-4 mr-2" />
               Calendar
             </TabsTrigger>
+            <TabsTrigger value="sprints">
+              <Layers className="h-4 w-4 mr-2" />
+              Sprints
+            </TabsTrigger>
             <TabsTrigger value="members">
               <Users className="h-4 w-4 mr-2" />
               Members
+            </TabsTrigger>
+            <TabsTrigger value="repository">
+              <FolderGit2 className="h-4 w-4 mr-2" />
+              Repository
             </TabsTrigger>
             <PermissionGate projectId={projectId} permission={["manage_project", "manage_states", "manage_priorities", "manage_roles"]}>
               <TabsTrigger value="settings">
@@ -121,6 +131,10 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
           />
         </TabsContent>
 
+        <TabsContent value="sprints" className="space-y-4">
+          <SprintBoard projectId={projectId} />
+        </TabsContent>
+
         <TabsContent value="members" className="space-y-4">
           <div className="flex justify-end">
             <PermissionGate projectId={projectId} permission="manage_members">
@@ -141,6 +155,10 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
             </PermissionGate>
           </div>
           <MemberList projectId={projectId} currentUserId={user.id} />
+        </TabsContent>
+
+        <TabsContent value="repository" className="space-y-4">
+          <RepoOverview projectId={projectId} />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">

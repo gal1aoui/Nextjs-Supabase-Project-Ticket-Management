@@ -1,16 +1,18 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { TicketPriority } from "@/types/ticket-priority";
-import type { Ticket } from "@/types/ticket";
-import UserAvatar from "../UserAvatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { getUserInitials } from "@/lib/helpers";
 import { getContrastColor } from "@/lib/utils";
+import { useProfile } from "@/stores/profile.store";
+import type { Ticket } from "@/types/ticket";
+import type { TicketPriority } from "@/types/ticket-priority";
 
 interface TicketCardProps {
   ticket: Ticket;
   priority?: TicketPriority;
-  assigneeInitials?: string;
   onclick?: () => void;
 }
 
@@ -30,7 +32,7 @@ export function TicketCard({ ticket, priority, onclick }: TicketCardProps) {
             {priority.name}
           </Badge>
         )}
-        <UserAvatar />
+        <AssigneeAvatar userId={ticket.assigned_to} />
       </CardHeader>
       <div className="space-y-2">
         <CardTitle>{ticket.title}</CardTitle>
@@ -39,5 +41,29 @@ export function TicketCard({ ticket, priority, onclick }: TicketCardProps) {
         </CardDescription>
       </div>
     </Card>
+  );
+}
+
+function AssigneeAvatar({ userId }: { userId: string | null }) {
+  const { data: profile } = useProfile(userId ?? "");
+
+  if (!userId) return null;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Avatar className="h-6 w-6">
+            <AvatarImage src={profile?.avatar_url || undefined} />
+            <AvatarFallback className="text-[10px] bg-primary text-primary-foreground">
+              {getUserInitials(profile?.full_name ?? null)}
+            </AvatarFallback>
+          </Avatar>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{profile?.full_name || "Loading..."}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
