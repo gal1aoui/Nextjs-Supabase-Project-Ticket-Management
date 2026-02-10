@@ -30,11 +30,7 @@ interface EventFormProps {
   closeModal: () => void;
 }
 
-export default function EventForm({
-  projectId,
-  defaultEventDate,
-  closeModal,
-}: EventFormProps) {
+export default function EventForm({ projectId, defaultEventDate, closeModal }: EventFormProps) {
   const [form, setForm] = useState<EventFormSchema>({
     title: "",
     description: "",
@@ -52,8 +48,7 @@ export default function EventForm({
   const createEvent = useCreateEvent();
   const isProjectEvent = !!projectId;
 
-  const isSingleDay =
-    form.start_date && form.end_date && isSameDay(form.start_date, form.end_date);
+  const isSingleDay = form.start_date && form.end_date && isSameDay(form.start_date, form.end_date);
 
   // Event types available based on single vs multi-day
   const availableTypes = isProjectEvent
@@ -147,9 +142,7 @@ export default function EventForm({
           <Input
             id="title"
             value={form?.title}
-            onChange={(e) =>
-              setForm((prev) => ({ ...prev, title: e.target.value }))
-            }
+            onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
             placeholder={isProjectEvent ? "Sprint Planning" : "Out of Office"}
           />
         </div>
@@ -159,9 +152,7 @@ export default function EventForm({
           <Textarea
             id="description"
             value={form?.description}
-            onChange={(e) =>
-              setForm((prev) => ({ ...prev, description: e.target.value }))
-            }
+            onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
             placeholder={
               isProjectEvent
                 ? "Discuss sprint goals and assign tasks"

@@ -69,11 +69,7 @@ export function CommentList({ ticketId, projectId }: CommentListProps) {
       {canComment && currentUserId && (
         <>
           <Separator />
-          <CommentForm
-            ticketId={ticketId}
-            projectId={projectId}
-            currentUserId={currentUserId}
-          />
+          <CommentForm ticketId={ticketId} projectId={projectId} currentUserId={currentUserId} />
         </>
       )}
     </div>

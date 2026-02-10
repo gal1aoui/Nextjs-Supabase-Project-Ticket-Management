@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, MessageSquare, Pencil, Send } from "lucide-react";
+import { Eye, Pencil, Send } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import { toast } from "sonner";
@@ -31,39 +31,38 @@ export function CommentForm({ ticketId, projectId, currentUserId }: CommentFormP
   const { data: members = [] } = useProjectMembers(projectId);
 
   const filteredMembers = useMemo(() => {
-    if (!mentionQuery) return members.filter((m) => m.status === "active" && m.user_id !== currentUserId);
-    const q = mentionQuery.toLowerCase();
-    return members.filter(
-      (m) => m.status === "active" && m.user_id !== currentUserId
-    );
+    if (!mentionQuery) {
+      return members.filter((m) => m.status === "active" && m.user_id !== currentUserId);
+    }
+    return members.filter((m) => m.status === "active" && m.user_id !== currentUserId);
   }, [members, mentionQuery, currentUserId]);
 
-  const handleContentChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const value = e.target.value;
-      const cursorPos = e.target.selectionStart;
-      setContent(value);
+  const handleContentChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    const cursorPos = e.target.selectionStart;
+    setContent(value);
 
-      // Detect @ trigger
-      const textBeforeCursor = value.slice(0, cursorPos);
-      const lastAtIndex = textBeforeCursor.lastIndexOf("@");
+    // Detect @ trigger
+    const textBeforeCursor = value.slice(0, cursorPos);
+    const lastAtIndex = textBeforeCursor.lastIndexOf("@");
 
-      if (lastAtIndex >= 0) {
-        const textAfterAt = textBeforeCursor.slice(lastAtIndex + 1);
-        // Show mentions if @ is at start or preceded by whitespace, and no spaces in query
-        const charBeforeAt = lastAtIndex > 0 ? value[lastAtIndex - 1] : " ";
-        if ((charBeforeAt === " " || charBeforeAt === "\n" || lastAtIndex === 0) && !textAfterAt.includes(" ")) {
-          setShowMentions(true);
-          setMentionQuery(textAfterAt);
-          setMentionStart(lastAtIndex);
-          return;
-        }
+    if (lastAtIndex >= 0) {
+      const textAfterAt = textBeforeCursor.slice(lastAtIndex + 1);
+      // Show mentions if @ is at start or preceded by whitespace, and no spaces in query
+      const charBeforeAt = lastAtIndex > 0 ? value[lastAtIndex - 1] : " ";
+      if (
+        (charBeforeAt === " " || charBeforeAt === "\n" || lastAtIndex === 0) &&
+        !textAfterAt.includes(" ")
+      ) {
+        setShowMentions(true);
+        setMentionQuery(textAfterAt);
+        setMentionStart(lastAtIndex);
+        return;
       }
-      setShowMentions(false);
-      setMentionQuery("");
-    },
-    []
-  );
+    }
+    setShowMentions(false);
+    setMentionQuery("");
+  }, []);
 
   const insertMention = useCallback(
     (userId: string, displayName: string) => {
@@ -141,7 +140,7 @@ export function CommentForm({ ticketId, projectId, currentUserId }: CommentFormP
           </div>
 
           {isPreview ? (
-            <div className="min-h-[80px] rounded-md border p-3 prose prose-sm dark:prose-invert max-w-none text-sm [&_p]:my-1">
+            <div className="min-h-20 rounded-md border p-3 prose prose-sm dark:prose-invert max-w-none text-sm [&_p]:my-1">
               <Markdown>{content || "*Nothing to preview*"}</Markdown>
             </div>
           ) : (
@@ -152,7 +151,7 @@ export function CommentForm({ ticketId, projectId, currentUserId }: CommentFormP
                 onChange={handleContentChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Add a comment... (Markdown supported, @ to mention)"
-                className="min-h-[80px] text-sm resize-none"
+                className="min-h-20 text-sm resize-none"
               />
 
               {/* @mention dropdown */}
@@ -168,14 +167,8 @@ export function CommentForm({ ticketId, projectId, currentUserId }: CommentFormP
           )}
 
           <div className="flex justify-between items-center mt-2">
-            <span className="text-xs text-muted-foreground">
-              Ctrl+Enter to submit
-            </span>
-            <Button
-              type="submit"
-              size="sm"
-              disabled={createComment.isPending || !content.trim()}
-            >
+            <span className="text-xs text-muted-foreground">Ctrl+Enter to submit</span>
+            <Button type="submit" size="sm" disabled={createComment.isPending || !content.trim()}>
               {createComment.isPending ? (
                 "Posting..."
               ) : (
@@ -196,7 +189,6 @@ function MentionDropdown({
   members,
   query,
   onSelect,
-  onClose,
 }: {
   members: { user_id: string; status: string }[];
   query: string;
@@ -206,9 +198,7 @@ function MentionDropdown({
   return (
     <div className="absolute left-0 bottom-full mb-1 w-64 max-h-48 overflow-y-auto border rounded-md bg-popover shadow-md z-50">
       {members.length === 0 ? (
-        <div className="p-3 text-sm text-muted-foreground text-center">
-          No members found
-        </div>
+        <div className="p-3 text-sm text-muted-foreground text-center">No members found</div>
       ) : (
         members.map((member) => (
           <MentionItem

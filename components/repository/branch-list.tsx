@@ -25,9 +25,7 @@ export function BranchList({ projectId, repoUrl, provider }: BranchListProps) {
   }
 
   if (branches.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground text-center py-8">No branches found</p>
-    );
+    return <p className="text-sm text-muted-foreground text-center py-8">No branches found</p>;
   }
 
   // Sort: default first, then alphabetical

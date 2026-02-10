@@ -1,6 +1,10 @@
 import { handleSupabaseError } from "@/lib/errors";
 import { supabaseClient } from "@/lib/supabase/client";
-import type { TicketPriority, TicketPriorityFormSchema, TicketPriorityUpdateSchema } from "@/types/ticket-priority";
+import type {
+  TicketPriority,
+  TicketPriorityFormSchema,
+  TicketPriorityUpdateSchema,
+} from "@/types/ticket-priority";
 
 export const ticketPriorityService = {
   async getByProject(projectId: string): Promise<TicketPriority[]> {

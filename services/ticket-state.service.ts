@@ -1,6 +1,10 @@
 import { handleSupabaseError } from "@/lib/errors";
 import { supabaseClient } from "@/lib/supabase/client";
-import type { TicketState, TicketStateFormSchema, TicketStateUpdateSchema } from "@/types/ticket-state";
+import type {
+  TicketState,
+  TicketStateFormSchema,
+  TicketStateUpdateSchema,
+} from "@/types/ticket-state";
 
 export const ticketStateService = {
   async getByProject(projectId: string): Promise<TicketState[]> {

@@ -33,9 +33,7 @@ export function MemberPicker({
 
   // Data sources
   const { data: members = [] } = useProjectMembers(projectId ?? "");
-  const { data: globalResults = [] } = useSearchProfiles(
-    projectId ? "" : debouncedSearch,
-  );
+  const { data: globalResults = [] } = useSearchProfiles(projectId ? "" : debouncedSearch);
 
   // Compute candidate user IDs
   const candidateIds = useMemo(() => {
@@ -64,9 +62,7 @@ export function MemberPicker({
 
   // Show results: for project mode show when input focused or has text,
   // for global mode show when search has results
-  const showResults = projectId
-    ? candidateIds.length > 0
-    : debouncedSearch.length >= 2;
+  const showResults = projectId ? candidateIds.length > 0 : debouncedSearch.length >= 2;
 
   return (
     <div className="grid gap-2">
@@ -80,11 +76,7 @@ export function MemberPicker({
       {value.length > 0 && (
         <div className="flex flex-wrap gap-1.5 p-2 border rounded-md bg-muted/30">
           {value.map((userId) => (
-            <SelectedChip
-              key={userId}
-              userId={userId}
-              onRemove={() => removeUser(userId)}
-            />
+            <SelectedChip key={userId} userId={userId} onRemove={() => removeUser(userId)} />
           ))}
         </div>
       )}
@@ -104,9 +96,7 @@ export function MemberPicker({
       {showResults && (
         <div className="max-h-48 overflow-y-auto border rounded-md">
           {candidateIds.length === 0 ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              No users found
-            </div>
+            <div className="p-4 text-center text-sm text-muted-foreground">No users found</div>
           ) : (
             candidateIds.map((userId) => (
               <SearchResultItem
@@ -123,10 +113,7 @@ export function MemberPicker({
   );
 }
 
-function SelectedChip({
-  userId,
-  onRemove,
-}: { userId: string; onRemove: () => void }) {
+function SelectedChip({ userId, onRemove }: { userId: string; onRemove: () => void }) {
   const { data: profile } = useProfile(userId);
 
   return (
@@ -156,7 +143,11 @@ function SearchResultItem({
   userId,
   searchQuery,
   onClick,
-}: { userId: string; searchQuery: string; onClick: () => void }) {
+}: {
+  userId: string;
+  searchQuery: string;
+  onClick: () => void;
+}) {
   const { data: profile } = useProfile(userId);
 
   // Client-side filtering for project mode
@@ -180,13 +171,9 @@ function SearchResultItem({
         </AvatarFallback>
       </Avatar>
       <div className="text-left">
-        <div className="font-medium text-sm">
-          {profile?.full_name || "Loading..."}
-        </div>
+        <div className="font-medium text-sm">{profile?.full_name || "Loading..."}</div>
         {profile?.username && (
-          <div className="text-xs text-muted-foreground">
-            @{profile.username}
-          </div>
+          <div className="text-xs text-muted-foreground">@{profile.username}</div>
         )}
       </div>
     </button>

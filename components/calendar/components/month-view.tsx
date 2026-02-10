@@ -108,9 +108,7 @@ export default function MonthView({
         const isDayToday = isToday(day);
         const isExpanded = expandedDays.has(dateKey);
         const hasOverflow = dayEvents.length > MAX_VISIBLE;
-        const visibleEvents = isExpanded
-          ? dayEvents
-          : dayEvents.slice(0, MAX_VISIBLE);
+        const visibleEvents = isExpanded ? dayEvents : dayEvents.slice(0, MAX_VISIBLE);
 
         return (
           <Card
@@ -131,10 +129,7 @@ export default function MonthView({
                 {format(day, "d")}
               </span>
               {dayEvents.length > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="text-[10px] h-5 px-1.5 font-semibold"
-                >
+                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 font-semibold">
                   {dayEvents.length}
                 </Badge>
               )}
@@ -142,11 +137,7 @@ export default function MonthView({
 
             <div className="space-y-1">
               {visibleEvents.map((event) => (
-                <EventPill
-                  key={event.id}
-                  event={event}
-                  onClick={onEventClick}
-                />
+                <EventPill key={event.id} event={event} onClick={onEventClick} />
               ))}
 
               {hasOverflow && (
@@ -162,8 +153,7 @@ export default function MonthView({
                     </>
                   ) : (
                     <>
-                      <ChevronDown className="h-3 w-3" />
-                      +{dayEvents.length - MAX_VISIBLE} more
+                      <ChevronDown className="h-3 w-3" />+{dayEvents.length - MAX_VISIBLE} more
                     </>
                   )}
                 </button>

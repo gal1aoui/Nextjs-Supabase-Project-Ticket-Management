@@ -3,9 +3,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import type { Ticket } from "@/types/ticket";
 import type { TicketPriority } from "@/types/ticket-priority";
 import type { TicketState } from "@/types/ticket-state";
-import type { Ticket } from "@/types/ticket";
 import { TicketCard } from "./ticket-card";
 
 interface ColumnProps {
@@ -15,12 +15,7 @@ interface ColumnProps {
   onTicketClick?: (ticket: Ticket) => void;
 }
 
-export function Column({
-  state,
-  tickets,
-  priorities,
-  onTicketClick,
-}: ColumnProps) {
+export function Column({ state, tickets, priorities, onTicketClick }: ColumnProps) {
   return (
     <Card className="relative flex flex-col">
       <CardHeader className="pb-3">

@@ -33,11 +33,8 @@ export async function GET(
     );
 
     return NextResponse.json(branches);
-  } catch (err) {
-    return NextResponse.json(
-      { error: "Failed to fetch branches" },
-      { status: 500 }
-    );
+  } catch (_err) {
+    return NextResponse.json({ error: "Failed to fetch branches" }, { status: 500 });
   }
 }
 

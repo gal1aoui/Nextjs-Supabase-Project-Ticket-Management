@@ -24,5 +24,5 @@ export function PermissionGate({
     ? permission.some((p) => hasPermission(p))
     : hasPermission(permission);
 
-  return allowed ? <>{children}</> : <>{fallback}</>;
+  return allowed ? <div>{children}</div> : <div>{fallback}</div>;
 }

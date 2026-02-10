@@ -156,9 +156,7 @@ export function EventDetailContent({ event, onEdit, onClose }: EventDetailConten
             <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wider">
               Description
             </h3>
-            <p className="text-sm whitespace-pre-wrap leading-relaxed">
-              {event.description}
-            </p>
+            <p className="text-sm whitespace-pre-wrap leading-relaxed">{event.description}</p>
           </div>
         )}
 
@@ -274,8 +272,7 @@ export function EventDetailContent({ event, onEdit, onClose }: EventDetailConten
         {/* Creator Info */}
         {event.creator && (
           <p className="text-xs text-muted-foreground pt-2">
-            Created by {event.creator.full_name} on{" "}
-            {format(new Date(event.created_at), "PPP")}
+            Created by {event.creator.full_name} on {format(new Date(event.created_at), "PPP")}
           </p>
         )}
       </div>

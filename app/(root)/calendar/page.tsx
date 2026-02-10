@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { Calendar, CalendarRange, Clock, Plus, Video } from "lucide-react";
 import { useMemo, useState } from "react";
 import { CalendarView } from "@/components/calendar/calendar-view";
+import { EventDetailContent } from "@/components/events/event-detail-content";
 import EventForm from "@/components/events/forms/event-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,6 @@ import { useModal } from "@/contexts/modal/modal-context";
 import { useUser } from "@/hooks/use-user";
 import { getCalendarDays, getDateRange, groupEventsByDate, isMultiDayEvent } from "@/lib/utils";
 import { useUserEventsByDateRange } from "@/stores/event.store";
-import { EventDetailContent } from "@/components/events/event-detail-content";
 import type { EventWithRelations } from "@/types/event";
 import { EVENT_TYPE_LABELS } from "@/types/event";
 
@@ -69,9 +69,7 @@ function CalendarPageContent({ userId }: { userId: string }) {
 
   const upcomingCount = useMemo(() => {
     const now = new Date();
-    return events.filter(
-      (m) => new Date(`${m.start_date}T${m.start_time}`) > now,
-    ).length;
+    return events.filter((m) => new Date(`${m.start_date}T${m.start_time}`) > now).length;
   }, [events]);
 
   const projectSet = useMemo(() => {
@@ -87,12 +85,7 @@ function CalendarPageContent({ userId }: { userId: string }) {
       title: "Create Personal Event",
       description: "Add a personal event to your calendar",
       className: "sm:max-w-[50vw]",
-      render: ({ close }) => (
-        <EventForm
-          defaultEventDate={date}
-          closeModal={close}
-        />
-      ),
+      render: ({ close }) => <EventForm defaultEventDate={date} closeModal={close} />,
     });
   };
 
@@ -107,9 +100,7 @@ function CalendarPageContent({ userId }: { userId: string }) {
             </div>
             <div>
               <h1 className="text-3xl font-bold tracking-tight">My Calendar</h1>
-              <p className="text-muted-foreground text-sm">
-                All your events across every project
-              </p>
+              <p className="text-muted-foreground text-sm">All your events across every project</p>
             </div>
           </div>
           <Button onClick={() => handleCreatePersonalEvent()}>
@@ -120,7 +111,10 @@ function CalendarPageContent({ userId }: { userId: string }) {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: "100ms", animationFillMode: "both" }}>
+      <div
+        className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
+        style={{ animationDelay: "100ms", animationFillMode: "both" }}
+      >
         <Card className="p-4 border-l-4 border-l-primary hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
@@ -171,24 +165,31 @@ function CalendarPageContent({ userId }: { userId: string }) {
 
       {/* Today's Quick View */}
       {todayEvents.length > 0 && (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
+        <div
+          className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+          style={{ animationDelay: "200ms", animationFillMode: "both" }}
+        >
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
             Today&apos;s Schedule
           </h2>
           <div className="flex gap-3 overflow-x-auto pb-2">
             {todayEvents.map((event) => (
-              <TodayEventCard key={event.id} event={event} onClick={() => handleEventClick(event)} />
+              <TodayEventCard
+                key={event.id}
+                event={event}
+                onClick={() => handleEventClick(event)}
+              />
             ))}
           </div>
         </div>
       )}
 
       {/* Full Calendar */}
-      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
-        <CalendarView
-          userId={userId}
-          onCreateClick={(date) => handleCreatePersonalEvent(date)}
-        />
+      <div
+        className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+        style={{ animationDelay: "300ms", animationFillMode: "both" }}
+      >
+        <CalendarView userId={userId} onCreateClick={(date) => handleCreatePersonalEvent(date)} />
       </div>
     </div>
   );

@@ -92,9 +92,7 @@ export function CommentItem({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-sm">
-              {comment.author?.full_name || "Unknown"}
-            </span>
+            <span className="font-medium text-sm">{comment.author?.full_name || "Unknown"}</span>
             <span className="text-xs text-muted-foreground">
               {timeAgo}
               {wasEdited && " (edited)"}
@@ -113,7 +111,12 @@ export function CommentItem({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {canEdit && (
-                    <DropdownMenuItem onClick={() => { setEditContent(comment.content); setIsEditing(true); }}>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setEditContent(comment.content);
+                        setIsEditing(true);
+                      }}
+                    >
                       <Edit className="h-3.5 w-3.5 mr-2" />
                       Edit
                     </DropdownMenuItem>
@@ -147,11 +150,7 @@ export function CommentItem({
                 >
                   {updateComment.isPending ? "Saving..." : "Save"}
                 </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setIsEditing(false)}
-                >
+                <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>
                   Cancel
                 </Button>
               </div>

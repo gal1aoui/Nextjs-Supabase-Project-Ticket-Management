@@ -1,14 +1,9 @@
 import { format } from "date-fns";
-import {
-  ApiError,
-  handleSupabaseError,
-  handleSupabaseVoid,
-  requireAuth,
-} from "@/lib/errors";
+import { ApiError, handleSupabaseError, handleSupabaseVoid, requireAuth } from "@/lib/errors";
 import { createClient, supabaseClient } from "@/lib/supabase/client";
 import type {
-  EventAttendeeUpdate,
   Event,
+  EventAttendeeUpdate,
   EventCreate,
   EventUpdate,
   EventWithRelations,
@@ -35,14 +30,14 @@ export const eventService = {
         .from("events")
         .select(EVENT_SELECT)
         .eq("project_id", projectId)
-        .order("start_time", { ascending: true }),
+        .order("start_time", { ascending: true })
     ) as Promise<EventWithRelations[]>;
   },
 
   async getByDateRange(
     projectId: string,
     startDate: Date,
-    endDate: Date,
+    endDate: Date
   ): Promise<EventWithRelations[]> {
     return handleSupabaseError(() =>
       supabaseClient
@@ -51,24 +46,21 @@ export const eventService = {
         .eq("project_id", projectId)
         .gte("start_date", toDateStr(startDate))
         .lte("end_date", toDateStr(endDate))
-        .order("start_time", { ascending: true }),
+        .order("start_time", { ascending: true })
     ) as Promise<EventWithRelations[]>;
   },
 
   async getUserEventsByDateRange(
     userId: string,
     startDate: Date,
-    endDate: Date,
+    endDate: Date
   ): Promise<EventWithRelations[]> {
     const startStr = toDateStr(startDate);
     const endStr = toDateStr(endDate);
 
     // Get event IDs where user is an attendee
     const attendeeRows = (await handleSupabaseError(() =>
-      supabaseClient
-        .from("event_attendees")
-        .select("event_id")
-        .eq("user_id", userId),
+      supabaseClient.from("event_attendees").select("event_id").eq("user_id", userId)
     )) as { event_id: string }[];
 
     const attendeeEventIds = attendeeRows.map((r) => r.event_id);
@@ -81,7 +73,7 @@ export const eventService = {
         .eq("created_by", userId)
         .gte("start_date", startStr)
         .lte("end_date", endStr)
-        .order("start_time", { ascending: true }),
+        .order("start_time", { ascending: true })
     )) as EventWithRelations[];
 
     // Fetch events where user is an attendee in date range
@@ -94,28 +86,22 @@ export const eventService = {
           .in("id", attendeeEventIds)
           .gte("start_date", startStr)
           .lte("end_date", endStr)
-          .order("start_time", { ascending: true }),
+          .order("start_time", { ascending: true })
       )) as EventWithRelations[];
     }
 
     // Deduplicate and sort
-    const uniqueMap = new Map(
-      [...created, ...attending].map((m) => [m.id, m]),
-    );
+    const uniqueMap = new Map([...created, ...attending].map((m) => [m.id, m]));
     return Array.from(uniqueMap.values()).sort(
       (a, b) =>
         new Date(`${a.start_date}T${a.start_time}`).getTime() -
-        new Date(`${b.start_date}T${b.start_time}`).getTime(),
+        new Date(`${b.start_date}T${b.start_time}`).getTime()
     );
   },
 
   async getById(id: string): Promise<EventWithRelations> {
     return handleSupabaseError(() =>
-      supabaseClient
-        .from("events")
-        .select(EVENT_SELECT)
-        .eq("id", id)
-        .single(),
+      supabaseClient.from("events").select(EVENT_SELECT).eq("id", id).single()
     ) as Promise<EventWithRelations>;
   },
 
@@ -134,7 +120,7 @@ export const eventService = {
           created_by: userId,
         })
         .select()
-        .single(),
+        .single()
     );
 
     if (attendees && attendees.length > 0) {
@@ -174,14 +160,12 @@ export const eventService = {
         })
         .eq("id", id)
         .select()
-        .single(),
+        .single()
     );
   },
 
   async delete(id: string): Promise<void> {
-    await handleSupabaseVoid(() =>
-      supabaseClient.from("events").delete().eq("id", id),
-    );
+    await handleSupabaseVoid(() => supabaseClient.from("events").delete().eq("id", id));
   },
 
   async updateAttendeeStatus(update: EventAttendeeUpdate): Promise<void> {
@@ -192,7 +176,7 @@ export const eventService = {
         .from("event_attendees")
         .update({ status })
         .eq("event_id", event_id)
-        .eq("user_id", user_id),
+        .eq("user_id", user_id)
     );
   },
 
@@ -200,7 +184,7 @@ export const eventService = {
     await handleSupabaseVoid(() =>
       supabaseClient
         .from("event_attendees")
-        .insert({ event_id: eventId, user_id: userId, status: "invited" }),
+        .insert({ event_id: eventId, user_id: userId, status: "invited" })
     );
   },
 
@@ -208,11 +192,7 @@ export const eventService = {
     const supabase = createClient();
 
     await handleSupabaseVoid(() =>
-      supabase
-        .from("event_attendees")
-        .delete()
-        .eq("event_id", eventId)
-        .eq("user_id", userId),
+      supabase.from("event_attendees").delete().eq("event_id", eventId).eq("user_id", userId)
     );
   },
 };

@@ -6,7 +6,8 @@ export const ticketKeys = {
   byProject: (projectId: string) => ["tickets", projectId] as const,
   detail: (id: string) => ["tickets", "detail", id] as const,
   backlog: (projectId: string) => ["tickets", "backlog", projectId] as const,
-  bySprint: (projectId: string, sprintId: string) => ["tickets", "sprint", projectId, sprintId] as const,
+  bySprint: (projectId: string, sprintId: string) =>
+    ["tickets", "sprint", projectId, sprintId] as const,
 };
 
 export function useTickets(projectId: string) {

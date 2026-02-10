@@ -83,14 +83,10 @@ function EventCard({
             )}
           </div>
 
-          <h3 className="text-lg font-semibold mb-1 truncate">
-            {event.title}
-          </h3>
+          <h3 className="text-lg font-semibold mb-1 truncate">{event.title}</h3>
 
           {event.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-              {event.description}
-            </p>
+            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{event.description}</p>
           )}
 
           <div className="flex items-center gap-4">
@@ -140,9 +136,7 @@ export default function DayView({
 }: Readonly<DayViewProps>) {
   const [isExpanded, setIsExpanded] = useState(false);
   const hasOverflow = events.length > MAX_VISIBLE;
-  const visibleEvents = isExpanded
-    ? events
-    : events.slice(0, MAX_VISIBLE);
+  const visibleEvents = isExpanded ? events : events.slice(0, MAX_VISIBLE);
 
   return (
     <Card className="p-6">
@@ -159,20 +153,13 @@ export default function DayView({
                 : "No events on this day."}
             </p>
             {onCreateClick && (
-              <Button onClick={() => onCreateClick(currentDate)}>
-                Schedule Event
-              </Button>
+              <Button onClick={() => onCreateClick(currentDate)}>Schedule Event</Button>
             )}
           </div>
         ) : (
           <>
             {visibleEvents.map((event, index) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                onClick={onEventClick}
-                index={index}
-              />
+              <EventCard key={event.id} event={event} onClick={onEventClick} index={index} />
             ))}
 
             {hasOverflow && (

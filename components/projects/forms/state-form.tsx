@@ -11,7 +11,11 @@ import {
   useDeleteTicketState,
   useUpdateTicketState,
 } from "@/stores/ticket-state.store";
-import { type TicketState, type TicketStateFormSchema, ticketStateFormSchema } from "@/types/ticket-state";
+import {
+  type TicketState,
+  type TicketStateFormSchema,
+  ticketStateFormSchema,
+} from "@/types/ticket-state";
 
 interface StateDialogProps {
   projectId: string;

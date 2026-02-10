@@ -92,10 +92,7 @@ export function SingleMemberPicker({
   );
 }
 
-function SelectedUser({
-  userId,
-  onClear,
-}: { userId: string; onClear: () => void }) {
+function SelectedUser({ userId, onClear }: { userId: string; onClear: () => void }) {
   const { data: profile } = useProfile(userId);
 
   return (
@@ -107,9 +104,7 @@ function SelectedUser({
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium truncate">
-          {profile?.full_name || "Loading..."}
-        </div>
+        <div className="text-sm font-medium truncate">{profile?.full_name || "Loading..."}</div>
         {profile?.username && (
           <div className="text-xs text-muted-foreground">@{profile.username}</div>
         )}
@@ -131,7 +126,11 @@ function SearchResult({
   userId,
   debouncedSearch,
   onClick,
-}: { userId: string; debouncedSearch: string; onClick: () => void }) {
+}: {
+  userId: string;
+  debouncedSearch: string;
+  onClick: () => void;
+}) {
   const { data: profile } = useProfile(userId);
 
   if (debouncedSearch && profile) {

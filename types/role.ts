@@ -6,7 +6,11 @@ import { z } from "zod";
 
 export const AVAILABLE_PERMISSIONS = [
   { key: "manage_project", label: "Manage Project", description: "Full project settings access" },
-  { key: "manage_members", label: "Manage Members", description: "Invite/remove members, assign roles" },
+  {
+    key: "manage_members",
+    label: "Manage Members",
+    description: "Invite/remove members, assign roles",
+  },
   { key: "manage_roles", label: "Manage Roles", description: "Create/modify custom roles" },
   { key: "manage_tickets", label: "Manage Tickets", description: "Full ticket CRUD" },
   { key: "manage_states", label: "Manage States", description: "Create/modify ticket states" },
@@ -14,7 +18,11 @@ export const AVAILABLE_PERMISSIONS = [
   { key: "manage_events", label: "Manage Events", description: "Full event CRUD" },
   { key: "manage_sprints", label: "Manage Sprints", description: "Create/modify sprints" },
   { key: "create_tickets", label: "Create Tickets", description: "Create new tickets" },
-  { key: "update_own_tickets", label: "Update Own Tickets", description: "Update tickets created by self" },
+  {
+    key: "update_own_tickets",
+    label: "Update Own Tickets",
+    description: "Update tickets created by self",
+  },
   { key: "update_tickets", label: "Update Tickets", description: "Update any ticket" },
   { key: "comment", label: "Comment", description: "Add comments to tickets" },
   { key: "view_tickets", label: "View Tickets", description: "View-only ticket access" },

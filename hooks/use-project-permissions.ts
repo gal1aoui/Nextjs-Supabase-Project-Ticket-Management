@@ -10,9 +10,7 @@ export function useProjectPermissions(projectId: string) {
   const { data: roles, isLoading: rolesLoading } = useRoles();
 
   const { membership, role, permissions } = useMemo(() => {
-    const membership = members?.find(
-      (m) => m.user_id === user?.id && m.status === "active"
-    );
+    const membership = members?.find((m) => m.user_id === user?.id && m.status === "active");
     const role = roles?.find((r) => r.id === membership?.role_id);
     const permissions = (role?.permissions ?? []) as string[];
 

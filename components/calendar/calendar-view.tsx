@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  addDays,
-  addMonths,
-  addWeeks,
-  subDays,
-  subMonths,
-  subWeeks,
-} from "date-fns";
+import { addDays, addMonths, addWeeks, subDays, subMonths, subWeeks } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { EventDetailContent } from "@/components/events/event-detail-content";
@@ -19,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useDrawer } from "@/contexts/drawer/drawer-context";
 import {
   type CalendarView as CalendarsView,
   formatDateForView,
@@ -26,7 +20,6 @@ import {
   getDateRange,
   groupEventsByDate,
 } from "@/lib/utils";
-import { useDrawer } from "@/contexts/drawer/drawer-context";
 import { useEventsByDateRange, useUserEventsByDateRange } from "@/stores/event.store";
 import type { EventWithRelations } from "@/types/event";
 import DayView from "./components/day-view";
@@ -121,9 +114,7 @@ export function CalendarView({ projectId, userId, onCreateClick }: CalendarViewP
       {/* Calendar Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold">
-            {formatDateForView(currentDate, view)}
-          </h2>
+          <h2 className="text-2xl font-bold">{formatDateForView(currentDate, view)}</h2>
           <Button variant="outline" size="sm" onClick={goToToday}>
             Today
           </Button>
@@ -137,10 +128,7 @@ export function CalendarView({ projectId, userId, onCreateClick }: CalendarViewP
             <ChevronRight className="h-4 w-4" />
           </Button>
 
-          <Select
-            value={view}
-            onValueChange={(v) => setView(v as CalendarsView)}
-          >
+          <Select value={view} onValueChange={(v) => setView(v as CalendarsView)}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
@@ -180,7 +168,6 @@ export function CalendarView({ projectId, userId, onCreateClick }: CalendarViewP
           onEventClick={handleEventClick}
         />
       )}
-
     </div>
   );
 }

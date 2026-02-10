@@ -42,7 +42,10 @@ export function CommitHistory({ projectId, repoUrl, provider }: CommitHistoryPro
       <div className="flex items-center gap-3">
         <Select
           value={selectedBranch || defaultBranch?.name || ""}
-          onValueChange={(v) => { setSelectedBranch(v); setPage(1); }}
+          onValueChange={(v) => {
+            setSelectedBranch(v);
+            setPage(1);
+          }}
         >
           <SelectTrigger className="w-48">
             <SelectValue placeholder={branchesLoading ? "Loading..." : "Select branch"} />
@@ -109,11 +112,7 @@ export function CommitHistory({ projectId, repoUrl, provider }: CommitHistoryPro
           >
             Previous
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setPage((p) => p + 1)}
-          >
+          <Button variant="outline" size="sm" onClick={() => setPage((p) => p + 1)}>
             Load More
           </Button>
         </div>
@@ -126,7 +125,6 @@ function CommitNode({
   commit,
   repoUrl,
   provider,
-  isLast,
 }: {
   commit: GitCommit;
   repoUrl: string;
@@ -139,9 +137,7 @@ function CommitNode({
   const [expanded, setExpanded] = useState(false);
 
   const commitUrl =
-    provider === "github"
-      ? `${repoUrl}/commit/${commit.sha}`
-      : `${repoUrl}/-/commit/${commit.sha}`;
+    provider === "github" ? `${repoUrl}/commit/${commit.sha}` : `${repoUrl}/-/commit/${commit.sha}`;
 
   const timeAgo = getRelativeTime(commit.author.date);
 
@@ -187,12 +183,7 @@ function CommitNode({
             )}
           </div>
 
-          <a
-            href={commitUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="shrink-0"
-          >
+          <a href={commitUrl} target="_blank" rel="noopener noreferrer" className="shrink-0">
             <Badge variant="outline" className="font-mono text-[10px] hover:bg-accent">
               {commit.sha.slice(0, 7)}
             </Badge>
@@ -208,12 +199,8 @@ function CommitNode({
               </AvatarFallback>
             </Avatar>
           )}
-          <span className="text-xs text-muted-foreground">
-            {commit.author.name}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {timeAgo}
-          </span>
+          <span className="text-xs text-muted-foreground">{commit.author.name}</span>
+          <span className="text-xs text-muted-foreground">{timeAgo}</span>
           {isMerge && (
             <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
               merge

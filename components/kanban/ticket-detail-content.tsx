@@ -5,7 +5,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { PermissionGate } from "@/components/permission-gate";
 import { CommentList } from "@/components/tickets/comments/comment-list";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -95,9 +95,7 @@ export function TicketDetailContent({
             <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wider">
               Description
             </h3>
-            <p className="text-sm whitespace-pre-wrap leading-relaxed">
-              {ticket.description}
-            </p>
+            <p className="text-sm whitespace-pre-wrap leading-relaxed">{ticket.description}</p>
           </div>
         )}
 
@@ -130,7 +128,10 @@ export function TicketDetailContent({
         </div>
 
         {/* Actions */}
-        <PermissionGate projectId={ticket.project_id} permission={["manage_tickets", "update_own_tickets"]}>
+        <PermissionGate
+          projectId={ticket.project_id}
+          permission={["manage_tickets", "update_own_tickets"]}
+        >
           <Separator />
           <div className="flex gap-2">
             <Button

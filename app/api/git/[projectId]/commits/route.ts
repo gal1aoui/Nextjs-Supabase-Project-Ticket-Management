@@ -27,22 +27,25 @@ export async function GET(
 
   const url = new URL(request.url);
   const branch = url.searchParams.get("branch") || undefined;
-  const page = Number.parseInt(url.searchParams.get("page") || "1");
-  const perPage = Number.parseInt(url.searchParams.get("per_page") || "30");
+  const page = Number.parseInt(url.searchParams.get("page") || "1", 10);
+  const perPage = Number.parseInt(url.searchParams.get("per_page") || "30", 10);
 
   try {
-    const commits = await fetchCommits(repo.provider, repo.repo_owner, repo.repo_name, repo.access_token, {
-      branch,
-      page,
-      perPage,
-    });
+    const commits = await fetchCommits(
+      repo.provider,
+      repo.repo_owner,
+      repo.repo_name,
+      repo.access_token,
+      {
+        branch,
+        page,
+        perPage,
+      }
+    );
 
     return NextResponse.json(commits);
-  } catch (err) {
-    return NextResponse.json(
-      { error: "Failed to fetch commits" },
-      { status: 500 }
-    );
+  } catch (_err) {
+    return NextResponse.json({ error: "Failed to fetch commits" }, { status: 500 });
   }
 }
 
@@ -60,15 +63,12 @@ async function fetchCommits(
     });
     if (opts.branch) params.set("sha", opts.branch);
 
-    const res = await fetch(
-      `https://api.github.com/repos/${owner}/${name}/commits?${params}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/vnd.github.v3+json",
-        },
-      }
-    );
+    const res = await fetch(`https://api.github.com/repos/${owner}/${name}/commits?${params}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+    });
 
     if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
 

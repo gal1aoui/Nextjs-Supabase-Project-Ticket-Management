@@ -94,9 +94,7 @@ export function groupEventsByDate<T extends { start_date: string; end_date: stri
 
   days.forEach((day) => {
     const key = format(day, "yyyy-MM-dd");
-    grouped[key] = events.filter(
-      (event) => key >= event.start_date && key <= event.end_date,
-    );
+    grouped[key] = events.filter((event) => key >= event.start_date && key <= event.end_date);
   });
 
   return grouped;

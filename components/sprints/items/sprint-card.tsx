@@ -29,7 +29,10 @@ export function SprintCard({ sprint, tickets, completedStateIds, onClick }: Spri
   const endDate = new Date(sprint.end_date);
   const now = new Date();
   const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  const daysRemaining = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+  const daysRemaining = Math.max(
+    0,
+    Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  );
 
   return (
     <Card
@@ -39,9 +42,7 @@ export function SprintCard({ sprint, tickets, completedStateIds, onClick }: Spri
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base">{sprint.name}</CardTitle>
-          <Badge variant={statusVariant[sprint.status]}>
-            {sprint.status}
-          </Badge>
+          <Badge variant={statusVariant[sprint.status]}>{sprint.status}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -56,7 +57,11 @@ export function SprintCard({ sprint, tickets, completedStateIds, onClick }: Spri
           <Calendar className="h-3.5 w-3.5" />
           <span>
             {startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })} —{" "}
-            {endDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+            {endDate.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })}
           </span>
         </div>
 

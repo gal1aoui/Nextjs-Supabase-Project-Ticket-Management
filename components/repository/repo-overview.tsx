@@ -1,6 +1,12 @@
 "use client";
 
-import { ExternalLink, Github, GitBranch as GitBranchIcon, GitCommitHorizontal, Unlink } from "lucide-react";
+import {
+  ExternalLink,
+  GitBranch as GitBranchIcon,
+  GitCommitHorizontal,
+  Github,
+  Unlink,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { PermissionGate } from "@/components/permission-gate";
@@ -124,19 +130,11 @@ export function RepoOverview({ projectId }: RepoOverviewProps) {
         </TabsList>
 
         <TabsContent value="commits">
-          <CommitHistory
-            projectId={projectId}
-            repoUrl={repo.repo_url}
-            provider={repo.provider}
-          />
+          <CommitHistory projectId={projectId} repoUrl={repo.repo_url} provider={repo.provider} />
         </TabsContent>
 
         <TabsContent value="branches">
-          <BranchList
-            projectId={projectId}
-            repoUrl={repo.repo_url}
-            provider={repo.provider}
-          />
+          <BranchList projectId={projectId} repoUrl={repo.repo_url} provider={repo.provider} />
         </TabsContent>
       </Tabs>
 

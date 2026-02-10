@@ -14,9 +14,7 @@ export const roleService = {
   async getById(id: string): Promise<Role> {
     const supabase = createClient();
 
-    return handleSupabaseError(() =>
-      supabase.from("roles").select("*").eq("id", id).single()
-    );
+    return handleSupabaseError(() => supabase.from("roles").select("*").eq("id", id).single());
   },
 
   async getByProject(projectId: string): Promise<Role[]> {
@@ -57,13 +55,7 @@ export const roleService = {
     const { id, ...updates } = role;
 
     return handleSupabaseError(() =>
-      supabase
-        .from("roles")
-        .update(updates)
-        .eq("id", id)
-        .eq("is_system", false)
-        .select()
-        .single()
+      supabase.from("roles").update(updates).eq("id", id).eq("is_system", false).select().single()
     );
   },
 
@@ -71,12 +63,7 @@ export const roleService = {
     const supabase = createClient();
 
     await handleSupabaseError(() =>
-      supabase
-        .from("roles")
-        .delete()
-        .eq("id", id)
-        .eq("is_system", false)
-        .select()
+      supabase.from("roles").delete().eq("id", id).eq("is_system", false).select()
     );
   },
 };

@@ -107,7 +107,7 @@ export async function DELETE(
   return NextResponse.json({ success: true });
 }
 
-function parseRepoUrl(url: string, provider: string): { owner: string; name: string } | null {
+function parseRepoUrl(url: string, _provider: string): { owner: string; name: string } | null {
   try {
     const urlObj = new URL(url);
     const parts = urlObj.pathname.split("/").filter(Boolean);

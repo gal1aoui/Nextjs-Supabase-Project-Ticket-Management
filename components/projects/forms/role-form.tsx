@@ -62,9 +62,7 @@ export default function RoleForm({ projectId, role, closeModal }: Readonly<RoleF
     if (!parsed.success) {
       const tree = z.treeifyError(parsed.error);
       setError(
-        tree.properties?.name?.errors[0] ??
-          tree.properties?.permissions?.errors[0] ??
-          undefined,
+        tree.properties?.name?.errors[0] ?? tree.properties?.permissions?.errors[0] ?? undefined
       );
       return;
     }
@@ -89,7 +87,7 @@ export default function RoleForm({ projectId, role, closeModal }: Readonly<RoleF
       toast.success(`Role ${role ? "updated" : "created"} successfully`);
     } catch (_) {
       toast.error(
-        `Failed to ${role ? "update" : "create"} role: ${role ? updateRole.error?.message : createRole.error?.message}`,
+        `Failed to ${role ? "update" : "create"} role: ${role ? updateRole.error?.message : createRole.error?.message}`
       );
     }
   };
@@ -164,9 +162,7 @@ export default function RoleForm({ projectId, role, closeModal }: Readonly<RoleF
             />
           </>
         )}
-        {!isSystem && (
-          <Button type="submit">{role ? "Update" : "Create"}</Button>
-        )}
+        {!isSystem && <Button type="submit">{role ? "Update" : "Create"}</Button>}
       </DialogFooter>
     </form>
   );

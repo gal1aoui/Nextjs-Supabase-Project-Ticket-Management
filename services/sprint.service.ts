@@ -56,8 +56,6 @@ export const sprintService = {
   },
 
   async delete(id: string): Promise<void> {
-    await handleSupabaseError(() =>
-      supabaseClient.from("sprints").delete().eq("id", id).select()
-    );
+    await handleSupabaseError(() => supabaseClient.from("sprints").delete().eq("id", id).select());
   },
 };
