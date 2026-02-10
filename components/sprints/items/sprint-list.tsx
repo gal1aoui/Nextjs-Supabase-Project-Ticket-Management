@@ -6,7 +6,7 @@ import { useTickets } from "@/stores/ticket.store";
 import { useTicketStates } from "@/stores/ticket-state.store";
 import type { Sprint } from "@/types/sprint";
 import type { Ticket } from "@/types/ticket";
-import { SprintCard } from "./items/sprint-card";
+import { SprintCard } from "./sprint-card";
 
 interface SprintListProps {
   sprints: Sprint[];
