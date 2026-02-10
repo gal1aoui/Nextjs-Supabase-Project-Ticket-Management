@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, Clock, Edit, Trash2, User } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { PermissionGate } from "@/components/permission-gate";
@@ -15,17 +15,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { dateFormatter, getUserInitials } from "@/lib/helpers";
 import { getContrastColor } from "@/lib/utils";
 import { useProfile } from "@/stores/profile.store";
 import { useDeleteTicket } from "@/stores/ticket.store";
 import type { Ticket } from "@/types/ticket";
 import type { TicketPriority } from "@/types/ticket-priority";
 import type { TicketState } from "@/types/ticket-state";
+import TicketDetailsCard from "./ticket-details-card";
 
 interface TicketDetailContentProps {
   ticket: Ticket;
@@ -44,6 +43,7 @@ export function TicketDetailContent({
 }: TicketDetailContentProps) {
   const deleteTicket = useDeleteTicket();
   const { data: assigneeProfile } = useProfile(ticket.assigned_to ?? "");
+  const { data: createdByProfile } = useProfile(ticket.created_by ?? "");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleDelete = async () => {
@@ -60,7 +60,6 @@ export function TicketDetailContent({
   return (
     <>
       <div className="space-y-5">
-        {/* Status & Priority Badges */}
         <div className="flex gap-2 flex-wrap">
           {state && (
             <Badge
@@ -86,10 +85,8 @@ export function TicketDetailContent({
           )}
         </div>
 
-        {/* Title */}
         <h2 className="text-xl font-semibold leading-tight">{ticket.title}</h2>
 
-        {/* Description */}
         {ticket.description && (
           <div>
             <h3 className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wider">
@@ -99,35 +96,12 @@ export function TicketDetailContent({
           </div>
         )}
 
-        {/* Details Card */}
-        <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
-          <div className="flex items-center gap-3">
-            <User className="h-4 w-4 text-muted-foreground shrink-0" />
-            {ticket.assigned_to && assigneeProfile ? (
-              <div className="flex items-center gap-2">
-                <Avatar className="h-5 w-5">
-                  <AvatarImage src={assigneeProfile.avatar_url || undefined} />
-                  <AvatarFallback className="text-[8px]">
-                    {getUserInitials(assigneeProfile.full_name ?? null)}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm">{assigneeProfile.full_name}</span>
-              </div>
-            ) : (
-              <span className="text-sm text-muted-foreground">Unassigned</span>
-            )}
-          </div>
-          <div className="flex items-center gap-3">
-            <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-            <span className="text-sm">Created {dateFormatter(ticket.created_at)}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
-            <span className="text-sm">Updated {dateFormatter(ticket.updated_at)}</span>
-          </div>
-        </div>
+        <TicketDetailsCard
+          ticket={ticket}
+          createdByProfile={createdByProfile}
+          assigneeProfile={assigneeProfile}
+        />
 
-        {/* Actions */}
         <PermissionGate
           projectId={ticket.project_id}
           permission={["manage_tickets", "update_own_tickets"]}
@@ -160,7 +134,6 @@ export function TicketDetailContent({
           </div>
         </PermissionGate>
 
-        {/* Comments */}
         <CommentList ticketId={ticket.id} projectId={ticket.project_id} />
       </div>
 

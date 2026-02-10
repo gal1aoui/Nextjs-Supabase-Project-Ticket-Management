@@ -19,7 +19,6 @@ export function SprintList({ sprints, projectId, isLoading, onSprintClick }: Spr
   const { data: allTickets = [] } = useTickets(projectId);
   const { data: states = [] } = useTicketStates(projectId);
 
-  // Identify "completed" state IDs (heuristic: last state by order, or name contains "done"/"completed")
   const completedStateIds = useMemo(() => {
     if (states.length === 0) return [];
     const sorted = [...states].sort((a, b) => a.order - b.order);
