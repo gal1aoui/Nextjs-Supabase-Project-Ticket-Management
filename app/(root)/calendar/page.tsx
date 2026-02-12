@@ -195,22 +195,33 @@ function CalendarPageContent({ userId }: { userId: string }) {
   );
 }
 
+const multiDayBg =
+  "repeating-linear-gradient(135deg, transparent, transparent 3px, rgba(236, 72, 153, 0.12) 3px, rgba(236, 72, 153, 0.12) 6px)";
+
+function getCardStyle(
+  multiDay: boolean,
+  projectColor: string | null | undefined
+): React.CSSProperties | undefined {
+  if (multiDay) return { background: multiDayBg };
+  if (projectColor) return { borderLeftColor: projectColor };
+  return undefined;
+}
+
 function TodayEventCard({ event, onClick }: { event: EventWithRelations; onClick: () => void }) {
   const multiDay = isMultiDayEvent(event);
+  const projectColor = event.project?.color;
+  const colorStyle = projectColor ? { color: projectColor } : undefined;
+
+  const borderClass = multiDay
+    ? "border-l-pink-500"
+    : projectColor
+      ? ""
+      : "border-l-primary";
 
   return (
     <Card
-      className={`min-w-60 p-3 border-l-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 shrink-0 cursor-pointer ${
-        multiDay ? "border-l-pink-500" : "border-l-primary"
-      }`}
-      style={
-        multiDay
-          ? {
-              background:
-                "repeating-linear-gradient(135deg, transparent, transparent 3px, rgba(236, 72, 153, 0.12) 3px, rgba(236, 72, 153, 0.12) 6px)",
-            }
-          : undefined
-      }
+      className={`min-w-60 p-3 border-l-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 shrink-0 cursor-pointer ${borderClass}`}
+      style={getCardStyle(multiDay, projectColor)}
       onClick={onClick}
     >
       <div className="flex items-center gap-1.5 mb-1.5">
@@ -223,8 +234,8 @@ function TodayEventCard({ event, onClick }: { event: EventWithRelations; onClick
           </>
         ) : (
           <>
-            <Clock className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-semibold text-primary">
+            <Clock className="h-3.5 w-3.5" style={colorStyle} />
+            <span className="text-xs font-semibold" style={colorStyle}>
               {event.start_time.slice(0, 5)} - {event.end_time.slice(0, 5)}
             </span>
           </>
@@ -233,7 +244,11 @@ function TodayEventCard({ event, onClick }: { event: EventWithRelations; onClick
       <p className="font-medium text-sm truncate">{event.title}</p>
       <div className="flex items-center gap-2 mt-1.5">
         {event.project ? (
-          <Badge variant="outline" className="text-[10px] h-5 px-1.5">
+          <Badge
+            variant="outline"
+            className="text-[10px] h-5 px-1.5"
+            style={projectColor ? { borderColor: projectColor, color: projectColor } : undefined}
+          >
             {event.project.name}
           </Badge>
         ) : (

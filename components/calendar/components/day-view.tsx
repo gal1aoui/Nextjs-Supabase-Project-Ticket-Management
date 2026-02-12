@@ -43,16 +43,18 @@ function EventCard({
   index: number;
 }) {
   const multiDay = isMultiDayEvent(event);
+  const projectColor = event.project?.color;
 
   return (
     <Card
       className={`p-4 cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 animate-in fade-in slide-in-from-left-3 border-l-4 ${
-        multiDay ? "border-l-pink-500" : "border-l-primary"
+        multiDay ? "border-l-pink-500" : projectColor ? "" : "border-l-primary"
       }`}
       style={{
         animationDelay: `${index * 50}ms`,
         animationFillMode: "both",
         ...(multiDay ? multiDayStyle : {}),
+        ...(!multiDay && projectColor ? { borderLeftColor: projectColor } : {}),
       }}
       onClick={() => onClick(event)}
     >
@@ -70,7 +72,10 @@ function EventCard({
                 </Badge>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 text-sm font-semibold text-primary">
+              <div
+                className="flex items-center gap-1.5 text-sm font-semibold"
+                style={projectColor ? { color: projectColor } : undefined}
+              >
                 <Clock className="h-4 w-4" />
                 {event.start_time.slice(0, 5)} - {event.end_time.slice(0, 5)}
               </div>

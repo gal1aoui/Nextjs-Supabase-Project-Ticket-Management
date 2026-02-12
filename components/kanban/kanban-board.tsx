@@ -1,16 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Plus } from "lucide-react";
+import { useMemo } from "react";
 import { PermissionGate } from "@/components/permission-gate";
+import { Button } from "@/components/ui/button";
 import { useDrawer } from "@/contexts/drawer/drawer-context";
+import { useModal } from "@/contexts/modal/modal-context";
 import { useTickets } from "@/stores/ticket.store";
 import { useTicketPriorities } from "@/stores/ticket-priority.store";
 import { useTicketStates } from "@/stores/ticket-state.store";
 import type { Ticket } from "@/types/ticket";
 import { ProjectKanbanSkeleton } from "../projects/project-detail/project-detail-skeleton";
 import { Column } from "./column";
-import { CreateTicketDialog } from "./create-ticket-dialog";
-import { EditTicketDialog } from "./edit-ticket-dialog";
+import { TicketForm } from "./forms/ticket-form";
 import { TicketDetailContent } from "./ticket-detail-content";
 
 interface KanbanBoardProps {
@@ -22,8 +24,8 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   const { data: tickets = [], isLoading: ticketsLoading } = useTickets(projectId);
   const { data: states = [], isLoading: statesLoading } = useTicketStates(projectId);
   const { data: priorities = [] } = useTicketPriorities(projectId);
-  const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
   const { openDrawer } = useDrawer();
+  const { openModal } = useModal();
 
   const ticketsByState = useMemo(() => {
     const grouped: Record<string, Ticket[]> = {};
@@ -52,7 +54,20 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
           onClose={close}
           onEdit={(t) => {
             close();
-            setEditingTicket(t);
+            openModal({
+              title: "Edit Ticket",
+              description: "Update ticket information",
+              render: ({ close }) => (
+                <TicketForm
+                  ticket={t}
+                  projectId={projectId}
+                  states={states}
+                  priorities={priorities}
+                  userId={userId}
+                  closeModal={close}
+                />
+              ),
+            });
           }}
         />
       ),
@@ -60,41 +75,44 @@ export function KanbanBoard({ projectId, userId }: KanbanBoardProps) {
   };
 
   return (
-    <>
-      <div className="flex-1 space-y-4 p-8 pt-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-bold tracking-tight">Kanban Board</h2>
-          <PermissionGate projectId={projectId} permission={["create_tickets", "manage_tickets"]}>
-            <CreateTicketDialog
-              projectId={projectId}
-              states={states}
-              priorities={priorities}
-              userId={userId}
-            />
-          </PermissionGate>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {states.map((state) => (
-            <Column
-              key={state.id}
-              state={state}
-              tickets={ticketsByState[state.id] || []}
-              priorities={priorities}
-              onTicketClick={handleTicketClick}
-            />
-          ))}
-        </div>
+    <div className="flex-1 space-y-4 p-8 pt-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold tracking-tight">Kanban Board</h2>
+        <PermissionGate projectId={projectId} permission={["create_tickets", "manage_tickets"]}>
+          <Button
+            onClick={() =>
+              openModal({
+                title: "Create New Ticket",
+                description: "Add a new ticket to your project board",
+                render: ({ close }) => (
+                  <TicketForm
+                    projectId={projectId}
+                    states={states}
+                    priorities={priorities}
+                    userId={userId}
+                    closeModal={close}
+                  />
+                ),
+              })
+            }
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Task
+          </Button>
+        </PermissionGate>
       </div>
 
-      <EditTicketDialog
-        ticket={editingTicket}
-        projectId={projectId}
-        states={states}
-        priorities={priorities}
-        open={!!editingTicket}
-        onOpenChange={(open) => !open && setEditingTicket(null)}
-      />
-    </>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {states.map((state) => (
+          <Column
+            key={state.id}
+            state={state}
+            tickets={ticketsByState[state.id] || []}
+            priorities={priorities}
+            onTicketClick={handleTicketClick}
+          />
+        ))}
+      </div>
+    </div>
   );
 }

@@ -41,7 +41,6 @@ export function Column({ state, tickets, priorities, onTicketClick }: ColumnProp
                   key={ticket.id}
                   ticket={ticket}
                   priority={priority}
-                  assigneeInitials="AC"
                   onclick={() => onTicketClick?.(ticket)}
                 />
               );

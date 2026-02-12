@@ -28,6 +28,7 @@ import { useDisconnectRepo, useRepository } from "@/stores/repository.store";
 import { BranchList } from "./branch-list";
 import { CommitHistory } from "./commit-history";
 import { RepoConnectForm } from "./repo-connect-form";
+import { RepoStats } from "./repo-stats";
 
 interface RepoOverviewProps {
   projectId: string;
@@ -115,6 +116,9 @@ export function RepoOverview({ projectId }: RepoOverviewProps) {
           </Button>
         </PermissionGate>
       </div>
+
+      {/* Repo stats */}
+      <RepoStats projectId={projectId} />
 
       {/* Commits & Branches tabs */}
       <Tabs defaultValue="commits" className="space-y-4">

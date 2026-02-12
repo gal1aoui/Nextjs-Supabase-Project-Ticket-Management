@@ -20,13 +20,13 @@ export const ticketCommentService = {
   async create(comment: TicketCommentCreate): Promise<TicketCommentWithAuthor> {
     const userId = await requireAuth(supabaseClient);
 
-    const created = await handleSupabaseError(() =>
+    const created = (await handleSupabaseError(() =>
       supabaseClient
         .from("ticket_comments")
         .insert({ ...comment, user_id: userId })
         .select("*, author:profiles!ticket_comments_user_id_fkey(*)")
         .single()
-    );
+    )) as unknown as TicketCommentWithAuthor;
 
     // Parse @mentions from content and create mention records
     const mentions = parseMentions(comment.content);
@@ -45,14 +45,14 @@ export const ticketCommentService = {
   async update(comment: TicketCommentUpdate): Promise<TicketCommentWithAuthor> {
     const { id, ...updates } = comment;
 
-    const updated = await handleSupabaseError(() =>
+    const updated = (await handleSupabaseError(() =>
       supabaseClient
         .from("ticket_comments")
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq("id", id)
         .select("*, author:profiles!ticket_comments_user_id_fkey(*)")
         .single()
-    );
+    )) as unknown as TicketCommentWithAuthor;
 
     // Re-parse mentions: delete old, insert new
     await supabaseClient.from("comment_mentions").delete().eq("comment_id", id);

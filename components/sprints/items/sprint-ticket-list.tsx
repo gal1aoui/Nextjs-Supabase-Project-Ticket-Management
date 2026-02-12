@@ -1,15 +1,17 @@
 "use client";
 
 import { Inbox } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useDrawer } from "@/contexts/drawer/drawer-context";
+import { useModal } from "@/contexts/modal/modal-context";
+import { useUser } from "@/hooks/use-user";
 import { useSprintTickets } from "@/stores/ticket.store";
 import { useTicketPriorities } from "@/stores/ticket-priority.store";
 import { useTicketStates } from "@/stores/ticket-state.store";
 import type { Ticket } from "@/types/ticket";
-import { EditTicketDialog } from "../../kanban/edit-ticket-dialog";
+import { TicketForm } from "../../kanban/forms/ticket-form";
 import { TicketDetailContent } from "../../kanban/ticket-detail-content";
 import SprintTicketItem from "./sprint-ticket-item";
 
@@ -23,8 +25,9 @@ export function SprintTicketList({ projectId, sprintId, canManage }: SprintTicke
   const { data: tickets = [], isLoading } = useSprintTickets(projectId, sprintId);
   const { data: states = [] } = useTicketStates(projectId);
   const { data: priorities = [] } = useTicketPriorities(projectId);
-  const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
+  const { data: user } = useUser();
   const { openDrawer } = useDrawer();
+  const { openModal } = useModal();
 
   const handleTicketClick = (ticket: Ticket) => {
     const state = states.find((s) => s.id === ticket.state_id);
@@ -39,7 +42,20 @@ export function SprintTicketList({ projectId, sprintId, canManage }: SprintTicke
           onClose={close}
           onEdit={(t) => {
             close();
-            setEditingTicket(t);
+            openModal({
+              title: "Edit Ticket",
+              description: "Update ticket information",
+              render: ({ close }) => (
+                <TicketForm
+                  ticket={t}
+                  projectId={projectId}
+                  states={states}
+                  priorities={priorities}
+                  userId={user?.id ?? ""}
+                  closeModal={close}
+                />
+              ),
+            });
           }}
         />
       ),
@@ -72,49 +88,39 @@ export function SprintTicketList({ projectId, sprintId, canManage }: SprintTicke
   }
 
   return (
-    <>
-      <ScrollArea className="max-h-[500px]">
-        <div className="space-y-4">
-          {states.map((state) => {
-            const stateTickets = ticketsByState[state.id];
-            if (!stateTickets) return null;
+    <ScrollArea className="max-h-[500px]">
+      <div className="space-y-4">
+        {states.map((state) => {
+          const stateTickets = ticketsByState[state.id];
+          if (!stateTickets) return null;
 
-            return (
-              <div key={state.id}>
-                <div className="flex items-center gap-2 mb-2">
-                  <div
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: state.color || "#888" }}
-                  />
-                  <span className="text-sm font-medium">{state.name}</span>
-                  <Badge variant="outline" className="text-xs">
-                    {stateTickets.length}
-                  </Badge>
-                </div>
-                <div className="space-y-1.5 pl-4">
-                  {stateTickets.map((ticket) => (
-                    <SprintTicketItem
-                      key={ticket.id}
-                      ticket={ticket}
-                      priority={priorities.find((p) => p.id === ticket.priority_id)}
-                      canManage={canManage}
-                      onClick={() => handleTicketClick(ticket)}
-                    />
-                  ))}
-                </div>
+          return (
+            <div key={state.id}>
+              <div className="flex items-center gap-2 mb-2">
+                <div
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: state.color || "#888" }}
+                />
+                <span className="text-sm font-medium">{state.name}</span>
+                <Badge variant="outline" className="text-xs">
+                  {stateTickets.length}
+                </Badge>
               </div>
-            );
-          })}
-        </div>
-      </ScrollArea>
-      <EditTicketDialog
-        ticket={editingTicket}
-        projectId={projectId}
-        states={states}
-        priorities={priorities}
-        open={!!editingTicket}
-        onOpenChange={(open) => !open && setEditingTicket(null)}
-      />
-    </>
+              <div className="space-y-1.5 pl-4">
+                {stateTickets.map((ticket) => (
+                  <SprintTicketItem
+                    key={ticket.id}
+                    ticket={ticket}
+                    priority={priorities.find((p) => p.id === ticket.priority_id)}
+                    canManage={canManage}
+                    onClick={() => handleTicketClick(ticket)}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </ScrollArea>
   );
 }

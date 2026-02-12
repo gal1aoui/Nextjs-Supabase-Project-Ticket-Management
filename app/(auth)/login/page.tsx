@@ -29,8 +29,8 @@ export default function Login() {
       setErrors(result.error);
     }
 
-    if (result?.supabaseError) {
-      toast.error(result.supabaseError);
+    if (result?.serverError) {
+      toast.error(result.serverError);
     }
 
     setIsLoading((prev) => !prev);

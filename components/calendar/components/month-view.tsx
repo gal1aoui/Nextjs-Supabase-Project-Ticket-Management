@@ -32,6 +32,7 @@ function EventPill({
   onClick: (event: EventWithRelations) => void;
 }) {
   const multiDay = isMultiDayEvent(event);
+  const projectColor = event.project?.color;
 
   return (
     <button
@@ -39,9 +40,17 @@ function EventPill({
       className={`group w-full flex items-center gap-1.5 text-xs px-2 py-1.5 rounded-md transition-all hover:shadow-sm animate-in fade-in slide-in-from-top-1 duration-200 ${
         multiDay
           ? "border border-pink-300/50 hover:border-pink-400/70"
-          : "bg-primary/10 hover:bg-primary/20"
+          : projectColor
+            ? "hover:opacity-80"
+            : "bg-primary/10 hover:bg-primary/20"
       }`}
-      style={multiDay ? multiDayStyle : undefined}
+      style={
+        multiDay
+          ? multiDayStyle
+          : projectColor
+            ? { backgroundColor: `${projectColor}18` }
+            : undefined
+      }
       onClick={(e) => {
         e.stopPropagation();
         onClick(event);
@@ -56,7 +65,10 @@ function EventPill({
         </>
       ) : (
         <>
-          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 group-hover:scale-125 transition-transform" />
+          <span
+            className="w-1.5 h-1.5 rounded-full shrink-0 group-hover:scale-125 transition-transform"
+            style={projectColor ? { backgroundColor: projectColor } : undefined}
+          />
           <Clock className="h-3 w-3 text-muted-foreground shrink-0" />
           <span className="text-muted-foreground font-medium shrink-0">
             {event.start_time.slice(0, 5)}

@@ -1,4 +1,4 @@
-import type { GitBranch, GitCommit, RepositoryConnect } from "@/types/repository";
+import type { GitBranch, GitCommit, RepoStats, RepositoryConnect } from "@/types/repository";
 
 type RepoInfo = {
   id: string;
@@ -74,6 +74,16 @@ export const repositoryService = {
     if (!res.ok) {
       const err = await res.json();
       throw new Error(err.error || "Failed to fetch branches");
+    }
+
+    return res.json();
+  },
+
+  async getStats(projectId: string): Promise<RepoStats> {
+    const res = await fetch(`/api/git/${projectId}/stats`);
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Failed to fetch stats");
     }
 
     return res.json();

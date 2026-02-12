@@ -1,21 +1,25 @@
 "use client";
 
-import { GitCommitHorizontal, GitMerge } from "lucide-react";
+import {
+  ChevronRight,
+  GitBranch as GitBranchIcon,
+  GitCommitHorizontal,
+  GitMerge,
+  Shield,
+} from "lucide-react";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getUserInitials } from "@/lib/helpers";
 import { useBranches, useCommits } from "@/stores/repository.store";
-import type { GitCommit } from "@/types/repository";
+import type { GitBranch, GitCommit } from "@/types/repository";
 
 interface CommitHistoryProps {
   projectId: string;
@@ -24,100 +28,165 @@ interface CommitHistoryProps {
 }
 
 export function CommitHistory({ projectId, repoUrl, provider }: CommitHistoryProps) {
-  const [selectedBranch, setSelectedBranch] = useState<string | undefined>();
+  const { data: branches = [], isLoading: branchesLoading } = useBranches(projectId);
+
+  if (branchesLoading) {
+    return (
+      <div className="space-y-3">
+        {[1, 2, 3].map((i) => (
+          <Skeleton key={i} className="h-16 rounded-lg" />
+        ))}
+      </div>
+    );
+  }
+
+  if (branches.length === 0) {
+    return <p className="text-sm text-muted-foreground text-center py-8">No branches found</p>;
+  }
+
+  // Sort: default first, then alphabetical
+  const sorted = [...branches].sort((a, b) => {
+    if (a.is_default) return -1;
+    if (b.is_default) return 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  return (
+    <div className="space-y-2">
+      {sorted.map((branch) => (
+        <BranchSection
+          key={branch.name}
+          branch={branch}
+          projectId={projectId}
+          repoUrl={repoUrl}
+          provider={provider}
+          defaultOpen={branch.is_default}
+        />
+      ))}
+    </div>
+  );
+}
+
+function BranchSection({
+  branch,
+  projectId,
+  repoUrl,
+  provider,
+  defaultOpen,
+}: {
+  branch: GitBranch;
+  projectId: string;
+  repoUrl: string;
+  provider: string;
+  defaultOpen: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
   const [page, setPage] = useState(1);
 
-  const { data: branches = [], isLoading: branchesLoading } = useBranches(projectId);
-  const { data: commits = [], isLoading: commitsLoading } = useCommits(
+  const { data: commits = [], isLoading } = useCommits(
     projectId,
-    selectedBranch,
+    branch.name,
     page
   );
 
-  const defaultBranch = branches.find((b) => b.is_default);
-
   return (
-    <div className="space-y-4">
-      {/* Branch selector */}
-      <div className="flex items-center gap-3">
-        <Select
-          value={selectedBranch || defaultBranch?.name || ""}
-          onValueChange={(v) => {
-            setSelectedBranch(v);
-            setPage(1);
-          }}
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger asChild>
+        <button
+          type="button"
+          className="flex items-center justify-between w-full p-3 rounded-lg border bg-muted/30 hover:bg-accent/50 transition-colors"
         >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder={branchesLoading ? "Loading..." : "Select branch"} />
-          </SelectTrigger>
-          <SelectContent>
-            {branches.map((branch) => (
-              <SelectItem key={branch.name} value={branch.name}>
-                <div className="flex items-center gap-2">
-                  {branch.name}
-                  {branch.is_default && (
-                    <Badge variant="outline" className="text-[10px] px-1 py-0">
-                      default
-                    </Badge>
-                  )}
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Commit list with graph */}
-      {commitsLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex gap-3">
-              <Skeleton className="h-6 w-6 rounded-full shrink-0" />
-              <div className="space-y-1.5 flex-1">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : commits.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-8">No commits found</p>
-      ) : (
-        <div className="relative">
-          {/* Vertical line */}
-          <div className="absolute left-3 top-3 bottom-3 w-px bg-border" />
-
-          <div className="space-y-0">
-            {commits.map((commit, idx) => (
-              <CommitNode
-                key={commit.sha}
-                commit={commit}
-                repoUrl={repoUrl}
-                provider={provider}
-                isLast={idx === commits.length - 1}
-              />
-            ))}
+          <div className="flex items-center gap-2.5">
+            <ChevronRight
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                isOpen ? "rotate-90" : ""
+              }`}
+            />
+            <GitBranchIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium font-mono">{branch.name}</span>
+            {branch.is_default && (
+              <Badge variant="default" className="text-[10px] px-1.5 py-0">
+                default
+              </Badge>
+            )}
+            {branch.is_protected && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                <Shield className="h-2.5 w-2.5 mr-0.5" />
+                protected
+              </Badge>
+            )}
           </div>
-        </div>
-      )}
+          {commits.length > 0 && (
+            <span className="text-xs text-muted-foreground">
+              {commits.length}{commits.length >= 30 ? "+" : ""} commits
+            </span>
+          )}
+        </button>
+      </CollapsibleTrigger>
 
-      {/* Pagination */}
-      {commits.length >= 30 && (
-        <div className="flex justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            Previous
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setPage((p) => p + 1)}>
-            Load More
-          </Button>
+      <CollapsibleContent>
+        <div className="ml-4 mt-1 pl-4 border-l-2 border-border">
+          {isLoading ? (
+            <div className="space-y-3 py-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex gap-3">
+                  <Skeleton className="h-6 w-6 rounded-full shrink-0" />
+                  <div className="space-y-1.5 flex-1">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : commits.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4">No commits found</p>
+          ) : (
+            <>
+              <div className="relative">
+                <div className="absolute left-3 top-3 bottom-3 w-px bg-border" />
+                <div className="space-y-0">
+                  {commits.map((commit, idx) => (
+                    <CommitNode
+                      key={commit.sha}
+                      commit={commit}
+                      repoUrl={repoUrl}
+                      provider={provider}
+                      isLast={idx === commits.length - 1}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {commits.length >= 30 && (
+                <div className="flex justify-center gap-2 py-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page <= 1}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPage((p) => p - 1);
+                    }}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPage((p) => p + 1);
+                    }}
+                  >
+                    Load More
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </div>
-      )}
-    </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 

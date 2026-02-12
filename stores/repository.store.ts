@@ -7,6 +7,7 @@ export const repoKeys = {
   commits: (projectId: string, branch?: string) =>
     ["repository", "commits", projectId, branch] as const,
   branches: (projectId: string) => ["repository", "branches", projectId] as const,
+  stats: (projectId: string) => ["repository", "stats", projectId] as const,
 };
 
 export function useRepository(projectId: string) {
@@ -21,6 +22,14 @@ export function useCommits(projectId: string, branch?: string, page = 1) {
   return useQuery({
     queryKey: [...repoKeys.commits(projectId, branch), page],
     queryFn: () => repositoryService.getCommits(projectId, branch, page),
+    enabled: !!projectId,
+  });
+}
+
+export function useRepoStats(projectId: string) {
+  return useQuery({
+    queryKey: repoKeys.stats(projectId),
+    queryFn: () => repositoryService.getStats(projectId),
     enabled: !!projectId,
   });
 }

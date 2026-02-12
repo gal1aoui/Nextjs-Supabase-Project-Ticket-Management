@@ -53,3 +53,21 @@ export type GitBranch = {
   is_default: boolean;
   is_protected: boolean;
 };
+
+export type GitBranchWithCommits = GitBranch & {
+  commits: GitCommit[];
+};
+
+export type RepoStats = {
+  total_commits: number;
+  total_branches: number;
+  stars: number;
+  forks: number;
+  languages: Record<string, number>;
+  top_contributors: {
+    name: string;
+    email: string;
+    avatar_url?: string;
+    commits: number;
+  }[];
+};

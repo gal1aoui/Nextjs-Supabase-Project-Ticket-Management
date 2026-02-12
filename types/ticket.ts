@@ -31,7 +31,7 @@ export const ticketCreateSchema = z.object({
   priority_id: z.uuid().optional(),
   assigned_to: z.uuid(),
   sprint_id: z.uuid().optional(),
-  sort_order: z.number().int().default(0),
+  sort_order: z.number().int().optional(),
 });
 
 export const ticketUpdateSchema = z.object({
