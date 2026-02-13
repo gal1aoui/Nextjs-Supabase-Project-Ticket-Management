@@ -347,16 +347,109 @@ Compatible with:
 - [Render](https://render.com/)
 - [AWS Amplify](https://aws.amazon.com/amplify/)
 
+## 🎯 Real-Time Notification System
+
+> Implementing a fully persistent, real-time notification system using Supabase database + Supabase Realtime subscriptions.
+
+### All Notification Types
+
+#### Ticket Notifications
+| Trigger | Recipient | Type Key |
+|---------|-----------|----------|
+| Ticket assigned to you | `assigned_to` user | `ticket_assigned` |
+| Ticket state changed | Assignee + creator | `ticket_state_changed` |
+| Ticket priority changed | Assignee + creator | `ticket_priority_changed` |
+| New comment on your ticket | Ticket creator + assignee | `ticket_commented` |
+| @mentioned in a comment | Mentioned user(s) | `comment_mention` |
+
+#### Project Member Notifications
+| Trigger | Recipient | Type Key |
+|---------|-----------|----------|
+| Invited to a project | Invited user | `project_invite` |
+| Member accepted your invite | `invited_by` user | `project_invite_accepted` |
+| Member declined your invite | `invited_by` user | `project_invite_declined` |
+| Removed from project | Removed user | `member_removed` |
+| Role changed | Affected user | `member_role_changed` |
+
+#### Event Notifications
+| Trigger | Recipient | Type Key |
+|---------|-----------|----------|
+| Invited to an event | Invited user | `event_invite` |
+| Event updated (time/date) | All attendees | `event_updated` |
+| Event deleted/cancelled | All attendees | `event_cancelled` |
+| Attendee responded | Event creator | `event_response` |
+
+#### Sprint Notifications
+| Trigger | Recipient | Type Key |
+|---------|-----------|----------|
+| Sprint started | All project members | `sprint_started` |
+| Sprint completed | All project members | `sprint_completed` |
+
+### Implementation Architecture
+
+**Layer 1: Database Schema**
+- `notifications` table with `user_id`, `type`, `title`, `message`, `read`, `metadata`, `created_at`
+- RLS policies for user-specific access
+- Realtime publication enabled
+
+**Layer 2: Database Triggers**
+- Server-side triggers auto-create notifications on events (ticket changes, member invites, event updates, etc.)
+- Ensures notifications are atomic and cannot be bypassed
+
+**Layer 3: TypeScript Types**
+- `NotificationType` union type with all notification type constants
+- `NotificationMetadata` interface for context (project_id, ticket_id, event_id, sprint_id, actor_id)
+
+**Layer 4: Service Layer**
+- `notification.service.ts` - API methods for CRUD operations
+- `getAll()`, `getUnreadCount()`, `markAsRead()`, `markAllAsRead()`, `delete()`, `clearAll()`
+
+**Layer 5: Store Layer (TanStack Query)**
+- `notification.store.ts` - Query hooks with caching and optimistic updates
+- `useNotifications()`, `useUnreadCount()`, `useMarkAsRead()`, etc.
+
+**Layer 6: Realtime Context**
+- `NotificationContext.tsx` - Subscribes to Supabase Realtime
+- On new notification: invalidates TanStack Query cache and shows toast
+
+**Layer 7: UI Components**
+- `NotificationDropdown.tsx` - Displays notification list with icons
+- Click-to-navigate based on metadata
+- Relative timestamps using date-fns
+
+### Navigation Mapping
+| Type | Route |
+|------|-------|
+| `ticket_*`, `comment_mention` | `/projects/{project_id}?ticket={ticket_id}` |
+| `project_invite*` | `/projects/{project_id}` |
+| `event_*` | `/calendar` |
+| `sprint_*` | `/projects/{project_id}/sprints` |
+
+### Implementation Order
+1. Database schema + RLS policies + realtime publication
+2. Database triggers (all notification-creating triggers)
+3. TypeScript types
+4. Service layer
+5. Store layer (TanStack Query)
+6. Context rewrite (realtime subscriptions + query invalidation)
+7. UI component updates
+8. Layout integration
+
+---
+
 ## 🎯 Roadmap
 
-- [ ] Real-time collaboration with Supabase Realtime
-- [ ] Ticket comments and activity history
+- [x] Base project and ticket management
+- [x] Kanban board with drag-and-drop
+- [x] Custom states & priorities
+- [x] Team collaboration and role-based access
+- [x] Event/calendar management
+- [x] Sprint management
+- [ ] Real-time notification system (implementation plan above)
+- [ ] Ticket comments and activity history (in-flight)
 - [ ] File attachments
 - [ ] Time tracking
 - [ ] Advanced filtering and search
-- [ ] Sprint/milestone management
-- [ ] Email notifications
-- [ ] Team collaboration features
 - [ ] Mobile app (React Native)
 - [ ] API documentation
 - [ ] Webhook integrations

@@ -15,6 +15,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Spinner } from "@/components/ui/spinner";
 import { DrawerProvider } from "@/contexts/drawer/drawer-context";
 import { ModalProvider } from "@/contexts/modal/modal-context";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import { profileService } from "@/services/profile.service";
 
 const ThemeToggle = dynamic(() => import("@/components/ThemeToggle"), {
@@ -52,7 +53,9 @@ export default function Layout({
   };
   return (
     <QueryClientProvider client={queryClient}>
-      <SidebarProvider>
+      <NotificationProvider>
+        <DrawerProvider>
+        <SidebarProvider>
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <div className="flex flex-1 flex-col">
@@ -78,11 +81,13 @@ export default function Layout({
               </div>
             </header>
             <ModalProvider>
-              <DrawerProvider>{children}</DrawerProvider>
+              {children}
             </ModalProvider>
           </div>
         </div>
-      </SidebarProvider>
+        </SidebarProvider>
+        </DrawerProvider>
+      </NotificationProvider>
     </QueryClientProvider>
   );
 }

@@ -4,7 +4,6 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/themeProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { NotificationProvider } from "@/contexts/NotificationContext";
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "600"],
@@ -27,10 +26,8 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={roboto.variable}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <NotificationProvider>
-            <TooltipProvider>{children}</TooltipProvider>
-            <Toaster />
-          </NotificationProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

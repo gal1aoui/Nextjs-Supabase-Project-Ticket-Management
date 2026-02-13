@@ -15,6 +15,7 @@ import EventForm from "@/components/events/forms/event-form";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { InviteMemberDialog } from "@/components/members/invite-member-dialog";
 import { MemberList } from "@/components/members/member-list";
+import { ProjectHistoryDrawer } from "@/components/notifications/project-history-drawer";
 import { PermissionGate } from "@/components/permission-gate";
 import ProjectDetailSkeleton from "@/components/projects/project-detail/project-detail-skeleton";
 import { ProjectStats } from "@/components/projects/project-detail/project-stats";
@@ -89,6 +90,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ projec
             )}
           </div>
         </div>
+        <ProjectHistoryDrawer projectId={projectId} />
       </div>
 
       <Tabs defaultValue="board" className="space-y-4">
